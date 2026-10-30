@@ -6,7 +6,7 @@ import { applyClue, BoostLevel, BOOST_FACTORS } from "./engine/clues";
 import { CellId, isCellId } from "./engine/grid";
 import { generatePriors, DEFAULT_ROW } from "./engine/priors";
 import { PROFILES, ProfileId } from "./profiles";
-import { ParsedReport } from "./schemas";
+import { Explanation, ParsedReport } from "./schemas";
 
 export type ReportSource = "claude" | "canned" | "manual";
 
@@ -26,6 +26,7 @@ export interface AppliedReport {
   rowAfter: number;
   /** Largest POA changes (after − before) caused by this report. */
   shifts: { cell: CellId; before: number; after: number }[];
+  explanation?: Explanation & { source: "claude" | "local" | "canned" };
 }
 
 export interface Clue {
@@ -96,6 +97,7 @@ export type Action =
   | { type: "apply_report"; payload: ApplyReportPayload }
   | { type: "add_clue"; text: string; cell: CellId; radius: number; boost: BoostLevel }
   | { type: "assign"; team: string; cell: CellId; suggestedRank: number | null; topSuggestion: CellId | null; reason?: string }
+  | { type: "set_explanation"; reportId: string; explanation: Explanation; source: "claude" | "local" | "canned" }
   | { type: "log"; entry: AuditEntry }
   | { type: "reset" }
   | { type: "load"; state: SearchState };
@@ -260,6 +262,24 @@ export function reducer(state: SearchState, action: Action): SearchState {
         );
       }
       return { ...state, assignments: [...state.assignments, a], audit: [...state.audit, ...entries] };
+    }
+
+    case "set_explanation": {
+      const reports = state.reports.map((r) =>
+        r.id === action.reportId ? { ...r, explanation: { ...action.explanation, source: action.source } } : r,
+      );
+      return {
+        ...state,
+        reports,
+        audit: [
+          ...state.audit,
+          makeAudit("explanation", `Explanation for ${action.reportId} (${action.source})`, {
+            report_id: action.reportId,
+            ...action.explanation,
+            source: action.source,
+          }),
+        ],
+      };
     }
 
     case "log":

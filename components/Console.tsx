@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useReducer, useState } from "react";
+import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import GridMap from "./GridMap";
 import MapLegend from "./MapLegend";
 import Panel from "./ui/Panel";
@@ -8,7 +8,11 @@ import RowIndicator from "./RowIndicator";
 import SetupPanel from "./SetupPanel";
 import CellInspector from "./CellInspector";
 import ReviewCard from "./ReviewCard";
-import { btnGhost, btnSecondary } from "./ui/styles";
+import ReportInput from "./ReportInput";
+import ExplanationCard from "./ExplanationCard";
+import { explainUpdate, parseReport } from "@/lib/api";
+import { buildUpdateSummary, localExplanation } from "@/lib/explain";
+import { btnGhost } from "./ui/styles";
 import { cumulativePodMap, initialState, loadState, reducer, ReportSource, saveState } from "@/lib/store";
 import { CellId } from "@/lib/engine/grid";
 import { emptyReport, ParsedReport } from "@/lib/schemas";
@@ -27,7 +31,30 @@ export default function Console() {
   const [inspect, setInspect] = useState<CellId | null>(null);
   const [draft, setDraft] = useState<Draft | null>(null);
 
+  const [parsing, setParsing] = useState(false);
+  const [parseError, setParseError] = useState<string | null>(null);
+  const [explaining, setExplaining] = useState<string | null>(null);
+  const requested = useRef(new Set<string>());
+
   useEffect(() => saveState(state), [state]);
+
+  // Ask for an explanation of each newly applied report (falls back to a local summary).
+  const lastReport = state.reports.at(-1);
+  useEffect(() => {
+    if (!lastReport || lastReport.explanation || !state.prob || requested.current.has(lastReport.id)) return;
+    requested.current.add(lastReport.id);
+    const report = lastReport;
+    const prob = state.prob;
+    setExplaining(report.id);
+    explainUpdate(buildUpdateSummary(report, prob)).then((res) => {
+      dispatch(
+        res.ok
+          ? { type: "set_explanation", reportId: report.id, explanation: res.explanation, source: "claude" }
+          : { type: "set_explanation", reportId: report.id, explanation: localExplanation(report, prob), source: "local" },
+      );
+      setExplaining(null);
+    });
+  }, [lastReport, state.prob]);
 
   const cumPod = useMemo(() => cumulativePodMap(state.pods), [state.pods]);
   const needLkp = !state.lkp || placingLkp;
@@ -48,8 +75,21 @@ export default function Console() {
     setInspect(id === inspect ? null : id);
   };
 
-  const openManual = () =>
-    setDraft({ report: emptyReport(), proposal: null, source: "manual", key: Date.now() });
+  const openManual = (rawText?: string) =>
+    setDraft({ report: emptyReport(), proposal: null, source: "manual", rawText: rawText || undefined, key: Date.now() });
+
+  const onParse = async (text: string) => {
+    setParsing(true);
+    setParseError(null);
+    const res = await parseReport(text);
+    setParsing(false);
+    if (res.ok) {
+      setDraft({ report: res.report, proposal: res.report, source: "claude", rawText: text, key: Date.now() });
+    } else {
+      setParseError(`Claude unavailable: ${res.reason} Switched to manual entry — the model works the same.`);
+      openManual(text);
+    }
+  };
 
   const applyDraft = () => {
     if (!draft) return;
@@ -136,31 +176,41 @@ export default function Console() {
           />
 
           {state.prob && (
-            <Panel
-              title="Radio report"
-              right={
-                !draft && (
-                  <button className={btnSecondary} onClick={openManual}>
-                    Manual entry
-                  </button>
-                )
-              }
-            >
+            <Panel title="Radio report">
               {draft ? (
-                <ReviewCard
-                  key={draft.key}
-                  draft={draft.report}
-                  proposal={draft.proposal}
-                  source={draft.source}
-                  onChange={(report) => setDraft({ ...draft, report })}
-                  onApply={applyDraft}
-                  onCancel={() => setDraft(null)}
-                />
+                <div className="space-y-2">
+                  {draft.rawText && (
+                    <blockquote className="rounded-md border-l-2 border-slate-600 bg-slate-950/50 px-3 py-2 font-mono text-xs text-slate-300">
+                      {draft.rawText}
+                    </blockquote>
+                  )}
+                  {parseError && draft.source === "manual" && (
+                    <div className="rounded-md border border-amber-500/50 bg-amber-950/30 px-3 py-2 text-xs text-amber-200">
+                      {parseError}
+                    </div>
+                  )}
+                  <ReviewCard
+                    key={draft.key}
+                    draft={draft.report}
+                    proposal={draft.proposal}
+                    source={draft.source}
+                    onChange={(report) => setDraft({ ...draft, report })}
+                    onApply={() => {
+                      applyDraft();
+                      setParseError(null);
+                    }}
+                    onCancel={() => setDraft(null)}
+                  />
+                </div>
               ) : (
-                <p className="text-sm text-slate-400">
-                  Enter which cells a team searched and the POD. Nothing changes until you click Apply.
-                </p>
+                <ReportInput busy={parsing} error={null} onParse={onParse} onManual={openManual} />
               )}
+            </Panel>
+          )}
+
+          {lastReport && (
+            <Panel title="Why the map changed">
+              <ExplanationCard report={lastReport} loading={explaining === lastReport.id} />
             </Panel>
           )}
 

@@ -39,7 +39,7 @@ Deadline: demo video by **Sat Oct 31, 10:00 a.m. ET**. Feature freeze **6:30 a.m
 - **Engine is pure:** no React, no fetch. Every state change to probabilities goes through `applySweep` / `applyClue` / `setPriors`, each of which asserts `|Σ − 1| < 1e-9` and renormalises only float drift (throws on real violations in tests).
 - **Claude never writes to the model directly.** API responses become a *draft* in the ReviewCard; only the IC's Apply dispatches the update.
 - **Fallback chain for parsing:** Claude → (invalid JSON) retry once → manual mode. In demo mode, a canned parse for each scripted report is used if the API call fails.
-- **Model ID** in one constant: `lib/claude.ts` → `export const CLAUDE_MODEL = "claude-sonnet-5-5"` (a current model from the Anthropic docs; confirmed via the claude-api reference before Milestone 4).
+- **Model ID** in one constant: `lib/claude.ts` → `export const CLAUDE_MODEL = "claude-opus-5-5"` (current default in the Anthropic docs), effort `low` for latency.
 - **No database.** localStorage only, wrapped in try/catch; app works if storage is unavailable.
 
 ## 2. ANTHROPIC_API_KEY handling
@@ -122,13 +122,13 @@ trailhead-sar/
 - [x] Reset search; verify in browser; commit
 
 ### M4 — Claude parse + review + explain
-- [ ] Confirm current model ID via claude-api reference; set `CLAUDE_MODEL`
-- [ ] `/api/parse-report`: system prompt → JSON; zod validate; retry once; else `{ok:false}`
-- [ ] ReviewCard: every field editable; low confidence → amber + "verify with team" above details; unclear_points listed
-- [ ] Nothing changes until Apply; failure → manual mode with message
-- [ ] `/api/explain`: 2–3 sentences + least-certain assumption, given before/after diff
-- [ ] Audit: raw report, AI proposal, IC edits (diff), applied values
-- [ ] Schema tests; build; manual check with and without key; commit
+- [x] Confirm current model ID via claude-api reference; set `CLAUDE_MODEL`
+- [x] `/api/parse-report`: system prompt → JSON; zod validate; retry once; else `{ok:false}`
+- [x] ReviewCard: every field editable; low confidence → amber + "verify with team" above details; unclear_points listed
+- [x] Nothing changes until Apply; failure → manual mode with message
+- [x] `/api/explain`: 2–3 sentences + least-certain assumption, given before/after diff
+- [x] Audit: raw report, AI proposal, IC edits (diff), applied values
+- [x] Schema tests; build; manual check with and without key; commit
 
 ### M5 — Weather (NWS)
 - [ ] `/api/weather`: `/points/44.27,-71.30` → `forecastHourly`, `User-Agent: TrailheadSAR (hackathon demo)`, timeout

@@ -51,7 +51,7 @@ export default function ReviewCard({
     <div className={`rounded-lg border p-3 ${low ? "border-amber-500/70 bg-amber-950/20" : "border-sky-700/60 bg-slate-950/40"}`}>
       {low && (
         <div className="mb-3 rounded-md border border-amber-500/60 bg-amber-500/15 px-3 py-2 text-sm font-semibold text-amber-200">
-          ⚠ Low-confidence parse — verify with team before applying.
+          ⚠ Low confidence — verify with team before applying.
         </div>
       )}
       <div className="mb-3 flex items-center justify-between text-xs">
