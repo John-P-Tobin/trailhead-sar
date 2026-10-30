@@ -105,12 +105,12 @@ trailhead-sar/
 - [x] `npm run build` passes; commit; start NOTES.md
 
 ### M2 — Bayesian engine + priors (pure TS, tested)
-- [ ] `bayes.ts`: `P_i' = P_i(1−p)/(1−P_i·p)`, others `/ (1−P_i·p)`, sequential over cells, ROW included
-- [ ] `assertSumToOne`; `cumulativePod = 1 − Π(1−p_k)`
-- [ ] `priors.ts`: distance decay × terrain multipliers × profile tendency; ROW starts at 10%; normalise
-- [ ] `profiles.ts`: day hiker, child, hunter, older adult, trail runner — marked "illustrative estimates"
-- [ ] Tests: sum-to-1 after every op, hand-computed single update, p=0 no-op, p=1 zeroes cell, sequential = repeated single, cumulative POD, ROW grows after sweeps, priors sum to 1 for every profile
-- [ ] `npm test` + build pass; commit
+- [x] `bayes.ts`: `P_i' = P_i(1−p)/(1−P_i·p)`, others `/ (1−P_i·p)`, sequential over cells, ROW included
+- [x] `assertSumToOne`; `cumulativePod = 1 − Π(1−p_k)`
+- [x] `priors.ts`: distance decay × terrain multipliers × profile tendency; ROW starts at 10%; normalise
+- [x] `profiles.ts`: day hiker, child, hunter, older adult, trail runner — marked "illustrative estimates"
+- [x] Tests: sum-to-1 after every op, hand-computed single update, p=0 no-op, p=1 zeroes cell, sequential = repeated single, cumulative POD, ROW grows after sweeps, priors sum to 1 for every profile
+- [x] `npm test` + build pass; commit
 
 ### M3 — Interactive grid (first end-to-end, target ~midnight)
 - [ ] Store/reducer + localStorage (try/catch)
