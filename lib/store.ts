@@ -64,6 +64,9 @@ export interface SearchState {
   rowHistory: number[];
   audit: AuditEntry[];
   demo: boolean;
+  /** Index of the next scripted demo step. */
+  demoStep: number;
+  found: { cell: CellId; at: string; text: string } | null;
 }
 
 export const initialState = (): SearchState => ({
@@ -79,6 +82,8 @@ export const initialState = (): SearchState => ({
   rowHistory: [],
   audit: [],
   demo: false,
+  demoStep: 0,
+  found: null,
 });
 
 export interface ApplyReportPayload {
@@ -100,6 +105,9 @@ export type Action =
   | { type: "set_explanation"; reportId: string; explanation: Explanation; source: "claude" | "local" | "canned" }
   | { type: "log"; entry: AuditEntry }
   | { type: "reset" }
+  | { type: "demo_load"; lkp: CellId; profileId: ProfileId }
+  | { type: "demo_advance" }
+  | { type: "mark_found"; cell: CellId; text: string }
   | { type: "load"; state: SearchState };
 
 const pct = (v: number) => `${(v * 100).toFixed(1)}%`;
@@ -285,6 +293,28 @@ export function reducer(state: SearchState, action: Action): SearchState {
     case "log":
       return { ...state, audit: [...state.audit, action.entry] };
 
+    case "demo_load": {
+      const base = { ...initialState(), demo: true, profileId: action.profileId };
+      const next = regenerate(base, action.lkp, action.profileId);
+      return {
+        ...next,
+        audit: [
+          makeAudit("setup", "Demo scenario loaded"),
+          makeAudit("setup", `LKP set to ${action.lkp}; priors generated (${PROFILES[action.profileId].label})`),
+        ],
+      };
+    }
+
+    case "demo_advance":
+      return { ...state, demoStep: state.demoStep + 1 };
+
+    case "mark_found":
+      return {
+        ...state,
+        found: { cell: action.cell, at: new Date().toISOString(), text: action.text },
+        audit: [...state.audit, makeAudit("note", `Subject located in ${action.cell}: ${action.text}`)],
+      };
+
     case "reset":
       return { ...initialState(), audit: [makeAudit("reset", "Search reset")] };
   }
@@ -303,7 +333,7 @@ export function loadState(): SearchState | null {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     const s = JSON.parse(raw) as SearchState;
-    return s?.version === 1 ? s : null;
+    return s?.version === 1 ? { ...initialState(), ...s } : null;
   } catch {
     return null;
   }

@@ -14,12 +14,14 @@ import WeatherPanel from "./WeatherPanel";
 import SuggestionsPanel from "./SuggestionsPanel";
 import CluePanel from "./CluePanel";
 import AuditLog from "./AuditLog";
+import DemoControls from "./DemoControls";
+import { DEMO_LKP, DEMO_PROFILE, DEMO_STEPS } from "@/lib/demo/scenario";
 import { combinedFactor, currentPeriod, podModifiers, safetyFlags, upcoming, WeatherSnapshot } from "@/lib/weather";
 import { rankCells } from "@/lib/engine/rank";
 import { cachedWeather } from "@/lib/demo/weather";
 import { explainUpdate, parseReport } from "@/lib/api";
 import { buildUpdateSummary, localExplanation } from "@/lib/explain";
-import { btnGhost } from "./ui/styles";
+import { btnGhost, btnSecondary } from "./ui/styles";
 import { cumulativePodMap, initialState, loadState, reducer, ReportSource, saveState } from "@/lib/store";
 import { CellId } from "@/lib/engine/grid";
 import { emptyReport, ParsedReport } from "@/lib/schemas";
@@ -30,6 +32,7 @@ interface Draft {
   source: ReportSource;
   rawText?: string;
   key: number;
+  demo?: boolean;
 }
 
 export default function Console() {
@@ -43,6 +46,7 @@ export default function Console() {
   const [explaining, setExplaining] = useState<string | null>(null);
   const requested = useRef(new Set<string>());
 
+  const [prefill, setPrefill] = useState<{ team: string; cell: string; reason: string; key: number } | null>(null);
   const [weather, setWeather] = useState<WeatherSnapshot | null>(null);
   const [weatherLoading, setWeatherLoading] = useState(true);
 
@@ -102,17 +106,43 @@ export default function Console() {
   const openManual = (rawText?: string) =>
     setDraft({ report: emptyReport(), proposal: null, source: "manual", rawText: rawText || undefined, key: Date.now() });
 
-  const onParse = async (text: string) => {
+  const onParse = async (text: string, canned?: ParsedReport) => {
     setParsing(true);
     setParseError(null);
     const res = await parseReport(text);
     setParsing(false);
+    const demo = !!canned;
     if (res.ok) {
-      setDraft({ report: res.report, proposal: res.report, source: "claude", rawText: text, key: Date.now() });
+      setDraft({ report: res.report, proposal: res.report, source: "claude", rawText: text, key: Date.now(), demo });
+    } else if (canned) {
+      setParseError(`Claude unavailable: ${res.reason} Using the demo's canned parse — review it like any proposal.`);
+      setDraft({ report: canned, proposal: canned, source: "canned", rawText: text, key: Date.now(), demo });
     } else {
       setParseError(`Claude unavailable: ${res.reason} Switched to manual entry — the model works the same.`);
       openManual(text);
     }
+  };
+
+  const resetAll = () => {
+    if (!confirm("Reset the whole search? This clears the map, reports and audit log.")) return;
+    dispatch({ type: "reset" });
+    requested.current.clear();
+    setPrefill(null);
+    setDraft(null);
+    setInspect(null);
+    setParseError(null);
+  };
+
+  const demoStep = state.demo ? DEMO_STEPS[state.demoStep] : undefined;
+
+  const loadDemo = () => {
+    if (state.audit.length > 1 && !confirm("Load the demo scenario? This replaces the current search.")) return;
+    dispatch({ type: "demo_load", lkp: DEMO_LKP, profileId: DEMO_PROFILE });
+    requested.current.clear();
+    setDraft(null);
+    setInspect(null);
+    setPrefill(null);
+    setParseError(null);
   };
 
   const applyDraft = () => {
@@ -121,6 +151,7 @@ export default function Console() {
       type: "apply_report",
       payload: { confirmed: draft.report, proposal: draft.proposal, source: draft.source, rawText: draft.rawText },
     });
+    if (draft.demo) dispatch({ type: "demo_advance" });
     setDraft(null);
   };
 
@@ -148,16 +179,10 @@ export default function Console() {
           <p className="text-xs text-slate-500">Bayesian decision support for the incident commander</p>
         </div>
         <div className="ml-auto flex gap-2">
-          <button
-            className={btnGhost}
-            onClick={() => {
-              if (confirm("Reset the whole search? This clears the map, reports and audit log.")) {
-                dispatch({ type: "reset" });
-                setDraft(null);
-                setInspect(null);
-              }
-            }}
-          >
+          <button className={btnSecondary} onClick={loadDemo}>
+            Load demo scenario
+          </button>
+          <button className={btnGhost} onClick={resetAll}>
             Reset
           </button>
         </div>
@@ -192,13 +217,18 @@ export default function Console() {
           {state.prob && (
             <div className="grid gap-3 xl:grid-cols-2">
               <SuggestionsPanel
+                key={prefill?.key ?? 0}
+                prefill={prefill}
                 suggestions={suggestions}
                 modifiers={modifiers}
                 weatherFactor={weatherFactor}
                 flaggedCells={flaggedCells}
                 assignments={state.assignments}
                 selectedCell={inspect}
-                onAssign={(a) => dispatch({ type: "assign", ...a })}
+                onAssign={(a) => {
+                  dispatch({ type: "assign", ...a });
+                  if (demoStep?.kind === "override" && a.cell === demoStep.cell) dispatch({ type: "demo_advance" });
+                }}
               />
               <CluePanel
                 prob={state.prob}
@@ -213,6 +243,41 @@ export default function Console() {
         </div>
 
         <div className="space-y-3">
+          {state.found && (
+            <section className="rounded-lg border border-emerald-500/60 bg-emerald-950/40 p-3">
+              <div className="text-xs font-semibold uppercase tracking-wider text-emerald-300">Subject located</div>
+              <div className="mt-1 text-sm text-emerald-100">
+                <span className="font-mono font-semibold">{state.found.cell}</span> — {state.found.text}
+              </div>
+              {(() => {
+                const a = [...state.assignments].reverse().find((x) => x.cell === state.found!.cell);
+                return a ? (
+                  <div className="mt-1 text-xs text-emerald-200/80">
+                    Model: suggestion #{a.suggestedRank ?? "—"} when assigned · IC: {a.override ? `override${a.reason ? ` (“${a.reason}”)` : ""}` : "followed top suggestion"}
+                  </div>
+                ) : null;
+              })()}
+            </section>
+          )}
+
+          {state.demo && (
+            <DemoControls
+              step={state.demoStep}
+              busy={parsing || !!draft}
+              onReport={(s) => onParse(s.text, s.canned)}
+              onClue={(s, boost) => {
+                dispatch({ type: "add_clue", text: s.text, cell: s.cell, radius: s.radius, boost });
+                dispatch({ type: "demo_advance" });
+              }}
+              onPrefillOverride={(s) => setPrefill({ team: s.team, cell: s.cell, reason: s.reason, key: Date.now() })}
+              onFound={(s) => {
+                dispatch({ type: "mark_found", cell: s.cell, text: s.text });
+                dispatch({ type: "demo_advance" });
+              }}
+              onExit={resetAll}
+            />
+          )}
+
           {state.prob && (
             <Panel title="Rest of World">
               <RowIndicator row={state.prob.row} history={state.rowHistory} />

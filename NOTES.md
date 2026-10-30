@@ -21,3 +21,14 @@
 - Assigning any cell other than #1 opens an optional one-line reason prompt; both the assignment and the override (with reason) go to the audit log.
 - Clues: IC picks cell, radius (0–2) and boost (log only / ×1.5 / ×2.5 / ×4) and sees a preview of the probability shift before applying. Claude may list clues in a parsed report but they are never applied automatically.
 - Audit export: JSON with every entry plus reports, clues, assignments, ROW history, LKP, profile and the Claude model ID.
+
+## Demo script (Load demo scenario)
+Subject: Dan, 58, day hiker, LKP H8 (trail junction). Each step still goes through the real UI — the presenter applies each parse, picks the clue boost and makes the assignment.
+1. Team 1 hasty search of Hollow Trail H8–H12 (POD 50%) → trail cells cool, ROW 10.0 → 10.5%.
+2. Team 2 line search of the trail corridor (POD 60%) → ROW 11.2%.
+3. Team 1 in fog on Hollow Brook G9/F10 → **amber low-confidence card**, POD 25%: those cells are barely cleared.
+4. Clue: wrapper at E11 — the IC picks the boost (medium ×2.5). ROW drops slightly (evidence the subject is on the grid).
+5. Team 2 clears Ledge Brook (POD 70%).
+6. Family tip → top suggestion is E11 (the wrapper cell); IC overrides to **E12** (model's #3, downstream) and logs the reason.
+7. Subject located in E12 → banner shows "model suggestion #3 · IC override".
+Works fully offline: canned parses (`lib/demo/scenario.ts`, labelled "Demo fallback parse") if Claude fails, cached weather if NWS fails, local explanations if /api/explain fails. `tests/demo.test.ts` checks the story holds numerically (E12 in top-5 but not #1 before the override).

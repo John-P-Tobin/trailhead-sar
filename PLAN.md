@@ -147,10 +147,10 @@ trailhead-sar/
 - [x] Commit
 
 ### M7 — Demo mode
-- [ ] "Load demo scenario": LKP at trail junction, day hiker
-- [ ] Step-through of 4 reports + 1 clue + family-tip override, per the scripted story (trail corridor cleared → fog sweep → clue shifts to drainage → override → found in cell both pointed to)
-- [ ] Canned parses/explanations used when Claude fails; cached weather when NWS fails
-- [ ] Run full demo with network blocked to API; commit
+- [x] "Load demo scenario": LKP at trail junction, day hiker
+- [x] Step-through of 4 reports + 1 clue + family-tip override, per the scripted story (trail corridor cleared → fog sweep → clue shifts to drainage → override → found in cell both pointed to)
+- [x] Canned parses/explanations used when Claude fails; cached weather when NWS fails
+- [x] Run full demo with network blocked to API; commit
 
 ### M8 — Polish
 - [ ] Serious dark ops-console styling, light mode friendly

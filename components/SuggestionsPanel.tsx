@@ -18,6 +18,7 @@ export default function SuggestionsPanel({
   flaggedCells,
   assignments,
   selectedCell,
+  prefill,
   onAssign,
 }: {
   suggestions: Suggestion[];
@@ -26,12 +27,14 @@ export default function SuggestionsPanel({
   flaggedCells: Set<string>;
   assignments: Assignment[];
   selectedCell: string | null;
+  /** Initial values (used by demo mode). Remount with a new key to apply. */
+  prefill?: { team: string; cell: string; reason: string } | null;
   onAssign: (a: { team: string; cell: string; suggestedRank: number | null; topSuggestion: string | null; reason?: string }) => void;
 }) {
-  const [team, setTeam] = useState("");
-  const [cell, setCell] = useState("");
+  const [team, setTeam] = useState(prefill?.team ?? "");
+  const [cell, setCell] = useState(prefill?.cell ?? "");
   const [askReason, setAskReason] = useState(false);
-  const [reason, setReason] = useState("");
+  const [reason, setReason] = useState(prefill?.reason ?? "");
   const top = suggestions[0]?.cell ?? null;
   const target = (cell || selectedCell || "").toUpperCase();
   const valid = isCellId(target) && team.trim().length > 0;
