@@ -113,13 +113,13 @@ trailhead-sar/
 - [x] `npm test` + build pass; commit
 
 ### M3 — Interactive grid (first end-to-end, target ~midnight)
-- [ ] Store/reducer + localStorage (try/catch)
-- [ ] Click to place LKP; profile picker regenerates priors
-- [ ] Heatmap overlay with animated transitions; cell hover shows POA + cumulative POD
-- [ ] Prior editor (edit a cell's POA, auto-renormalise others) — only before search starts
-- [ ] ROW always visible, with trend
-- [ ] Manual report entry: team, cells, POD → Apply → update
-- [ ] Reset search; verify in browser; commit
+- [x] Store/reducer + localStorage (try/catch)
+- [x] Click to place LKP; profile picker regenerates priors
+- [x] Heatmap overlay with animated transitions; cell hover shows POA + cumulative POD
+- [x] Prior editor (edit a cell's POA, auto-renormalise others) — only before search starts
+- [x] ROW always visible, with trend
+- [x] Manual report entry: team, cells, POD → Apply → update
+- [x] Reset search; verify in browser; commit
 
 ### M4 — Claude parse + review + explain
 - [ ] Confirm current model ID via claude-api reference; set `CLAUDE_MODEL`

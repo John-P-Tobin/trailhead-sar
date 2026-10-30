@@ -8,3 +8,6 @@
 - Engine (`lib/engine/`) is pure TS: `bayes.ts` (update formula, sequential sweeps, cumulative POD, sum-to-1 assertion, prior editing), `priors.ts` (exp(−d/scale) × terrain × profile multipliers, ROW 10%), `clues.ts` (IC-chosen likelihood-ratio boost with distance falloff, renormalized incl. ROW — so a clue on the grid slightly lowers ROW).
 - Profile weights in `lib/profiles.ts` are **illustrative estimates**, hand-tuned, not published statistics. Say so in the pitch.
 - Editing a cell's prior rescales the other cells and leaves ROW fixed; ROW has its own control.
+- State: `lib/store.ts` reducer (pure; every probability change goes through the engine) + localStorage (`trailhead:v1`, try/catch). The console is client-only (`next/dynamic` with `ssr:false`) so restored state never causes hydration mismatches.
+- Once any report or clue is applied, setup (LKP, profile, priors, ROW) locks.
+- The review card is shared by manual entry and the Claude parse: same fields, same Apply button. Map clicks add/remove cells while a report draft is open.
