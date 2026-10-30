@@ -131,12 +131,12 @@ trailhead-sar/
 - [x] Schema tests; build; manual check with and without key; commit
 
 ### M5 — Weather (NWS)
-- [ ] `/api/weather`: `/points/44.27,-71.30` → `forecastHourly`, `User-Agent: TrailheadSAR (hackathon demo)`, timeout
-- [ ] Cached demo weather fallback + "using cached weather" badge
-- [ ] POD modifiers (fog, rain, snow, darkness) with visible text, e.g. "fog: −30% expected detection"
-- [ ] Urgency panel: temp, wind, wind chill, exposure risk label (low/moderate/high/severe) — **no survival time**
-- [ ] Team safety flags (e.g. ridge cells + wind > 50 mph)
-- [ ] Tests for modifiers / wind chill / risk label; commit
+- [x] `/api/weather`: `/points/44.27,-71.30` → `forecastHourly`, `User-Agent: TrailheadSAR (hackathon demo)`, timeout
+- [x] Cached demo weather fallback + "using cached weather" badge
+- [x] POD modifiers (fog, rain, snow, darkness) with visible text, e.g. "fog: −30% expected detection"
+- [x] Urgency panel: temp, wind, wind chill, exposure risk label (low/moderate/high/severe) — **no survival time**
+- [x] Team safety flags (e.g. ridge cells + wind > 50 mph)
+- [x] Tests for modifiers / wind chill / risk label; commit
 
 ### M6 — Suggestions, overrides, clues, audit export
 - [ ] `rank.ts`: score = POA × expected POD (weather-adjusted); top 5 of unsearched/under-searched; tested

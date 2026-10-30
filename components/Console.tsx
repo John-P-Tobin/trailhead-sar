@@ -10,6 +10,9 @@ import CellInspector from "./CellInspector";
 import ReviewCard from "./ReviewCard";
 import ReportInput from "./ReportInput";
 import ExplanationCard from "./ExplanationCard";
+import WeatherPanel from "./WeatherPanel";
+import { WeatherSnapshot } from "@/lib/weather";
+import { cachedWeather } from "@/lib/demo/weather";
 import { explainUpdate, parseReport } from "@/lib/api";
 import { buildUpdateSummary, localExplanation } from "@/lib/explain";
 import { btnGhost } from "./ui/styles";
@@ -36,7 +39,24 @@ export default function Console() {
   const [explaining, setExplaining] = useState<string | null>(null);
   const requested = useRef(new Set<string>());
 
+  const [weather, setWeather] = useState<WeatherSnapshot | null>(null);
+  const [weatherLoading, setWeatherLoading] = useState(true);
+
   useEffect(() => saveState(state), [state]);
+
+  const fetchWeather = () =>
+    fetch("/api/weather", { signal: AbortSignal.timeout(20_000) })
+      .then((r) => r.json() as Promise<WeatherSnapshot>)
+      .catch(() => cachedWeather(Date.now(), "Weather route unreachable"))
+      .then((snap) => {
+        setWeather(snap);
+        setWeatherLoading(false);
+      });
+  const loadWeather = () => {
+    setWeatherLoading(true);
+    fetchWeather();
+  };
+  useEffect(() => void fetchWeather(), []);
 
   // Ask for an explanation of each newly applied report (falls back to a local summary).
   const lastReport = state.reports.at(-1);
@@ -207,6 +227,8 @@ export default function Console() {
               )}
             </Panel>
           )}
+
+          <WeatherPanel weather={weather} loading={weatherLoading} onRefresh={loadWeather} />
 
           {lastReport && (
             <Panel title="Why the map changed">
