@@ -97,12 +97,12 @@ trailhead-sar/
 ## 4. Milestones checklist
 
 ### M1 — Scaffold + static grid
-- [ ] `create-next-app` (App Router, TS, Tailwind, ESLint), add vitest
-- [ ] `.gitignore` includes `.env.local` / `.env*.local`; add `.env.example`
-- [ ] `lib/terrain.ts` with 15×15 map (trail, junction, drainages, ridge, cliffs, pond)
-- [ ] `GridMap` renders SVG terrain with A–O / 1–15 labels
-- [ ] Safety footer in layout
-- [ ] `npm run build` passes; commit; start NOTES.md
+- [x] `create-next-app` (App Router, TS, Tailwind, ESLint), add vitest
+- [x] `.gitignore` includes `.env.local` / `.env*.local`; add `.env.example`
+- [x] `lib/terrain.ts` with 15×15 map (trail, junction, drainages, ridge, cliffs, pond)
+- [x] `GridMap` renders SVG terrain with A–O / 1–15 labels
+- [x] Safety footer in layout
+- [x] `npm run build` passes; commit; start NOTES.md
 
 ### M2 — Bayesian engine + priors (pure TS, tested)
 - [ ] `bayes.ts`: `P_i' = P_i(1−p)/(1−P_i·p)`, others `/ (1−P_i·p)`, sequential over cells, ROW included
