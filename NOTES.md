@@ -32,3 +32,23 @@ Subject: Dan, 58, day hiker, LKP H8 (trail junction). Each step still goes throu
 6. Family tip → top suggestion is E11 (the wrapper cell); IC overrides to **E12** (model's #3, downstream) and logs the reason.
 7. Subject located in E12 → banner shows "model suggestion #3 · IC override".
 Works fully offline: canned parses (`lib/demo/scenario.ts`, labelled "Demo fallback parse") if Claude fails, cached weather if NWS fails, local explanations if /api/explain fails. `tests/demo.test.ts` checks the story holds numerically (E12 in top-5 but not #1 before the override).
+
+## Pitch: the three questions
+**1. Who is this for and why do they need it?**
+The incident commander of a small volunteer SAR team (3–6 field teams) running a lost-hiker search. Professional teams use Bayesian search theory to decide where to look next; volunteer ICs rarely have the time or tools to do that math under pressure at 2 a.m., so they fall back on whiteboards and gut feel. Trailhead runs the math, turns messy radio traffic into structured inputs, and keeps a defensible record of every decision.
+
+**2. What could go wrong, and what do we do about it?**
+- *Claude misreads a report* (wrong cells, inflated POD) → it only proposes; every value is editable on a review card and nothing changes until the IC clicks Apply. Edits vs. the AI proposal are logged. Vague reports are flagged amber with "verify with team".
+- *False confidence in the map* → ROW is always on screen and grows as the grid is searched; the app never recommends ending, suspending or expanding a search. Priors are labelled illustrative. Each update comes with "the assumption I'm least sure about".
+- *Over-trusting the ranking* → suggestions are labelled suggestions; any cell can be assigned; overrides prompt for a reason, which is logged rather than discouraged.
+- *Clues weighted wrongly by an AI* → the AI never weights clues. The IC picks the boost and sees a preview first.
+- *Exposure misjudged* → weather gives a plain risk label and team-safety flags; no survival-time number (that's for the IC and medical staff).
+- *API outages in the field* → manual mode works the same; cached weather with a visible badge; local explanations; the demo works fully offline.
+- *Accountability* → full audit log (reports, AI proposals, IC edits, overrides with reasons, clues) exportable as JSON for the after-action review.
+
+**3. How does this help people rather than decide for them?**
+It does the arithmetic and the transcription — the parts humans are bad at under fatigue — and leaves every judgment (POD, clue weight, team assignment, safety, when to stop) with the IC. The demo ends with the subject found in a cell the model ranked #3 and the IC chose on a family tip: the model narrowed the field, the human made the call.
+
+## UI notes
+- Layout: map + suggestions/clues/audit on the left; demo, ROW, setup, report, weather and explanation on the right. On phones the order is map → controls → suggestions; POA numbers hide below 640 px.
+- Persistent amber footer: "Decision support only. The incident commander directs all search operations."

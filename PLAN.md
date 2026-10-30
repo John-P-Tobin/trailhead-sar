@@ -153,10 +153,10 @@ trailhead-sar/
 - [x] Run full demo with network blocked to API; commit
 
 ### M8 — Polish
-- [ ] Serious dark ops-console styling, light mode friendly
-- [ ] Responsive layout (laptop + tablet), empty states, loading spinners/skeletons
-- [ ] Accessibility pass (labels, focus, color + text for amber warnings)
-- [ ] Update NOTES.md with pitch answers (who/what could go wrong/helps not decides); commit
+- [x] Serious dark ops-console styling (dark-only theme)
+- [x] Responsive layout (laptop + tablet), empty states, loading spinners/skeletons
+- [x] Accessibility pass (labels, focus, color + text for amber warnings)
+- [x] Update NOTES.md with pitch answers (who/what could go wrong/helps not decides); commit
 
 ### M9 — (Optional) Summit conditions card
 - [ ] Link-out card to Mount Washington Observatory webcam + Higher Summits Forecast (no scraping/hotlinking)

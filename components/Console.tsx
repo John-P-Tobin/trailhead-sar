@@ -15,6 +15,7 @@ import SuggestionsPanel from "./SuggestionsPanel";
 import CluePanel from "./CluePanel";
 import AuditLog from "./AuditLog";
 import DemoControls from "./DemoControls";
+import WelcomeCard from "./WelcomeCard";
 import { DEMO_LKP, DEMO_PROFILE, DEMO_STEPS } from "@/lib/demo/scenario";
 import { combinedFactor, currentPeriod, podModifiers, safetyFlags, upcoming, WeatherSnapshot } from "@/lib/weather";
 import { rankCells } from "@/lib/engine/rank";
@@ -169,14 +170,16 @@ export default function Console() {
   );
 
   return (
-    <main className="mx-auto max-w-[1400px] p-3 sm:p-4">
+    <main className="mx-auto max-w-[1400px] p-3 pb-16 sm:p-4 sm:pb-16">
       <header className="mb-3 flex flex-wrap items-center gap-3">
         <div>
           <h1 className="text-lg font-semibold tracking-tight">
             Trailhead <span className="text-slate-500">·</span>{" "}
             <span className="text-slate-300">Search Planner</span>
           </h1>
-          <p className="text-xs text-slate-500">Bayesian decision support for the incident commander</p>
+          <p className="text-xs text-slate-500">
+            Bayesian decision support for the incident commander · prototype with illustrative priors
+          </p>
         </div>
         <div className="ml-auto flex gap-2">
           <button className={btnSecondary} onClick={loadDemo}>
@@ -188,8 +191,8 @@ export default function Console() {
         </div>
       </header>
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_420px]">
-        <div className="space-y-3">
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_420px] lg:grid-rows-[auto_1fr]">
+        <div className="lg:col-start-1 lg:row-start-1">
           <Panel
             title="Search area"
             right={
@@ -207,42 +210,18 @@ export default function Console() {
               selected={selected}
               suggested={draft ? [] : suggestions.map((s) => s.cell)}
               clueCells={state.clues.map((c) => c.cell)}
+              found={state.found?.cell ?? null}
               onCellClick={onCellClick}
             />
             <div className="mt-2">
               <MapLegend />
             </div>
           </Panel>
-
-          {state.prob && (
-            <div className="grid gap-3 xl:grid-cols-2">
-              <SuggestionsPanel
-                key={prefill?.key ?? 0}
-                prefill={prefill}
-                suggestions={suggestions}
-                modifiers={modifiers}
-                weatherFactor={weatherFactor}
-                flaggedCells={flaggedCells}
-                assignments={state.assignments}
-                selectedCell={inspect}
-                onAssign={(a) => {
-                  dispatch({ type: "assign", ...a });
-                  if (demoStep?.kind === "override" && a.cell === demoStep.cell) dispatch({ type: "demo_advance" });
-                }}
-              />
-              <CluePanel
-                prob={state.prob}
-                clues={state.clues}
-                selectedCell={inspect}
-                onAdd={(c) => dispatch({ type: "add_clue", ...c })}
-              />
-            </div>
-          )}
-
-          <AuditLog state={state} />
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-3 lg:col-start-2 lg:row-span-2 lg:row-start-1">
+          {!state.lkp && <WelcomeCard onDemo={loadDemo} />}
+
           {state.found && (
             <section className="rounded-lg border border-emerald-500/60 bg-emerald-950/40 p-3">
               <div className="text-xs font-semibold uppercase tracking-wider text-emerald-300">Subject located</div>
@@ -371,6 +350,35 @@ export default function Console() {
             </Panel>
           )}
         </div>
+        <div className="space-y-3 lg:col-start-1 lg:row-start-2">
+          {state.prob && (
+            <div className="grid gap-3 xl:grid-cols-2">
+              <SuggestionsPanel
+                key={prefill?.key ?? 0}
+                prefill={prefill}
+                suggestions={suggestions}
+                modifiers={modifiers}
+                weatherFactor={weatherFactor}
+                flaggedCells={flaggedCells}
+                assignments={state.assignments}
+                selectedCell={inspect}
+                onAssign={(a) => {
+                  dispatch({ type: "assign", ...a });
+                  if (demoStep?.kind === "override" && a.cell === demoStep.cell) dispatch({ type: "demo_advance" });
+                }}
+              />
+              <CluePanel
+                prob={state.prob}
+                clues={state.clues}
+                selectedCell={inspect}
+                onAdd={(c) => dispatch({ type: "add_clue", ...c })}
+              />
+            </div>
+          )}
+
+          <AuditLog state={state} />
+        </div>
+
       </div>
     </main>
   );
