@@ -16,6 +16,8 @@ export default function MapLegend() {
       <Item swatch={<span className="h-3 w-3 rounded-full border-2 border-rose-500" />} text="LKP" />
       <Item swatch={<span className="h-3 w-3 bg-gradient-to-r from-yellow-300 via-orange-500 to-red-600" />} text="POA (relative)" />
       <Item swatch={<span className="h-3 w-3 bg-[repeating-linear-gradient(-45deg,#e8f1ff_0_1px,transparent_1px_5px)]" />} text="Searched" />
+      <Item swatch={<span className="h-3 w-3 border-2 border-dashed border-sky-400" />} text="Suggestion (#)" />
+      <Item swatch={<span className="h-2.5 w-2.5 rounded-full bg-purple-500" />} text="Clue" />
     </div>
   );
 }

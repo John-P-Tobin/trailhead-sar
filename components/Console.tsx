@@ -11,7 +11,11 @@ import ReviewCard from "./ReviewCard";
 import ReportInput from "./ReportInput";
 import ExplanationCard from "./ExplanationCard";
 import WeatherPanel from "./WeatherPanel";
-import { WeatherSnapshot } from "@/lib/weather";
+import SuggestionsPanel from "./SuggestionsPanel";
+import CluePanel from "./CluePanel";
+import AuditLog from "./AuditLog";
+import { combinedFactor, currentPeriod, podModifiers, safetyFlags, upcoming, WeatherSnapshot } from "@/lib/weather";
+import { rankCells } from "@/lib/engine/rank";
 import { cachedWeather } from "@/lib/demo/weather";
 import { explainUpdate, parseReport } from "@/lib/api";
 import { buildUpdateSummary, localExplanation } from "@/lib/explain";
@@ -122,6 +126,17 @@ export default function Console() {
 
   const selected = draft ? draft.report.cells : inspect ? [inspect] : [];
 
+  const modifiers = useMemo(() => podModifiers(weather ? currentPeriod(weather) : null), [weather]);
+  const weatherFactor = combinedFactor(modifiers);
+  const flaggedCells = useMemo(
+    () => new Set(weather ? safetyFlags(upcoming(weather, 12)).flatMap((f) => f.cells) : []),
+    [weather],
+  );
+  const suggestions = useMemo(
+    () => (state.prob ? rankCells(state.prob, cumPod, weatherFactor) : []),
+    [state.prob, cumPod, weatherFactor],
+  );
+
   return (
     <main className="mx-auto max-w-[1400px] p-3 sm:p-4">
       <header className="mb-3 flex flex-wrap items-center gap-3">
@@ -165,12 +180,36 @@ export default function Console() {
               cumulativePod={cumPod}
               lkp={state.lkp}
               selected={selected}
+              suggested={draft ? [] : suggestions.map((s) => s.cell)}
+              clueCells={state.clues.map((c) => c.cell)}
               onCellClick={onCellClick}
             />
             <div className="mt-2">
               <MapLegend />
             </div>
           </Panel>
+
+          {state.prob && (
+            <div className="grid gap-3 xl:grid-cols-2">
+              <SuggestionsPanel
+                suggestions={suggestions}
+                modifiers={modifiers}
+                weatherFactor={weatherFactor}
+                flaggedCells={flaggedCells}
+                assignments={state.assignments}
+                selectedCell={inspect}
+                onAssign={(a) => dispatch({ type: "assign", ...a })}
+              />
+              <CluePanel
+                prob={state.prob}
+                clues={state.clues}
+                selectedCell={inspect}
+                onAdd={(c) => dispatch({ type: "add_clue", ...c })}
+              />
+            </div>
+          )}
+
+          <AuditLog state={state} />
         </div>
 
         <div className="space-y-3">

@@ -139,12 +139,12 @@ trailhead-sar/
 - [x] Tests for modifiers / wind chill / risk label; commit
 
 ### M6 — Suggestions, overrides, clues, audit export
-- [ ] `rank.ts`: score = POA × expected POD (weather-adjusted); top 5 of unsearched/under-searched; tested
-- [ ] SuggestionsPanel labelled "suggestions"; IC assigns team to any cell
-- [ ] Picking non-top suggestion → optional one-line reason dialog → logged
-- [ ] CluePanel: text + cell + IC-chosen boost (none/small/medium/large) and radius; AI never weights clues; tested
-- [ ] Audit log view + Export JSON; never a "stop search" recommendation anywhere
-- [ ] Commit
+- [x] `rank.ts`: score = POA × expected POD (weather-adjusted); top 5 of unsearched/under-searched; tested
+- [x] SuggestionsPanel labelled "suggestions"; IC assigns team to any cell
+- [x] Picking non-top suggestion → optional one-line reason dialog → logged
+- [x] CluePanel: text + cell + IC-chosen boost (none/small/medium/large) and radius; AI never weights clues; tested
+- [x] Audit log view + Export JSON; never a "stop search" recommendation anywhere
+- [x] Commit
 
 ### M7 — Demo mode
 - [ ] "Load demo scenario": LKP at trail junction, day hiker
