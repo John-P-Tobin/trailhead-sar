@@ -11,34 +11,37 @@ Deadline: demo video by **Sat Oct 31, 10:00 a.m. ET**. Feature freeze **6:30 a.m
 
 ```
 ┌──────────────────────────── Browser (client state only) ───────────────────────────┐
-│  page.tsx (Ops console)                                                            │
-│   ├─ GridMap (SVG terrain + animated POA heatmap, LKP marker, cell selection)      │
-│   ├─ SetupPanel (LKP, profile, edit priors, ROW %)                                 │
-│   ├─ ReportPanel (free text → Parse | Manual entry) → ReviewCard (edit → Apply)    │
-│   ├─ SuggestionsPanel (top 5, assign team, override reason prompt)                 │
-│   ├─ CluePanel (IC-chosen boost)        ├─ WeatherPanel (urgency, safety flags)    │
-│   ├─ ExplanationCard                    ├─ AuditLog (view + export JSON)           │
+│  Console (ops console, client-only)                                                │
+│   ├─ GridMap (SVG from OSM vector data, true cell aspect, animated POA heatmap,   │
+│   │           terrain badge, © OpenStreetMap contributors)                         │
+│   ├─ SetupPanel (LKP, profile, ROW)        ├─ CellInspector (POA, bounds, edit)    │
+│   ├─ ReportInput → ReviewCard (edit → Apply)                                       │
+│   ├─ SuggestionsPanel (top 5, assign, override reason)  ├─ CluePanel (IC boost)    │
+│   ├─ WeatherPanel (urgency, safety flags, auto-refresh 20 min)                     │
+│   ├─ ExplanationCard   ├─ AuditLog (JSON export + Export for CalTopo / KML)        │
 │   └─ Footer: "Decision support only. The incident commander directs all search…"  │
 │                                                                                    │
-│  useSearchStore (React reducer) ── persists to localStorage (try/catch)            │
-│  lib/engine/* (pure TS: priors, Bayes update, POD, ranking, clues) ← unit tested   │
+│  lib/store.ts reducer (search + terrain snapshot) ── localStorage (try/catch)      │
+│  lib/engine/* pure TS (priors, Bayes update, POD, ranking, clues) ← unit tested    │
+│  lib/osm.ts (OSM → cells), lib/export.ts (CalTopo GeoJSON/KML) ← unit tested       │
+│  data/terrain.geojson (bundled Mt Washington OSM, loaded as JSON)                  │
 └────────────────────────────────────────┬───────────────────────────────────────────┘
                                          │ fetch (JSON)
 ┌────────────────────────── Next.js route handlers (server only) ────────────────────┐
-│  POST /api/parse-report  → Claude → zod validate → retry once → else {fallback}    │
+│  POST /api/parse-report  → Claude → zod → retry once → else {ok:false} → manual    │
 │  POST /api/explain       → Claude → 2–3 sentences + least-certain assumption       │
-│  GET  /api/weather       → NWS /points → forecastHourly (User-Agent set)           │
-│                            → else cached demo weather + `cached: true`             │
+│  GET  /api/weather       → NWS /points → forecastHourly (User-Agent) | cached      │
+│  GET  /api/terrain       → Overpass (User-Agent, 30 s) → normalized GeoJSON        │
 │  ANTHROPIC_API_KEY read here only (process.env), never sent to the client          │
 └────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 **Key design decisions**
-- **Grid:** 15×15, columns `A–O`, rows `1–15`, cell IDs like `C4`. Terrain is a hand-authored static map (`lib/terrain.ts`) with per-cell features: `trail`, `drainage`, `ridge`, `cliff`, `water`, `forest`, `open`, plus elevation. One trail junction sits near the center for the demo LKP.
+- **Grid:** 15×15, columns `A–O`, rows `1–15`, cell IDs like `C4`, over a real bounding box (Mt Washington / Lakes of the Clouds by default); each cell has lat/lon bounds. Per-cell terrain (`trail`, `drainage`, `ridge`, `cliff`, `water`, cover, elevation) comes from OpenStreetMap: live via Overpass, else the bundled file, else the stylized hand-drawn map.
 - **State model:** `{ grid: Terrain, lkp, profile, poa: Record<CellId, number>, row: number, cumulativePod: Record<CellId, number>, sweeps[], clues[], assignments[], audit[], weather }`. Probabilities stored as one vector (cells + ROW) so sum-to-1 is checked in one place.
 - **Engine is pure:** no React, no fetch. Every state change to probabilities goes through `applySweep` / `applyClue` / `setPriors`, each of which asserts `|Σ − 1| < 1e-9` and renormalises only float drift (throws on real violations in tests).
 - **Claude never writes to the model directly.** API responses become a *draft* in the ReviewCard; only the IC's Apply dispatches the update.
-- **Fallback chain for parsing:** Claude → (invalid JSON) retry once → manual mode. In demo mode, a canned parse for each scripted report is used if the API call fails.
+- **Fallback chain for parsing:** Claude → (invalid output or refusal) retry once → manual mode. No fallback to another model. In demo mode, a canned parse for each scripted report is used if the API call fails.
 - **Model ID** in one constant: `lib/claude.ts` → `export const CLAUDE_MODEL = "claude-opus-5-5"` (current default in the Anthropic docs), effort `low` for latency.
 - **No database.** localStorage only, wrapped in try/catch; app works if storage is unavailable.
 
@@ -56,42 +59,31 @@ Deadline: demo video by **Sat Oct 31, 10:00 a.m. ET**. Feature freeze **6:30 a.m
 ```
 trailhead-sar/
 ├─ app/
-│  ├─ layout.tsx                 # dark ops-console shell, persistent safety footer
-│  ├─ page.tsx                   # main console
-│  ├─ globals.css
+│  ├─ layout.tsx  page.tsx  globals.css     # shell, safety footer, client-only console
 │  └─ api/
 │     ├─ parse-report/route.ts   # Claude → ParsedReport (zod), retry once
 │     ├─ explain/route.ts        # Claude → explanation + least-certain assumption
-│     └─ weather/route.ts        # NWS proxy + cached fallback
-├─ components/
-│  ├─ GridMap.tsx  TerrainLayer.tsx  HeatmapLayer.tsx
-│  ├─ SetupPanel.tsx  ProfilePicker.tsx  PriorEditor.tsx  RowIndicator.tsx
-│  ├─ ReportPanel.tsx  ReviewCard.tsx  ManualEntry.tsx  ExplanationCard.tsx
-│  ├─ SuggestionsPanel.tsx  OverrideReasonDialog.tsx
-│  ├─ CluePanel.tsx  WeatherPanel.tsx  SummitCard.tsx
-│  ├─ AuditLog.tsx  DemoControls.tsx  SafetyFooter.tsx
+│     ├─ weather/route.ts        # NWS proxy + cached fallback
+│     └─ terrain/route.ts        # Overpass → normalized OSM GeoJSON for the grid's bbox
+├─ components/   Console, GridMap, MapLegend, TerrainBadge, SetupPanel, CellInspector,
+│                ReportInput, ReviewCard, ExplanationCard, SuggestionsPanel, CluePanel,
+│                WeatherPanel, SummitCard, AuditLog, DemoControls, WelcomeCard, …
 ├─ lib/
-│  ├─ engine/
-│  │  ├─ grid.ts          # CellId helpers, neighbours, distance
-│  │  ├─ priors.ts        # distance × terrain × profile → POA, + ROW
-│  │  ├─ bayes.ts         # applySweep, applySweeps, cumulativePod, assertSumToOne
-│  │  ├─ rank.ts          # POA × expected POD × weather modifier → top 5
-│  │  └─ clues.ts         # IC-chosen boost around a cell, renormalise
-│  ├─ terrain.ts          # static White Mountains-style map
-│  ├─ profiles.ts         # 5 profiles, illustrative weights (labelled as such)
-│  ├─ weather.ts          # NWS types, POD modifiers, exposure risk, safety flags
-│  ├─ schemas.ts          # zod: ParsedReport, Explanation, Weather
-│  ├─ claude.ts           # CLAUDE_MODEL constant + prompt text (no key)
-│  ├─ server/anthropic.ts # server-only client factory
-│  ├─ store.ts            # reducer, actions, localStorage persistence
-│  ├─ audit.ts            # audit entry types + JSON export
-│  └─ demo/
-│     ├─ scenario.ts      # LKP, profile, 4 scripted reports, 1 clue, family tip
-│     ├─ canned.ts        # canned parses + explanations
-│     └─ weather.json     # cached Mt Washington forecast
-├─ tests/                 # vitest: bayes, priors, rank, clues, weather, schemas
-├─ .env.example  .gitignore  PLAN.md  NOTES.md  CLAUDE.md  README.md
-└─ package.json  tsconfig.json  vitest.config.ts  next.config.ts
+│  ├─ engine/    grid.ts  bayes.ts  priors.ts  rank.ts  clues.ts   (pure, tested)
+│  ├─ geo.ts            # bbox, cell lat/lon bounds, [lon,lat] ↔ grid units
+│  ├─ osm.ts            # Overpass query, OSM → normalized GeoJSON, features → cells
+│  ├─ terrain.ts        # terrain types, sources, stylized fallback map
+│  ├─ terrainClient.ts  # bundled file loader, live fetch + localStorage cache
+│  ├─ export.ts         # CalTopo GeoJSON + KML
+│  ├─ heat.ts           # heatmap scale shared by the map and the export
+│  ├─ weather.ts  useWeather.ts   # NWS parsing, modifiers, risk, flags, refresh policy
+│  ├─ store.ts  audit.ts  schemas.ts  prompts.ts  explain.ts  api.ts  download.ts
+│  ├─ claude.ts  server/anthropic.ts   # model constant; server-only client
+│  └─ demo/     scenario.ts  weather.ts
+├─ data/terrain.geojson     # bundled OSM terrain (Mt Washington / Lakes of the Clouds)
+├─ scripts/convert-terrain.ts   # Overpass Turbo export → data/terrain.geojson
+├─ tests/                   # vitest: engine, store, weather, OSM/terrain, export, routes, demo story
+└─ .env.example  PLAN.md  NOTES.md  CLAUDE.md  README.md  next.config.ts
 ```
 
 ## 4. Milestones checklist
@@ -161,6 +153,14 @@ trailhead-sar/
 ### M9 — (Optional) Summit conditions card
 - [x] Link-out card to Mount Washington Observatory webcam + Higher Summits Forecast (no scraping/hotlinking)
 - [x] Commit
+
+### Round 2
+- [x] Remove the cross-model refusal fallback; invalid output or refusal → retry once → manual mode (tested)
+- [x] Weather auto-refresh every 20 min during a search; "updated X min ago"; failed refresh keeps the last live forecast; cached fallback + badge unchanged (tested, fake-clock browser check)
+- [x] Real terrain: `/api/terrain` (Overpass, User-Agent, 30 s), per-cell lat/lon bounds, OSM features → cell flags, localStorage cache, source badge, OSM attribution
+- [x] Bundled `data/terrain.geojson` from the team's Overpass Turbo export; demo always uses it; demo story retuned and re-tested on it
+- [x] Export for CalTopo: GeoJSON (cells, markers, team outlines, weather note) + KML; button + hint in the audit area; exports logged; unit tests for structure and coordinate order
+- [x] Docs (PLAN, CLAUDE, NOTES), tests, lint, build, PR
 
 ## 5. Per-milestone routine
 Build → tests → run app and check the feature → commit → push to `claude/funny-johnson-necpxn` → tick box here. Main is never left broken; reliability of the demo path beats extra features.

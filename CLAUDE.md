@@ -12,7 +12,7 @@ Hackathon project for AI at 70 (Dartmouth, with Anthropic). Read this whole file
 The user is the **incident commander (IC)** of a volunteer search-and-rescue team running a lost-hiker search in the White Mountains with 3–6 field teams. Professional SAR uses Bayesian search theory to decide where to send searchers. Small volunteer teams rarely run that math under pressure, so they rely on whiteboards and gut feel. This app runs the math, uses Claude to turn messy radio reports into structured inputs, and keeps every decision with the IC.
 
 ## Core loop
-1. **Setup.** The IC places the last known point (LKP) on a terrain grid (~15×15 cells) and picks a lost-person profile: day hiker, child, hunter, older adult, or trail runner. The app seeds each cell's probability of area (POA) from:
+1. **Setup.** The IC places the last known point (LKP) on a terrain grid (15×15 cells over a real bounding box, built from OpenStreetMap; see Terrain) and picks a lost-person profile: day hiker, child, hunter, older adult, or trail runner. The app seeds each cell's probability of area (POA) from:
    - distance from the LKP (most people are found fairly close to it),
    - terrain features: trails and drainages get boosted, cliffs and open water get reduced,
    - a profile-specific tendency: hikers follow trails and drainages downhill, children stay closer to the LKP, and so on.
@@ -38,6 +38,19 @@ The user is the **incident commander (IC)** of a volunteer search-and-rescue tea
   2. **Urgency panel:** temperature, wind, and wind chill, plus a plain "exposure risk" label (low/moderate/high/severe). Never show a survival-time number. That's a judgment call for the IC and medical staff.
   3. **Team safety flags:** e.g. "winds above 50 mph forecast on ridgeline cells. Consider team safety before assigning."
 - If the API fails, fall back to cached demo weather and show a "using cached weather" badge.
+- During a search, refresh the forecast every 20 minutes and show "updated X min ago". A failed refresh keeps the last live forecast (flagged) rather than swapping in canned weather.
+
+## Terrain (OpenStreetMap)
+- The grid covers a real bounding box (default: Mt Washington / Lakes of the Clouds, 44.245,−71.335,44.285,−71.285). Every cell has real lat/lon bounds derived from it.
+- When the IC places an LKP, a server route (`/api/terrain`) fetches trails, streams, water, cliffs and peaks for the box from the Overpass API (User-Agent header, 30 s timeout). Features are mapped onto cells (trail/drainage/cliff/water flags, rough elevation from peak heights) so the priors use real terrain. Results are cached in localStorage.
+- Terrain locks once the first report or clue is applied, so the map never shifts under applied updates.
+- `data/terrain.geojson` is the bundled fallback (regenerate with `npm run convert-terrain -- <overpass-turbo-export.geojson>`). Demo mode always uses it.
+- A badge shows the source: "Live OSM", "Bundled Mt Washington", or "Stylized" (the original hand-drawn map, last resort). Show "© OpenStreetMap contributors" on the map.
+
+## Export for CalTopo
+- Real SAR teams run searches in CalTopo; the app feeds that workflow instead of replacing it. CalTopo's API needs a team account, so export files: GeoJSON (WGS84, [lon, lat]) and KML with styles as a fallback.
+- Cells as styled polygons (POA title, description with cumulative POD, last searcher, sweeps, weather-adjusted vs base expected POD, safety flags on ridgeline cells), markers for the LKP, clues and the found location, team-assignment outlines, and a top-level note with export time, ROW, NWS conditions, exposure risk, weather source and the decision-support line.
+- "Export for CalTopo" sits in the audit-log area with the hint "Import into CalTopo via Import → choose file." Every export is logged.
 
 ## Mount Washington conditions (optional, last priority)
 - Add a "Summit conditions" card that **links out** to the Mount Washington Observatory's official webcam and Higher Summits Forecast pages.
@@ -55,12 +68,12 @@ The user is the **incident commander (IC)** of a volunteer search-and-rescue tea
 - **Next.js (App Router) + TypeScript + Tailwind**, deployed on **Vercel**.
 - **Claude API** via `@anthropic-ai/sdk` in server route handlers only (`/api/parse-report`, `/api/explain`). The key comes from `process.env.ANTHROPIC_API_KEY`. **Never** expose it to the client, and never commit it. Add `.env.local` to `.gitignore`, and keep a `.env.example` with no value.
 - Use a current Claude model ID from the Anthropic docs, and keep it in one constant.
-- Ask Claude for JSON output and validate it with zod. Retry once on invalid output, then fall back to manual mode.
-- The grid map is a stylized SVG (terrain colors, trail lines, streams, ridges), not real map tiles. The heatmap overlay animates on update.
+- Ask Claude for JSON output and validate it with zod. Retry once on invalid output, then fall back to manual mode. No fallback to another model: manual entry is the failure path.
+- The grid map is an SVG drawn from OpenStreetMap vector data (trails, streams, lakes, peaks), not map tiles. The heatmap overlay animates on update.
 - State lives in the client. No database. Persist to localStorage wrapped in try/catch.
 
 ## Demo mode (critical)
-- A **"Load demo scenario"** button seeds a complete search: the LKP near a trail junction, a day-hiker profile, and a scripted list of 4 radio reports plus 1 clue that the presenter steps through.
+- A **"Load demo scenario"** button seeds a complete search on the bundled Mt Washington terrain: the LKP at the Lakes of the Clouds hut junction (E10), a day-hiker profile, and a scripted list of 4 radio reports plus 1 clue that the presenter steps through.
 - The demo must work end to end even if the Claude API or weather API is down. Ship canned responses for the scripted reports as a fallback.
 - The scripted story: early sweeps clear the trail corridor. Fog lowers detection on one sweep. A clue shifts probability toward a drainage. The IC overrides the top suggestion based on a family tip. The subject is found in a cell that both the model and the human judgment pointed toward.
 
@@ -74,6 +87,12 @@ The user is the **incident commander (IC)** of a volunteer search-and-rescue tea
 7. Demo mode with canned fallbacks.
 8. Polish: a clean, serious operations-console look (dark mode friendly), responsive layout, empty states, loading states.
 9. (Optional) Summit conditions link-out card.
+
+Round 2 (done):
+10. Remove the cross-model refusal fallback (manual entry is the failure path).
+11. Live weather refresh every 20 minutes with "updated X min ago".
+12. Real terrain from OpenStreetMap (Overpass), bundled Mt Washington fallback, demo retuned on it.
+13. Export for CalTopo (GeoJSON + KML).
 
 ## Working rules for Claude
 - After each milestone: run the build and tests, fix failures, start the app and check the feature works, commit with a clear message, and check the milestone off in PLAN.md.

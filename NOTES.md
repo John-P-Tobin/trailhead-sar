@@ -62,6 +62,8 @@ The incident commander of a small volunteer SAR team (3–6 field teams) running
 - *API outages in the field* → manual mode works the same; cached weather with a visible badge; local explanations; the demo works fully offline.
 - *Accountability* → full audit log (reports, AI proposals, IC edits, overrides with reasons, clues) exportable as JSON for the after-action review.
 
+**Fits how SAR teams already work.** Trailhead runs on real terrain (OpenStreetMap trails, streams and lakes for the actual Mt Washington / Lakes of the Clouds area) and exports its grid, probabilities, team assignments, clues and weather to CalTopo, the mapping tool real SAR teams already use. It adds the Bayesian math and an audit trail to the team's existing workflow instead of asking them to replace it.
+
 **3. How does this help people rather than decide for them?**
 It does the arithmetic and the transcription — the parts humans are bad at under fatigue — and leaves every judgment (POD, clue weight, team assignment, safety, when to stop) with the IC. The demo ends with the subject found in a cell the model ranked #3 and the IC chose on a family tip: the model narrowed the field, the human made the call.
 
@@ -72,6 +74,8 @@ It does the arithmetic and the transcription — the parts humans are bad at und
 
 ## Before recording the demo (checklist)
 1. Set `ANTHROPIC_API_KEY` in Vercel project env (and `.env.local` for local runs). Run one live report; confirm the review card fills and the explanation says "Written by Claude".
-2. Confirm the weather badge says "Live NWS" on Vercel (cached fallback is what the build container saw).
-3. Click both summit links.
-4. Load demo scenario → step through all 7 steps once. Reset before recording.
+2. Confirm the weather badge says "Live NWS" on Vercel and the panel shows "Updated X min ago" (cached fallback is what the build container saw).
+3. Outside demo mode, place an LKP and confirm the terrain badge turns "Live OSM" (Overpass was blocked from the build container).
+4. Export for CalTopo once and import the file into a CalTopo map (Import → choose file) to check titles, colors and outlines.
+5. Click both summit links.
+6. Load demo scenario → step through all 7 steps once. At the clue step pick **small** (the highlighted button). Reset before recording.
