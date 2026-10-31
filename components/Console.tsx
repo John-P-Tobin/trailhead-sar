@@ -18,9 +18,9 @@ import DemoControls from "./DemoControls";
 import WelcomeCard from "./WelcomeCard";
 import SummitCard from "./SummitCard";
 import { DEMO_LKP, DEMO_PROFILE, DEMO_STEPS } from "@/lib/demo/scenario";
-import { combinedFactor, currentPeriod, podModifiers, safetyFlags, upcoming, WeatherSnapshot } from "@/lib/weather";
+import { combinedFactor, currentPeriod, podModifiers, safetyFlags, upcoming } from "@/lib/weather";
+import { useWeather } from "@/lib/useWeather";
 import { rankCells } from "@/lib/engine/rank";
-import { cachedWeather } from "@/lib/demo/weather";
 import { explainUpdate, parseReport } from "@/lib/api";
 import { buildUpdateSummary, localExplanation } from "@/lib/explain";
 import { btnGhost, btnSecondary } from "./ui/styles";
@@ -49,24 +49,11 @@ export default function Console() {
   const requested = useRef(new Set<string>());
 
   const [prefill, setPrefill] = useState<{ team: string; cell: string; reason: string; key: number } | null>(null);
-  const [weather, setWeather] = useState<WeatherSnapshot | null>(null);
-  const [weatherLoading, setWeatherLoading] = useState(true);
-
   useEffect(() => saveState(state), [state]);
 
-  const fetchWeather = () =>
-    fetch("/api/weather", { signal: AbortSignal.timeout(20_000) })
-      .then((r) => r.json() as Promise<WeatherSnapshot>)
-      .catch(() => cachedWeather(Date.now(), "Weather route unreachable"))
-      .then((snap) => {
-        setWeather(snap);
-        setWeatherLoading(false);
-      });
-  const loadWeather = () => {
-    setWeatherLoading(true);
-    fetchWeather();
-  };
-  useEffect(() => void fetchWeather(), []);
+  // Weather auto-refreshes every 20 minutes while a search is active.
+  const searchActive = !!state.lkp && !state.found;
+  const { weather, loading: weatherLoading, lastAttemptAt, refreshFailed, refresh: refreshWeather } = useWeather(searchActive);
 
   // Ask for an explanation of each newly applied report (falls back to a local summary).
   const lastReport = state.reports.at(-1);
@@ -312,7 +299,14 @@ export default function Console() {
             </Panel>
           )}
 
-          <WeatherPanel weather={weather} loading={weatherLoading} onRefresh={loadWeather} />
+          <WeatherPanel
+            weather={weather}
+            loading={weatherLoading}
+            lastAttemptAt={lastAttemptAt}
+            refreshFailed={refreshFailed}
+            autoRefresh={searchActive}
+            onRefresh={refreshWeather}
+          />
           <SummitCard />
 
           {lastReport && (

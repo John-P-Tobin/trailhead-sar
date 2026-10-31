@@ -1,17 +1,67 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Panel from "./ui/Panel";
 import { btnGhost } from "./ui/styles";
 import {
   currentPeriod,
   exposureRisk,
   ExposureLevel,
+  formatAge,
+  nextRefreshDelay,
   podModifiers,
   safetyFlags,
   upcoming,
   WeatherSnapshot,
   windChillF,
 } from "@/lib/weather";
+
+/** Live NWS data older than this is flagged as stale. */
+const STALE_MS = 45 * 60_000;
+
+function useNow(intervalMs: number): number {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), intervalMs);
+    return () => clearInterval(t);
+  }, [intervalMs]);
+  return now;
+}
+
+function UpdatedLine({
+  weather,
+  lastAttemptAt,
+  refreshFailed,
+  autoRefresh,
+}: {
+  weather: WeatherSnapshot;
+  lastAttemptAt: number | null;
+  refreshFailed: boolean;
+  autoRefresh: boolean;
+}) {
+  const now = useNow(30_000);
+  const nextMin =
+    autoRefresh && lastAttemptAt !== null ? Math.ceil(nextRefreshDelay(lastAttemptAt, refreshFailed, now) / 60_000) : null;
+  const next = nextMin === null ? "" : nextMin <= 0 ? " · refreshing…" : ` · next refresh in ${nextMin} min`;
+
+  if (weather.source === "live") {
+    const age = now - Date.parse(weather.fetchedAt);
+    const warn = refreshFailed || age > STALE_MS;
+    return (
+      <div className={`text-xs ${warn ? "text-amber-300" : "text-slate-400"}`}>
+        Updated {formatAge(age)}
+        {refreshFailed && " · last refresh failed, showing the last live forecast"}
+        {next}
+      </div>
+    );
+  }
+  return (
+    <div className="text-xs text-amber-300">
+      Live NWS unavailable{lastAttemptAt !== null && ` · last checked ${formatAge(now - lastAttemptAt)}`}
+      {next}
+    </div>
+  );
+}
 
 const RISK_STYLE: Record<ExposureLevel, string> = {
   low: "bg-emerald-500/15 text-emerald-300 border-emerald-500/40",
@@ -25,10 +75,17 @@ const hour = (iso: string) => new Date(iso).toLocaleTimeString([], { hour: "nume
 export default function WeatherPanel({
   weather,
   loading,
+  lastAttemptAt,
+  refreshFailed,
+  autoRefresh,
   onRefresh,
 }: {
   weather: WeatherSnapshot | null;
   loading: boolean;
+  lastAttemptAt: number | null;
+  refreshFailed: boolean;
+  /** True while a search is active; the forecast then refreshes every 20 minutes. */
+  autoRefresh: boolean;
   onRefresh: () => void;
 }) {
   const now = currentPeriod(weather ?? { source: "cached", fetchedAt: "", location: "", periods: [] });
@@ -65,6 +122,7 @@ export default function WeatherPanel({
         </div>
       ) : (
         <div className="space-y-3 text-sm">
+          <UpdatedLine weather={weather} lastAttemptAt={lastAttemptAt} refreshFailed={refreshFailed} autoRefresh={autoRefresh} />
           <div className="flex flex-wrap items-end gap-4">
             <div>
               <div className="text-2xl font-semibold tabular-nums">{now.temperatureF}°F</div>
