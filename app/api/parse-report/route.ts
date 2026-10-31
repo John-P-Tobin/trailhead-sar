@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { askClaudeJson } from "@/lib/server/anthropic";
-import { PARSE_SYSTEM } from "@/lib/prompts";
+import { buildParseSystem } from "@/lib/prompts";
 import { ParsedReport, ParsedReportSchema } from "@/lib/schemas";
 import { isCellId } from "@/lib/engine/grid";
 
@@ -16,14 +16,26 @@ const ParseOutput = z.object({
   unclear_points: z.array(z.string()),
 });
 
-const Body = z.object({ text: z.string().min(1).max(4000) });
+const PromptFeatureSchema = z.object({
+  kind: z.enum(["trail", "road", "stream", "water", "cliff", "ridge", "peak", "saddle"]),
+  name: z.string().min(1).max(120),
+  cells: z.array(z.string().max(3)).max(60),
+});
+
+const Body = z.object({
+  text: z.string().min(1).max(4000),
+  /** Named features of the map the IC is looking at, so "the Crawford Path" maps to cells. */
+  features: z.array(PromptFeatureSchema).max(80).optional(),
+});
 
 export async function POST(req: Request) {
   const body = Body.safeParse(await req.json().catch(() => null));
   if (!body.success) return Response.json({ ok: false, reason: "Report text is required." }, { status: 400 });
 
   const result = await askClaudeJson<ParsedReport>({
-    system: PARSE_SYSTEM,
+    system: buildParseSystem(
+      (body.data.features ?? []).map((f) => ({ ...f, cells: f.cells.filter(isCellId).map((c) => c.toUpperCase()) })),
+    ),
     user: `Radio report:\n"""\n${body.data.text}\n"""`,
     outputSchema: ParseOutput,
     strictSchema: ParsedReportSchema,

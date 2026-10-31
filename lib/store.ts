@@ -7,6 +7,7 @@ import { CellId, isCellId } from "./engine/grid";
 import { generatePriors, DEFAULT_ROW } from "./engine/priors";
 import { PROFILES, ProfileId } from "./profiles";
 import { Explanation, ParsedReport } from "./schemas";
+import { snapshotOf, STYLIZED_TERRAIN, TerrainSnapshot } from "./terrain";
 
 export type ReportSource = "claude" | "canned" | "manual";
 
@@ -64,12 +65,16 @@ export interface SearchState {
   rowHistory: number[];
   audit: AuditEntry[];
   demo: boolean;
+  /** Terrain the priors and suggestions use. Locked once the search starts. */
+  terrain: TerrainSnapshot;
+  /** True once the IC has hand-edited a cell's prior (kept if new terrain arrives). */
+  priorsEdited: boolean;
   /** Index of the next scripted demo step. */
   demoStep: number;
   found: { cell: CellId; at: string; text: string } | null;
 }
 
-export const initialState = (): SearchState => ({
+export const initialState = (terrain: TerrainSnapshot = snapshotOf(STYLIZED_TERRAIN)): SearchState => ({
   version: 1,
   lkp: null,
   profileId: "day_hiker",
@@ -82,6 +87,8 @@ export const initialState = (): SearchState => ({
   rowHistory: [],
   audit: [],
   demo: false,
+  terrain,
+  priorsEdited: false,
   demoStep: 0,
   found: null,
 });
@@ -105,7 +112,8 @@ export type Action =
   | { type: "set_explanation"; reportId: string; explanation: Explanation; source: "claude" | "local" | "canned" }
   | { type: "log"; entry: AuditEntry }
   | { type: "reset" }
-  | { type: "demo_load"; lkp: CellId; profileId: ProfileId }
+  | { type: "set_terrain"; terrain: TerrainSnapshot }
+  | { type: "demo_load"; lkp: CellId; profileId: ProfileId; terrain: TerrainSnapshot }
   | { type: "demo_advance" }
   | { type: "mark_found"; cell: CellId; text: string }
   | { type: "load"; state: SearchState };
@@ -120,8 +128,8 @@ function topShifts(before: ProbState, after: ProbState, n = 5) {
 }
 
 function regenerate(state: SearchState, lkp: CellId, profileId: ProfileId): SearchState {
-  const prob = generatePriors(lkp, PROFILES[profileId], state.prob?.row ?? DEFAULT_ROW);
-  return { ...state, lkp, profileId, prob, rowHistory: [prob.row] };
+  const prob = generatePriors(lkp, PROFILES[profileId], state.terrain.cells, state.prob?.row ?? DEFAULT_ROW);
+  return { ...state, lkp, profileId, prob, rowHistory: [prob.row], priorsEdited: false };
 }
 
 export function reducer(state: SearchState, action: Action): SearchState {
@@ -135,7 +143,10 @@ export function reducer(state: SearchState, action: Action): SearchState {
       const next = regenerate(state, action.cell, state.profileId);
       return {
         ...next,
-        audit: [...state.audit, makeAudit("setup", `LKP set to ${action.cell}; priors generated (${PROFILES[state.profileId].label})`)],
+        audit: [
+          ...state.audit,
+          makeAudit("setup", `LKP set to ${action.cell}; priors generated (${PROFILES[state.profileId].label}, ${state.terrain.label} terrain)`),
+        ],
       };
     }
 
@@ -156,6 +167,7 @@ export function reducer(state: SearchState, action: Action): SearchState {
       return {
         ...state,
         prob,
+        priorsEdited: true,
         audit: [
           ...state.audit,
           makeAudit("prior_edit", `IC edited ${action.cell} POA ${pct(before)} → ${pct(prob.cells[action.cell])}`, {
@@ -293,14 +305,33 @@ export function reducer(state: SearchState, action: Action): SearchState {
     case "log":
       return { ...state, audit: [...state.audit, action.entry] };
 
+    case "set_terrain": {
+      if (state.started) return state; // never change terrain under applied updates
+      const next = { ...state, terrain: action.terrain };
+      if (!state.lkp || !state.prob) return next;
+      if (state.priorsEdited) {
+        return {
+          ...next,
+          audit: [...state.audit, makeAudit("setup", `Terrain changed to ${action.terrain.label}; IC-edited priors kept`)],
+        };
+      }
+      return {
+        ...regenerate(next, state.lkp, state.profileId),
+        audit: [...state.audit, makeAudit("setup", `Terrain: ${action.terrain.label}; priors regenerated`)],
+      };
+    }
+
     case "demo_load": {
-      const base = { ...initialState(), demo: true, profileId: action.profileId };
+      const base = { ...initialState(action.terrain), demo: true, profileId: action.profileId };
       const next = regenerate(base, action.lkp, action.profileId);
       return {
         ...next,
         audit: [
           makeAudit("setup", "Demo scenario loaded"),
-          makeAudit("setup", `LKP set to ${action.lkp}; priors generated (${PROFILES[action.profileId].label})`),
+          makeAudit(
+            "setup",
+            `LKP set to ${action.lkp}; priors generated (${PROFILES[action.profileId].label}, ${action.terrain.label} terrain)`,
+          ),
         ],
       };
     }
@@ -316,7 +347,7 @@ export function reducer(state: SearchState, action: Action): SearchState {
       };
 
     case "reset":
-      return { ...initialState(), audit: [makeAudit("reset", "Search reset")] };
+      return { ...initialState(state.terrain), audit: [makeAudit("reset", "Search reset")] };
   }
 }
 

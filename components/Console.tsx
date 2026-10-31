@@ -17,16 +17,22 @@ import AuditLog from "./AuditLog";
 import DemoControls from "./DemoControls";
 import WelcomeCard from "./WelcomeCard";
 import SummitCard from "./SummitCard";
+import TerrainBadge from "./TerrainBadge";
 import { DEMO_LKP, DEMO_PROFILE, DEMO_STEPS } from "@/lib/demo/scenario";
-import { combinedFactor, currentPeriod, podModifiers, safetyFlags, upcoming, WeatherSnapshot } from "@/lib/weather";
+import { combinedFactor, currentPeriod, podModifiers, safetyFlags, upcoming } from "@/lib/weather";
+import { useWeather } from "@/lib/useWeather";
 import { rankCells } from "@/lib/engine/rank";
-import { cachedWeather } from "@/lib/demo/weather";
 import { explainUpdate, parseReport } from "@/lib/api";
 import { buildUpdateSummary, localExplanation } from "@/lib/explain";
 import { btnGhost, btnSecondary } from "./ui/styles";
 import { cumulativePodMap, initialState, loadState, reducer, ReportSource, saveState } from "@/lib/store";
 import { CellId } from "@/lib/engine/grid";
 import { emptyReport, ParsedReport } from "@/lib/schemas";
+import { describeCell, promptFeatures, snapshotOf, STYLIZED_TERRAIN, TerrainModel } from "@/lib/terrain";
+import { featuresForSnapshot, loadBundledTerrain, loadLiveTerrain } from "@/lib/terrainClient";
+import { buildCalTopoGeoJSON, buildCalTopoKML } from "@/lib/export";
+import { downloadText, fileStamp } from "@/lib/download";
+import { makeAudit } from "@/lib/audit";
 
 interface Draft {
   report: ParsedReport;
@@ -49,24 +55,56 @@ export default function Console() {
   const requested = useRef(new Set<string>());
 
   const [prefill, setPrefill] = useState<{ team: string; cell: string; reason: string; key: number } | null>(null);
-  const [weather, setWeather] = useState<WeatherSnapshot | null>(null);
-  const [weatherLoading, setWeatherLoading] = useState(true);
-
   useEffect(() => saveState(state), [state]);
+  const stateRef = useRef(state);
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
 
-  const fetchWeather = () =>
-    fetch("/api/weather", { signal: AbortSignal.timeout(20_000) })
-      .then((r) => r.json() as Promise<WeatherSnapshot>)
-      .catch(() => cachedWeather(Date.now(), "Weather route unreachable"))
-      .then((snap) => {
-        setWeather(snap);
-        setWeatherLoading(false);
-      });
-  const loadWeather = () => {
-    setWeatherLoading(true);
-    fetchWeather();
+  // Terrain: the store holds the cells the model uses; this holds the drawable features.
+  const [terrainModel, setTerrainModel] = useState<TerrainModel>(STYLIZED_TERRAIN);
+  const [terrainLoading, setTerrainLoading] = useState(false);
+  const [terrainNote, setTerrainNote] = useState<string | null>(null);
+
+  const applyTerrain = (model: TerrainModel) => {
+    setTerrainModel(model);
+    dispatch({ type: "set_terrain", terrain: snapshotOf(model) });
   };
-  useEffect(() => void fetchWeather(), []);
+
+  // On load: before a search starts, use real terrain (cached live OSM for this grid, else the
+  // bundled file). A search in progress keeps the cells it started with; only the drawing is restored.
+  useEffect(() => {
+    const s = stateRef.current;
+    featuresForSnapshot(s.terrain).then(async (model) => {
+      if (s.started) {
+        if (model) setTerrainModel(model);
+        return;
+      }
+      const real = model && model.source !== "stylized" ? model : await loadBundledTerrain();
+      if (real && !stateRef.current.started) applyTerrain(real);
+    });
+  }, []);
+
+  /** After the LKP is placed: fetch live OSM for the grid (cache first). The bundled terrain stays if it fails. */
+  const fetchLiveTerrain = async () => {
+    const bbox = stateRef.current.terrain.bbox;
+    setTerrainLoading(true);
+    setTerrainNote(null);
+    const res = await loadLiveTerrain(bbox);
+    setTerrainLoading(false);
+    const s = stateRef.current;
+    if (!res.model) {
+      setTerrainNote(`Live OSM unavailable: ${res.reason} Using ${s.terrain.label} terrain.`);
+    } else if (s.started || s.demo) {
+      setTerrainNote(`Live OSM arrived after the search started, so the ${s.terrain.label} terrain was kept to keep the model consistent.`);
+    } else {
+      applyTerrain(res.model);
+    }
+  };
+
+  // Weather auto-refreshes every 20 minutes while a search is active.
+  const searchActive = !!state.lkp && !state.found;
+  const { weather, loading: weatherLoading, lastAttemptAt, refreshFailed, refresh: refreshWeather } = useWeather(searchActive);
 
   // Ask for an explanation of each newly applied report (falls back to a local summary).
   const lastReport = state.reports.at(-1);
@@ -93,6 +131,7 @@ export default function Console() {
     if (needLkp) {
       dispatch({ type: "set_lkp", cell: id });
       setPlacingLkp(false);
+      if (!state.demo && state.terrain.source !== "live") fetchLiveTerrain();
       return;
     }
     if (draft) {
@@ -111,7 +150,7 @@ export default function Console() {
   const onParse = async (text: string, canned?: ParsedReport) => {
     setParsing(true);
     setParseError(null);
-    const res = await parseReport(text);
+    const res = await parseReport(text, promptFeatures(terrainModel.features));
     setParsing(false);
     const demo = !!canned;
     if (res.ok) {
@@ -137,9 +176,14 @@ export default function Console() {
 
   const demoStep = state.demo ? DEMO_STEPS[state.demoStep] : undefined;
 
-  const loadDemo = () => {
+  // Demo mode always uses the bundled terrain, so the video never depends on a live API.
+  const loadDemo = async () => {
     if (state.audit.length > 1 && !confirm("Load the demo scenario? This replaces the current search.")) return;
-    dispatch({ type: "demo_load", lkp: DEMO_LKP, profileId: DEMO_PROFILE });
+    const bundled = await loadBundledTerrain();
+    const model = bundled ?? STYLIZED_TERRAIN;
+    setTerrainModel(model);
+    setTerrainNote(bundled ? null : "The bundled terrain failed to load; the demo story is tuned for it.");
+    dispatch({ type: "demo_load", lkp: DEMO_LKP, profileId: DEMO_PROFILE, terrain: snapshotOf(model) });
     requested.current.clear();
     setDraft(null);
     setInspect(null);
@@ -159,16 +203,47 @@ export default function Console() {
 
   const selected = draft ? draft.report.cells : inspect ? [inspect] : [];
 
+  /** Download the grid, markers and team outlines for CalTopo, and log the export. */
+  const exportCalTopo = (format: "geojson" | "kml") => {
+    if (!state.prob) return;
+    const input = { state, weather, now: Date.now() };
+    const row = `${(state.prob.row * 100).toFixed(1)}%`;
+    const weatherSource = weather?.source === "live" ? "Live NWS" : "cached";
+    if (format === "geojson") {
+      const fc = buildCalTopoGeoJSON(input);
+      downloadText(`trailhead-caltopo-${fileStamp()}.geojson`, JSON.stringify(fc), "application/geo+json");
+      const teams = fc.features.filter((f) => f.properties.kind === "assignment").length;
+      const markers = fc.features.filter((f) => f.geometry.type === "Point").length;
+      dispatch({
+        type: "log",
+        entry: makeAudit(
+          "export",
+          `Exported for CalTopo (GeoJSON): 225 cells, ${markers} marker${markers === 1 ? "" : "s"}, ${teams} team outline${teams === 1 ? "" : "s"}; ROW ${row}; ${weatherSource} weather`,
+        ),
+      });
+    } else {
+      downloadText(`trailhead-caltopo-${fileStamp()}.kml`, buildCalTopoKML(input), "application/vnd.google-earth.kml+xml");
+      dispatch({ type: "log", entry: makeAudit("export", `Exported for CalTopo (KML): ROW ${row}; ${weatherSource} weather`) });
+    }
+  };
+
   const modifiers = useMemo(() => podModifiers(weather ? currentPeriod(weather) : null), [weather]);
   const weatherFactor = combinedFactor(modifiers);
   const flaggedCells = useMemo(
-    () => new Set(weather ? safetyFlags(upcoming(weather, 12)).flatMap((f) => f.cells) : []),
-    [weather],
+    () => new Set(weather ? safetyFlags(upcoming(weather, 12), state.terrain.cells).flatMap((f) => f.cells) : []),
+    [weather, state.terrain.cells],
   );
   const suggestions = useMemo(
-    () => (state.prob ? rankCells(state.prob, cumPod, weatherFactor) : []),
-    [state.prob, cumPod, weatherFactor],
+    () => (state.prob ? rankCells(state.prob, cumPod, state.terrain.cells, weatherFactor) : []),
+    [state.prob, cumPod, state.terrain.cells, weatherFactor],
   );
+  // Cells come from the store (what the model uses); lines and shapes from the loaded terrain.
+  const mapTerrain = {
+    cells: state.terrain.cells,
+    bbox: state.terrain.bbox,
+    osm: state.terrain.source !== "stylized",
+    features: terrainModel.features,
+  };
 
   return (
     <main className="mx-auto max-w-[1400px] p-3 pb-16 sm:p-4 sm:pb-16">
@@ -197,14 +272,23 @@ export default function Console() {
           <Panel
             title="Search area"
             right={
-              needLkp ? (
-                <span className="text-xs font-medium text-amber-300">Click a cell to place the last known point</span>
-              ) : draft ? (
-                <span className="text-xs font-medium text-sky-300">Click cells to add/remove them from the report</span>
-              ) : null
+              <div className="flex flex-wrap items-center justify-end gap-2">
+                {needLkp ? (
+                  <span className="text-xs font-medium text-amber-300">Click a cell to place the last known point</span>
+                ) : draft ? (
+                  <span className="text-xs font-medium text-sky-300">Click cells to add/remove them from the report</span>
+                ) : null}
+                <TerrainBadge
+                  source={state.terrain.source}
+                  label={state.terrain.label}
+                  fetchedAt={state.terrain.fetchedAt}
+                  loading={terrainLoading}
+                />
+              </div>
             }
           >
             <GridMap
+              terrain={mapTerrain}
               poa={state.prob?.cells}
               cumulativePod={cumPod}
               lkp={state.lkp}
@@ -214,8 +298,9 @@ export default function Console() {
               found={state.found?.cell ?? null}
               onCellClick={onCellClick}
             />
+            {terrainNote && <p className="mt-2 text-xs text-amber-300">{terrainNote}</p>}
             <div className="mt-2">
-              <MapLegend />
+              <MapLegend kinds={new Set(mapTerrain.features.map((f) => f.kind))} />
             </div>
           </Panel>
         </div>
@@ -270,6 +355,7 @@ export default function Console() {
 
           <SetupPanel
             lkp={state.lkp}
+            lkpInfo={state.lkp ? describeCell(state.terrain.cells[state.lkp]) : undefined}
             profileId={state.profileId}
             row={state.prob?.row ?? null}
             started={state.started}
@@ -312,7 +398,15 @@ export default function Console() {
             </Panel>
           )}
 
-          <WeatherPanel weather={weather} loading={weatherLoading} onRefresh={loadWeather} />
+          <WeatherPanel
+            weather={weather}
+            loading={weatherLoading}
+            lastAttemptAt={lastAttemptAt}
+            refreshFailed={refreshFailed}
+            autoRefresh={searchActive}
+            terrain={state.terrain.cells}
+            onRefresh={refreshWeather}
+          />
           <SummitCard />
 
           {lastReport && (
@@ -325,6 +419,7 @@ export default function Console() {
             <CellInspector
               key={`${inspect}-${state.prob.cells[inspect]}`}
               cell={inspect}
+              terrain={state.terrain.cells[inspect]}
               poa={state.prob.cells[inspect]}
               cumPod={cumPod[inspect] ?? 0}
               sweeps={state.pods[inspect]?.length ?? 0}
@@ -364,6 +459,7 @@ export default function Console() {
                 flaggedCells={flaggedCells}
                 assignments={state.assignments}
                 selectedCell={inspect}
+                terrain={state.terrain.cells}
                 onAssign={(a) => {
                   dispatch({ type: "assign", ...a });
                   if (demoStep?.kind === "override" && a.cell === demoStep.cell) dispatch({ type: "demo_advance" });
@@ -378,7 +474,7 @@ export default function Console() {
             </div>
           )}
 
-          <AuditLog state={state} />
+          <AuditLog state={state} onExportCalTopo={exportCalTopo} />
         </div>
 
       </div>

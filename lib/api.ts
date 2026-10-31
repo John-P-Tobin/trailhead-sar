@@ -1,5 +1,6 @@
 // Browser-side calls to our own server routes (never to Anthropic directly).
 import { Explanation, ParsedReport } from "./schemas";
+import type { PromptFeature } from "./terrain";
 
 type Result<T> = ({ ok: true } & T) | { ok: false; reason: string };
 
@@ -23,7 +24,8 @@ async function post<T>(url: string, body: unknown, timeoutMs: number): Promise<R
   }
 }
 
-export const parseReport = (text: string) => post<{ report: ParsedReport }>("/api/parse-report", { text }, 45_000);
+export const parseReport = (text: string, features: PromptFeature[] = []) =>
+  post<{ report: ParsedReport }>("/api/parse-report", { text, features }, 45_000);
 
 export const explainUpdate = (summary: string) =>
   post<{ explanation: Explanation }>("/api/explain", { summary }, 45_000);

@@ -8,4 +8,6 @@ cp .env.example .env.local   # add your ANTHROPIC_API_KEY (optional; manual mode
 npm run dev
 ```
 
-`npm test` runs the Bayesian engine unit tests. See `PLAN.md` and `NOTES.md`.
+`npm test` runs the unit tests. See `PLAN.md` and `NOTES.md`.
+
+Bundled terrain: `data/terrain.geojson` (OpenStreetMap, © OpenStreetMap contributors, ODbL). To regenerate it from an Overpass Turbo export: `npm run convert-terrain -- export.geojson`.

@@ -3,7 +3,7 @@
 
 import { CellId } from "./grid";
 import { ProbState } from "./bayes";
-import { Cover, TERRAIN } from "../terrain";
+import { CellTerrain, Cover } from "../terrain";
 
 /** Illustrative expected POD for one line-search sweep at ~20 m spacing, by vegetation. */
 export const BASE_POD: Record<Cover, number> = { open: 0.75, hardwood: 0.6, spruce: 0.45, alpine: 0.65 };
@@ -11,8 +11,8 @@ export const BASE_POD: Record<Cover, number> = { open: 0.75, hardwood: 0.6, spru
 /** Cells with cumulative POD at or above this are treated as well searched. */
 export const WELL_SEARCHED = 0.8;
 
-export function expectedPod(cell: CellId, weatherFactor = 1): number {
-  const t = TERRAIN[cell];
+export function expectedPod(cell: CellId, terrain: Record<CellId, CellTerrain>, weatherFactor = 1): number {
+  const t = terrain[cell];
   let p = BASE_POD[t.cover];
   if (t.cliff || t.water) p = Math.min(p, 0.3);
   return Math.max(0, Math.min(1, p * weatherFactor));
@@ -29,13 +29,14 @@ export interface Suggestion {
 export function rankCells(
   prob: ProbState,
   cumPod: Record<CellId, number>,
+  terrain: Record<CellId, CellTerrain>,
   weatherFactor = 1,
   n = 5,
 ): Suggestion[] {
   return Object.entries(prob.cells)
     .filter(([cell, poa]) => poa > 1e-6 && (cumPod[cell] ?? 0) < WELL_SEARCHED)
     .map(([cell, poa]) => {
-      const e = expectedPod(cell, weatherFactor);
+      const e = expectedPod(cell, terrain, weatherFactor);
       return { cell, poa, expectedPod: e, cumulativePod: cumPod[cell] ?? 0, score: poa * e };
     })
     .sort((a, b) => b.score - a.score || b.poa - a.poa)

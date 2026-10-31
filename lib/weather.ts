@@ -2,7 +2,7 @@
 // All thresholds and multipliers are ILLUSTRATIVE ESTIMATES for decision support.
 
 import { CellId } from "./engine/grid";
-import { TERRAIN } from "./terrain";
+import { CellTerrain } from "./terrain";
 
 export interface HourlyPeriod {
   startTime: string;
@@ -148,15 +148,11 @@ export interface SafetyFlag {
   cells: CellId[];
 }
 
-const EXPOSED: CellId[] = Object.values(TERRAIN)
-  .filter((t) => t.ridge || t.cover === "alpine")
-  .map((t) => t.id);
-const RIDGE: CellId[] = Object.values(TERRAIN)
-  .filter((t) => t.ridge)
-  .map((t) => t.id);
-
 /** Team safety flags over the next hours. These inform the IC; they never block an assignment. */
-export function safetyFlags(periods: HourlyPeriod[]): SafetyFlag[] {
+export function safetyFlags(periods: HourlyPeriod[], terrain: Record<CellId, CellTerrain>): SafetyFlag[] {
+  const all = Object.values(terrain);
+  const RIDGE = all.filter((t) => t.ridge).map((t) => t.id);
+  const EXPOSED = all.filter((t) => t.ridge || t.cover === "alpine").map((t) => t.id);
   if (!periods.length) return [];
   const flags: SafetyFlag[] = [];
   const maxWind = Math.max(...periods.map((p) => p.windMph));
@@ -189,4 +185,37 @@ export function safetyFlags(periods: HourlyPeriod[]): SafetyFlag[] {
     });
   }
   return flags;
+}
+
+// ---------------------------------------------------------------------------
+// Refresh policy
+
+export const WEATHER_REFRESH_MS = 20 * 60_000;
+/** Retry sooner after a failed refresh. */
+export const WEATHER_RETRY_MS = 5 * 60_000;
+/** Keep showing the last live forecast after a failed refresh for up to this long. */
+export const MAX_STALE_LIVE_MS = 2 * 3600_000;
+
+/**
+ * What to show after a refresh. A failed refresh (cached demo weather) does not
+ * replace a recent live forecast: slightly old real data beats canned data.
+ */
+export function mergeWeather(prev: WeatherSnapshot | null, next: WeatherSnapshot, now = Date.now()): WeatherSnapshot {
+  if (next.source === "live" || prev?.source !== "live") return next;
+  return now - Date.parse(prev.fetchedAt) < MAX_STALE_LIVE_MS ? prev : next;
+}
+
+/** Milliseconds until the next scheduled refresh attempt. */
+export function nextRefreshDelay(lastAttemptAt: number, failed: boolean, now = Date.now()): number {
+  return Math.max(0, lastAttemptAt + (failed ? WEATHER_RETRY_MS : WEATHER_REFRESH_MS) - now);
+}
+
+/** "just now", "1 min ago", "23 min ago", "1 h 5 min ago". */
+export function formatAge(ms: number): string {
+  const min = Math.floor(Math.max(0, ms) / 60_000);
+  if (min < 1) return "just now";
+  if (min < 60) return `${min} min ago`;
+  const h = Math.floor(min / 60);
+  const m = min % 60;
+  return m ? `${h} h ${m} min ago` : `${h} h ago`;
 }

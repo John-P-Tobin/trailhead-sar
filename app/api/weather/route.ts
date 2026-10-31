@@ -22,7 +22,8 @@ export async function GET(req: Request) {
   const lon = Number(url.searchParams.get("lon") ?? MAP_ANCHOR.lon);
   if (!Number.isFinite(lat) || !Number.isFinite(lon)) return Response.json(cachedWeather(Date.now(), "Invalid location"));
   const key = `${lat.toFixed(4)},${lon.toFixed(4)}`;
-  if (cache && cache.key === key && Date.now() - cache.at < TTL_MS) return Response.json(cache.snap);
+  const fresh = url.searchParams.get("fresh") === "1";
+  if (!fresh && cache && cache.key === key && Date.now() - cache.at < TTL_MS) return Response.json(cache.snap);
 
   try {
     const points = (await getJson(`https://api.weather.gov/points/${key}`)) as {

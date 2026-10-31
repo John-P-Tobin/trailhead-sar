@@ -6,7 +6,7 @@ import { btnPrimary, btnSecondary, input, label } from "./ui/styles";
 import { Suggestion } from "@/lib/engine/rank";
 import { isCellId } from "@/lib/engine/grid";
 import { PodModifier } from "@/lib/weather";
-import { describeCell } from "@/lib/terrain";
+import { CellTerrain, describeCell } from "@/lib/terrain";
 import { Assignment } from "@/lib/store";
 
 const pct = (v: number, d = 1) => `${(v * 100).toFixed(d)}%`;
@@ -19,6 +19,7 @@ export default function SuggestionsPanel({
   assignments,
   selectedCell,
   prefill,
+  terrain,
   onAssign,
 }: {
   suggestions: Suggestion[];
@@ -27,6 +28,7 @@ export default function SuggestionsPanel({
   flaggedCells: Set<string>;
   assignments: Assignment[];
   selectedCell: string | null;
+  terrain: Record<string, CellTerrain>;
   /** Initial values (used by demo mode). Remount with a new key to apply. */
   prefill?: { team: string; cell: string; reason: string } | null;
   onAssign: (a: { team: string; cell: string; suggestedRank: number | null; topSuggestion: string | null; reason?: string }) => void;
@@ -91,7 +93,7 @@ export default function SuggestionsPanel({
                   <span className="font-mono font-semibold">{s.cell}</span>
                   {flaggedCells.has(s.cell) && <span title="Weather safety flag on this cell"> ⚠</span>}
                   <div className="text-[10px] text-slate-500">
-                    {describeCell(s.cell)}
+                    {describeCell(terrain[s.cell])}
                     {s.cumulativePod > 0 && ` · searched ${pct(s.cumulativePod, 0)}`}
                   </div>
                 </td>
