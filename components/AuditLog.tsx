@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import Panel from "./ui/Panel";
-import { btnSecondary } from "./ui/styles";
+import { btnPrimary, btnSecondary } from "./ui/styles";
 import { AuditEntry, AuditType, exportAuditJson } from "@/lib/audit";
 import { SearchState } from "@/lib/store";
 import { PROFILES } from "@/lib/profiles";
 import { CLAUDE_MODEL } from "@/lib/claude";
+import { downloadText, fileStamp } from "@/lib/download";
+import { CALTOPO_HINT } from "@/lib/export";
 
 const TYPE_STYLE: Partial<Record<AuditType, string>> = {
   report: "text-sky-300",
@@ -14,9 +16,17 @@ const TYPE_STYLE: Partial<Record<AuditType, string>> = {
   clue: "text-fuchsia-300",
   prior_edit: "text-amber-300",
   explanation: "text-slate-400",
+  export: "text-emerald-300",
 };
 
-export default function AuditLog({ state }: { state: SearchState }) {
+export default function AuditLog({
+  state,
+  onExportCalTopo,
+}: {
+  state: SearchState;
+  /** Builds, downloads and logs the CalTopo file. */
+  onExportCalTopo: (format: "geojson" | "kml") => void;
+}) {
   const [all, setAll] = useState(false);
   const entries: AuditEntry[] = [...state.audit].reverse();
   const shown = all ? entries : entries.slice(0, 8);
@@ -33,12 +43,7 @@ export default function AuditLog({ state }: { state: SearchState }) {
       assignments: state.assignments,
       row_history: state.rowHistory,
     });
-    const url = URL.createObjectURL(new Blob([json], { type: "application/json" }));
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `trailhead-audit-${new Date().toISOString().replace(/[:.]/g, "-")}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+    downloadText(`trailhead-audit-${fileStamp()}.json`, json, "application/json");
   };
 
   return (
@@ -50,6 +55,17 @@ export default function AuditLog({ state }: { state: SearchState }) {
         </button>
       }
     >
+      <div className="mb-3 flex flex-wrap items-center gap-2 rounded-md border border-slate-800 bg-slate-950/40 p-2">
+        <button className={btnPrimary} onClick={() => onExportCalTopo("geojson")} disabled={!state.prob}>
+          Export for CalTopo
+        </button>
+        <button className={btnSecondary} onClick={() => onExportCalTopo("kml")} disabled={!state.prob} title="KML with styles, as a fallback">
+          KML
+        </button>
+        <span className="text-xs text-slate-400">
+          {state.prob ? CALTOPO_HINT : "Place the LKP to export the search grid for CalTopo."}
+        </span>
+      </div>
       {entries.length === 0 ? (
         <p className="text-sm text-slate-400">Every report, AI proposal, IC edit, override and clue is recorded here.</p>
       ) : (

@@ -7,6 +7,7 @@ export type AuditType =
   | "assignment"
   | "override"
   | "note"
+  | "export"
   | "reset";
 
 export interface AuditEntry {

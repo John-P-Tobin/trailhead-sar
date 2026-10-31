@@ -30,6 +30,9 @@ import { CellId } from "@/lib/engine/grid";
 import { emptyReport, ParsedReport } from "@/lib/schemas";
 import { describeCell, promptFeatures, snapshotOf, STYLIZED_TERRAIN, TerrainModel } from "@/lib/terrain";
 import { featuresForSnapshot, loadBundledTerrain, loadLiveTerrain } from "@/lib/terrainClient";
+import { buildCalTopoGeoJSON, buildCalTopoKML } from "@/lib/export";
+import { downloadText, fileStamp } from "@/lib/download";
+import { makeAudit } from "@/lib/audit";
 
 interface Draft {
   report: ParsedReport;
@@ -199,6 +202,30 @@ export default function Console() {
   };
 
   const selected = draft ? draft.report.cells : inspect ? [inspect] : [];
+
+  /** Download the grid, markers and team outlines for CalTopo, and log the export. */
+  const exportCalTopo = (format: "geojson" | "kml") => {
+    if (!state.prob) return;
+    const input = { state, weather, now: Date.now() };
+    const row = `${(state.prob.row * 100).toFixed(1)}%`;
+    const weatherSource = weather?.source === "live" ? "Live NWS" : "cached";
+    if (format === "geojson") {
+      const fc = buildCalTopoGeoJSON(input);
+      downloadText(`trailhead-caltopo-${fileStamp()}.geojson`, JSON.stringify(fc), "application/geo+json");
+      const teams = fc.features.filter((f) => f.properties.kind === "assignment").length;
+      const markers = fc.features.filter((f) => f.geometry.type === "Point").length;
+      dispatch({
+        type: "log",
+        entry: makeAudit(
+          "export",
+          `Exported for CalTopo (GeoJSON): 225 cells, ${markers} marker${markers === 1 ? "" : "s"}, ${teams} team outline${teams === 1 ? "" : "s"}; ROW ${row}; ${weatherSource} weather`,
+        ),
+      });
+    } else {
+      downloadText(`trailhead-caltopo-${fileStamp()}.kml`, buildCalTopoKML(input), "application/vnd.google-earth.kml+xml");
+      dispatch({ type: "log", entry: makeAudit("export", `Exported for CalTopo (KML): ROW ${row}; ${weatherSource} weather`) });
+    }
+  };
 
   const modifiers = useMemo(() => podModifiers(weather ? currentPeriod(weather) : null), [weather]);
   const weatherFactor = combinedFactor(modifiers);
@@ -447,7 +474,7 @@ export default function Console() {
             </div>
           )}
 
-          <AuditLog state={state} />
+          <AuditLog state={state} onExportCalTopo={exportCalTopo} />
         </div>
 
       </div>

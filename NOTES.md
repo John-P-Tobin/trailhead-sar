@@ -32,6 +32,12 @@
 - Data caveats: this OSM export has no `natural=cliff` features in the box, so no cliff cells; the ponds (Lakes of the Clouds, Hermit Lake, Spaulding Lake, Gem Pool) are smaller than a cell, so they are drawn but no cell is flagged water.
 - Attribution: "© OpenStreetMap contributors" (link to openstreetmap.org/copyright) sits on the map whenever OSM data is shown; the bundled file carries the ODbL attribution.
 
+## Export for CalTopo
+- Real SAR teams run searches in CalTopo; its API needs a team account, so Trailhead exports files the IC imports (Import → choose file). Button in the audit-log panel; every export is logged.
+- GeoJSON (`lib/export.ts`, RFC 7946: WGS84, `[lon, lat]`): one Polygon per cell (counterclockwise ring from the cell's real bounds) titled like "G14 – POA 1.7%", with a description (POA, cumulative POD, last searched by, sweeps, weather-adjusted vs base expected POD with active penalties, terrain, and any team-safety flag on ridgeline/exposed cells) and `fill` / `fill-opacity` / `stroke` from the same heatmap function the map uses (`lib/heat.ts`). Markers for the LKP, each clue (title = clue text) and the found location. Each team's assigned cells are merged into one outline polygon (adjacent cells merge, corner-only contacts split, holes kept), titled with the team name.
+- The top-level `description` (and a structured `trailhead` member) carries the note: export time, ROW, NWS conditions at export time, exposure-risk label, weather source and last update, and the decision-support line. CalTopo ignores top-level members, so the same note is also a "Trailhead export" marker at the grid's NW corner.
+- KML with inline styles (aabbggrr colors, outline-only team shapes) as a fallback. Unit tests check structure, coordinate order, ring closure/orientation, titles, styles, markers, outlines and the note. **Not tested by importing into CalTopo itself** (needs an account and network access) — try one import before the demo.
+
 ## Demo script (Load demo scenario)
 Runs on the bundled real terrain. Subject: Dan, 58, day hiker; left the Lakes of the Clouds hut (E10, junction of the Crawford Path, Ammonoosuc Ravine and Dry River trails) for the summit in fog. Each step still goes through the real UI — the presenter applies each parse, picks the clue boost and makes the assignment.
 1. Team 1 hasty search of the Crawford Path toward the summit (E10, F10, G10, G9; POD 50%) → ROW 10.0 → 10.3%.
