@@ -94,6 +94,12 @@ Round 2 (done):
 12. Real terrain from OpenStreetMap (Overpass), bundled Mt Washington fallback, demo retuned on it.
 13. Export for CalTopo (GeoJSON + KML).
 
+Round 4 (done):
+14. Lost-person behaviour priors: lognormal distance from the LKP (ISRID hiker fit via MapScore; other categories illustrative), scaled by the subject (age, experience, fitness, medical), truncated by time-aware reach, graded downhill pull, model-suggested ROW (IC slider stays authoritative).
+15. Subject card pre-filled by Claude from the call-out (`/api/parse-subject`), every field confirmed by the IC; seven-factor relative urgency chart with logged IC overrides; never a survival estimate.
+16. Ant-style UI kit in `components/ui/` (no library), tabbed console, status bar, confirm modals.
+17. Publish to CalTopo through the signed API into an app-owned `[Trailhead]` folder (`CALTOPO_ID/KEY/MAP_ID` server env); human features untouched; no subject personal details leave the device.
+
 ## Working rules for Claude
 - After each milestone: run the build and tests, fix failures, start the app and check the feature works, commit with a clear message, and check the milestone off in PLAN.md.
 - Keep going through the milestones without asking for permission. Ask only if truly blocked.

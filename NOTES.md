@@ -39,6 +39,30 @@
 - `/api/terrain` asks two Overpass servers at once (overpass-api.de and overpass.private.coffee) and takes the first good answer; `OVERPASS_URL` still overrides with a single server. **Overpass was overloaded on the night of Oct 30**, so Live OSM may not appear; the demo always uses the bundled terrain regardless.
 - `tests/robustness.test.ts`: blank reports, out-of-grid cells, garbled POD, engine errors, 300 random sweeps/clues staying normalized, restore after refresh, corrupt saved state, Reset mid-demo, Overpass backup server.
 
+## Round 4: lost-person model, subject, urgency, UI kit, CalTopo publishing
+
+### Behaviour-based priors (`lib/engine/behaviour.ts`, `lib/engine/priors.ts`)
+- Distance from the LKP is **lognormal**. `day_hiker` uses the ISRID fit for hikers in temperate mountainous terrain from MapScore (`github.com/ctwardy/mapscore`, `arc-models/lognorm_params.csv`): μ 0.962, σ 1.258 (ln km) → half within 2.6 km, ~89 % within 12 km. The other four categories are fitted to approximate quartiles and are **illustrative**. Say so in the pitch.
+- The subject form scales the distances (experience, fitness, age band, medical) and sets a **time-aware reach** (speed by category × hours missing, capped at 6 h of travel), which truncates the distribution early in a search. Per-cell weight = areal density (ring mass ÷ ring area) × the old terrain multipliers × a **graded downhill pull** (saturates at 150 m below the LKP). Real metres from the cell bounds.
+- **Model-suggested ROW** = share of the distribution beyond the nearest grid edge (clamped 5–60 %). The IC's slider stays authoritative; for the demo the IC keeps 10 % (Dan was headed for the summit in fog), and the Subject card says what the model would suggest. Rankings on the grid do not depend on ROW.
+- The LKP cell and its neighbours now carry more mass, which is why the demo's Team 2 report line-searches around the hut (E10, D10, F11, D12, F12 added).
+
+### Subject and urgency
+- `lib/subject.ts`: category, name, age band, experience, fitness, medical, equipment, party size, last seen, intent, notes. `defaultSubject(category)` keeps the quick path working.
+- `/api/parse-subject` + `lib/subjectParse.ts`: Claude pre-fills the card from the call-out (structured output, zod, retry once, manual fallback). Times are resolved against the client's clock and zone; missing, garbled or future times fall back to "2 h ago" and are flagged. Store flag `subjectConfirmed`; demo pre-seeds the subject but leaves it unconfirmed until step 0.
+- `lib/engine/urgency.ts`: the standard seven-factor **relative urgency** chart (age, medical, number of subjects, experience, weather, equipment, terrain; 1–3 each; 7–11 emergency, 12–16 measured, 17–21 evaluate). Weather comes from exposure risk now / within 8 h; terrain from cliffs, water or alpine ground within 3 cells of the LKP. The IC can set any factor (Segmented 1/2/3); overrides keep the proposed score and are logged (`urgency` audit type). Never a survival estimate.
+
+### UI kit and layout
+- `components/ui/`: Card, Button, Tag, Alert, Statistic, Empty, Skeleton, Steps, Segmented, Tabs, Tooltip, Descriptions, Modal + `ConfirmProvider`/`useConfirm`, inline icons. Ant-dark tokens live in `app/globals.css` (`@theme`: surface/line/fg levels, primary #1677ff, success/warning/error/purple). No component library installed; no text under 12 px.
+- Console: header actions (demo, publish, export, reset), **StatusBar** (LKP, subject, missing-for, ROW, urgency band, exposure, found), sticky map column with the ROW card, right column **Tabs** (Operations · Cell · Clues · Weather · Log) with the demo card above them. Map click opens the Cell tab; weather flags can highlight their cells. 25/50/75 % distance rings around the LKP (toggle). `window.confirm` is gone.
+- **Do not run `next build` while `next dev` is running**: both write `.next` and dev then serves stale CSS. Stop dev first.
+
+### Publish to CalTopo (`lib/server/caltopo.ts`, `/api/caltopo`, `lib/caltopoPublish.ts`)
+- Signed requests exactly like `caltopo_python`: `signature = base64(HMAC-SHA256(base64decode(key), "METHOD /api/v1/map/MAP/Class[/id]\n<expires ms>\n<json or empty>"))`, POST as form fields (`id`, `expires`, `signature`, `json`), DELETE with the same fields as query params. Verified against the Python library and live.
+- Server env: `CALTOPO_ID`, `CALTOPO_KEY`, `CALTOPO_MAP_ID` (map code from `caltopo.com/m/XXXXX`). **Set these three in the Vercel project (Settings → Environment Variables) and redeploy; otherwise the Publish button is hidden and the file export remains.** Locally they are in `.env.local` (git-ignored). The credential is Xander's Pro trial (ends Nov 13); delete it on caltopo.com after the hackathon.
+- What is written (≤ 50 features, into a new `[Trailhead] <category> · <time> ET` folder): 50/75/90 % probability zones as merged cell outlines, top-5 suggestion cells, team assignment outlines, markers for LKP, clues (`Clue · G13`, text in the description), found location and an export note. Then the previous app-owned ids (kept in localStorage `trailhead:caltopo:v1`) are deleted, folder last. Human-drawn features are never touched. **No subject name, medical or family details are ever written** (tested).
+- Demo map: `https://caltopo.com/m/A53VMHU` (Xander's account). It already holds one published set from the final local run.
+
 ## Export for CalTopo
 - Real SAR teams run searches in CalTopo; its API needs a team account, so Trailhead exports files the IC imports (Import → choose file). Button in the audit-log panel; every export is logged.
 - GeoJSON (`lib/export.ts`, RFC 7946: WGS84, `[lon, lat]`): one Polygon per cell (counterclockwise ring from the cell's real bounds) titled like "G14 – POA 1.7%", with a description (POA, cumulative POD, last searched by, sweeps, weather-adjusted vs base expected POD with active penalties, terrain, and any team-safety flag on ridgeline/exposed cells) and `fill` / `fill-opacity` / `stroke` from the same heatmap function the map uses (`lib/heat.ts`). Markers for the LKP, each clue (title = clue text) and the found location. Each team's assigned cells are merged into one outline polygon (adjacent cells merge, corner-only contacts split, holes kept), titled with the team name.
@@ -46,7 +70,7 @@
 - KML with inline styles (aabbggrr colors, outline-only team shapes) as a fallback. Unit tests check structure, coordinate order, ring closure/orientation, titles, styles, markers, outlines and the note. **Not tested by importing into CalTopo itself** (needs an account and network access) — try one import before the demo.
 
 ## Demo script (Load demo scenario)
-Runs on the bundled real terrain. Subject: Dan, 58, day hiker; left the Lakes of the Clouds hut (E10, junction of the Crawford Path, Ammonoosuc Ravine and Dry River trails) for the summit in fog. Each step still goes through the real UI — the presenter applies each parse, picks the clue boost and makes the assignment.
+Runs on the bundled real terrain. **Round 4 adds step 0:** the IC pastes the call-out, Claude pre-fills the subject card (canned fallback), the IC confirms; the urgency chart reads *Measured response · 13*. The remaining steps are unchanged (8 steps total; see `DEMO.md`). Subject: Dan, 58, day hiker; left the Lakes of the Clouds hut (E10, junction of the Crawford Path, Ammonoosuc Ravine and Dry River trails) for the summit in fog. Each step still goes through the real UI — the presenter applies each parse, picks the clue boost and makes the assignment.
 1. Team 1 hasty search of the Crawford Path toward the summit (E10, F10, G10, G9; POD 50%) → ROW 10.0 → 10.3%.
 2. Team 2 line search all around the hut (E10, D10, E9, D9, E11, E12, D12, F12, F11; POD 60%) → the hut cell and its neighbours drop out; probability shifts downhill into the two drainages. (Round 4: these extra cells are needed because the lognormal prior keeps a lot of mass in the cells next to the LKP.)
 3. Team 1 in fog down the Dry River Trail (F11, G11, G12) → **amber low-confidence card**, POD 25%: those cells are barely cleared.
@@ -85,4 +109,6 @@ It does the arithmetic and the transcription — the parts humans are bad at und
 3. Outside demo mode, place an LKP and confirm the terrain badge turns "Live OSM" (Overpass was blocked from the build container).
 4. Export for CalTopo once and import the file into a CalTopo map (Import → choose file) to check titles, colors and outlines.
 5. Click both summit links.
-6. Load demo scenario → step through all 7 steps once. At the clue step pick **small** (the highlighted button). Reset before recording.
+6. Load demo scenario → step through all 8 steps once. At the clue step pick **small** (the highlighted button). Reset before recording.
+7. Add `CALTOPO_ID`, `CALTOPO_KEY`, `CALTOPO_MAP_ID` to Vercel env (values are in the IC laptop's `.env.local`) so **Publish to CalTopo** appears on the live site; publish once and open the map.
+8. Health check 2026-10-31 ~23:20 ET (local dev, Claude key absent so canned fallbacks were used): full 8-step demo passes, G13/G11/G14 ordering, found banner "suggestion #3 · IC override", publish replaces the previous set (19 features, 20 removed).
