@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { ALL_CELLS, COLS, CellId, GRID_SIZE } from "@/lib/engine/grid";
 import { cellSizeM } from "@/lib/geo";
 import { heatCss, heatOpacity, hypsoCss } from "@/lib/heat";
@@ -57,6 +58,7 @@ export default function GridMap({
   showHeatmap = true,
   onCellClick,
 }: GridMapProps) {
+  const [hover, setHover] = useState<{ id: CellId; x: number; y: number } | null>(null);
   const { w, h } = cellSizeM(terrain.bbox);
   const CELL_W = CELL_H * (w / h); // cells drawn at their real width:height
   const WIDTH = PAD + CELL_W * GRID_SIZE + 4;
@@ -347,16 +349,39 @@ export default function GridMap({
                 fill="transparent"
                 className="cursor-pointer hover:fill-white/10"
                 onClick={() => onCellClick(id)}
+                onMouseEnter={(e) => {
+                  const box = (e.currentTarget.ownerSVGElement?.parentElement as HTMLElement | null)?.getBoundingClientRect();
+                  if (box) setHover({ id, x: e.clientX - box.left, y: e.clientY - box.top });
+                }}
+                onMouseMove={(e) => {
+                  const box = (e.currentTarget.ownerSVGElement?.parentElement as HTMLElement | null)?.getBoundingClientRect();
+                  if (box) setHover({ id, x: e.clientX - box.left, y: e.clientY - box.top });
+                }}
+                onMouseLeave={() => setHover(null)}
+                aria-label={`${id} · ${describeCell(terrain.cells[id])}`}
               >
-                <title>
-                  {`${id} · ${describeCell(terrain.cells[id])}${poa ? ` · POA ${((poa[id] ?? 0) * 100).toFixed(1)}%` : ""}${
-                    cumulativePod?.[id] ? ` · cum. POD ${(cumulativePod[id] * 100).toFixed(0)}%` : ""
-                  }`}
-                </title>
               </rect>
             );
           })}
       </svg>
+      {hover && terrain.cells[hover.id] && (
+        <div
+          className="pointer-events-none absolute z-20 w-56 rounded-md border border-line-strong bg-surface/95 px-2.5 py-2 text-xs shadow-xl backdrop-blur"
+          style={{ left: Math.min(hover.x + 14, 9999), top: hover.y + 14, transform: hover.x > 420 ? "translateX(calc(-100% - 28px))" : undefined }}
+        >
+          <div className="flex items-baseline justify-between">
+            <span className="font-mono text-sm font-semibold text-fg">{hover.id}</span>
+            {poa && <span className="font-mono text-fg">{((poa[hover.id] ?? 0) * 100).toFixed(2)}% POA</span>}
+          </div>
+          <div className="mt-0.5 text-fg-2">{describeCell(terrain.cells[hover.id])}</div>
+          {(cumulativePod?.[hover.id] ?? 0) > 0 && <div className="text-fg-2">Searched to {((cumulativePod![hover.id] ?? 0) * 100).toFixed(0)}% cumulative POD</div>}
+          {terrain.cells[hover.id].slopeDeg !== undefined && (
+            <div className="text-fg-3">
+              Slope {terrain.cells[hover.id].slopeDeg}°{terrain.cells[hover.id].aspect !== "flat" ? ` facing ${terrain.cells[hover.id].aspect}` : ""}
+            </div>
+          )}
+        </div>
+      )}
       {terrain.osm && (
         <a
           href="https://www.openstreetmap.org/copyright"
