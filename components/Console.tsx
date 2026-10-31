@@ -27,7 +27,7 @@ import Empty from "./ui/Empty";
 import Tabs from "./ui/Tabs";
 import Tag from "./ui/Tag";
 import { useConfirm } from "./ui/ConfirmProvider";
-import { IconDownload, IconTarget } from "./ui/icons";
+import { IconDownload, IconTarget, IconUpload } from "./ui/icons";
 import { listRow, quote } from "./ui/styles";
 import { DEMO_LKP, DEMO_PROFILE, DEMO_STEPS, demoSubject } from "@/lib/demo/scenario";
 import { combinedFactor, currentPeriod, exposureRisk, podModifiers, safetyFlags, upcoming } from "@/lib/weather";
@@ -35,7 +35,8 @@ import { useWeather } from "@/lib/useWeather";
 import { rankCells } from "@/lib/engine/rank";
 import { priorSummary } from "@/lib/engine/priors";
 import { hazardsNearLkp, scoreUrgency, urgencyFactors } from "@/lib/engine/urgency";
-import { explainUpdate, parseReport, parseSubject } from "@/lib/api";
+import { caltopoStatus, explainUpdate, OwnedFeature, parseReport, parseSubject, publishToCalTopo } from "@/lib/api";
+import { buildPublishFeatures } from "@/lib/caltopoPublish";
 import { defaultSubject, Subject } from "@/lib/subject";
 import { buildUpdateSummary, localExplanation } from "@/lib/explain";
 import { cumulativePodMap, initialState, loadState, reducer, ReportSource, saveState } from "@/lib/store";
@@ -71,6 +72,12 @@ export default function Console() {
   const [subjectDraft, setSubjectDraft] = useState<SubjectDraft | null>(null);
   const [subjectParsing, setSubjectParsing] = useState(false);
   const [subjectError, setSubjectError] = useState<string | null>(null);
+  const [caltopo, setCaltopo] = useState<{ configured: boolean; mapUrl?: string; mapId?: string } | null>(null);
+  const [publishing, setPublishing] = useState(false);
+  const [publishNote, setPublishNote] = useState<{ type: "success" | "error"; text: string; url?: string } | null>(null);
+  useEffect(() => {
+    caltopoStatus().then(setCaltopo);
+  }, []);
 
   const [parsing, setParsing] = useState(false);
   const [parseError, setParseError] = useState<string | null>(null);
@@ -284,6 +291,50 @@ export default function Console() {
   const weatherFactor = combinedFactor(modifiers);
   const flaggedCells = useMemo(() => new Set(weather ? safetyFlags(upcoming(weather, 12), state.terrain.cells).flatMap((f) => f.cells) : []), [weather, state.terrain.cells]);
   const suggestions = useMemo(() => (state.prob ? rankCells(state.prob, cumPod, state.terrain.cells, weatherFactor) : []), [state.prob, cumPod, state.terrain.cells, weatherFactor]);
+  const OWNED_KEY = "trailhead:caltopo:v1";
+  const readOwned = (): OwnedFeature[] => {
+    try {
+      const raw = window.localStorage.getItem(OWNED_KEY);
+      const parsed = raw ? (JSON.parse(raw) as { mapId?: string; owned?: OwnedFeature[] }) : null;
+      return parsed && parsed.mapId === caltopo?.mapId && Array.isArray(parsed.owned) ? parsed.owned : [];
+    } catch {
+      return [];
+    }
+  };
+  const writeOwned = (owned: OwnedFeature[]) => {
+    try {
+      window.localStorage.setItem(OWNED_KEY, JSON.stringify({ mapId: caltopo?.mapId, owned }));
+    } catch {
+      // storage unavailable: the next publish will not be able to clean up the previous set
+    }
+  };
+
+  /** Publish zones, suggestions, team outlines and markers onto the team's CalTopo map (app-owned folder only). */
+  const publishCalTopo = async () => {
+    if (!state.prob || !caltopo?.configured) return;
+    const previous = readOwned();
+    const ok = await confirm({
+      title: "Publish to CalTopo?",
+      content: `Writes Trailhead's probability zones, top suggestions, team outlines and markers into a “[Trailhead]” folder on map ${caltopo.mapId}${previous.length ? `, replacing the ${previous.length} features Trailhead published last time` : ""}. Features drawn by people are never touched. The subject's personal details stay on this device.`,
+      okText: "Publish",
+    });
+    if (!ok) return;
+    setPublishing(true);
+    setPublishNote(null);
+    const features = buildPublishFeatures({ state, weather, now: Date.now() }, suggestions);
+    const res = await publishToCalTopo(features, previous, PROFILES[state.profileId].label);
+    setPublishing(false);
+    if (res.ok) {
+      writeOwned([...res.created, ...res.leftovers]);
+      const msg = `Published to CalTopo: ${features.length} features in a new [Trailhead] folder${res.deleted ? `, ${res.deleted} previous removed` : ""}${res.leftovers.length ? ` (${res.leftovers.length} old features could not be removed)` : ""}.`;
+      setPublishNote({ type: "success", text: msg, url: res.mapUrl });
+      dispatch({ type: "log", entry: makeAudit("export", `${msg} Map ${caltopo.mapId}.`) });
+    } else {
+      setPublishNote({ type: "error", text: res.reason });
+      dispatch({ type: "log", entry: makeAudit("note", `CalTopo publish failed: ${res.reason}`) });
+    }
+  };
+
   const exposure = period ? exposureRisk(period).level : null;
   const exposureSoon = weather ? (upcoming(weather, 8).map((p) => exposureRisk(p).level).find((l) => l === "severe" || l === "high") ?? null) : null;
   const effectiveSubject = useMemo(() => state.subject ?? defaultSubject(state.profileId), [state.subject, state.profileId]);
@@ -488,6 +539,11 @@ export default function Console() {
         </div>
         <div className="ml-auto flex flex-wrap gap-2">
           <Button onClick={loadDemo}>Load demo scenario</Button>
+          {caltopo?.configured && (
+            <Button variant="primary" icon={<IconUpload width={14} height={14} />} loading={publishing} onClick={publishCalTopo} disabled={!state.prob} title={`Publish app-owned features to CalTopo map ${caltopo.mapId}`}>
+              Publish to CalTopo
+            </Button>
+          )}
           <Button icon={<IconDownload width={14} height={14} />} onClick={() => exportCalTopo("geojson")} disabled={!state.prob} title={CALTOPO_HINT}>
             Export for CalTopo
           </Button>
@@ -559,6 +615,25 @@ export default function Console() {
         </div>
 
         <div className="min-w-0 space-y-3">
+          {publishNote && (
+            <Alert
+              type={publishNote.type}
+              compact
+              description={publishNote.text}
+              action={
+                <div className="flex items-center gap-1">
+                  {publishNote.url && (
+                    <a className="text-sm text-primary-hover hover:underline" href={publishNote.url} target="_blank" rel="noopener noreferrer">
+                      Open map ↗
+                    </a>
+                  )}
+                  <Button size="sm" variant="text" onClick={() => setPublishNote(null)} aria-label="Dismiss">
+                    ×
+                  </Button>
+                </div>
+              }
+            />
+          )}
           {state.demo && (
             <DemoControls
               step={state.demoStep}
