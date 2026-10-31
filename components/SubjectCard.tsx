@@ -79,8 +79,9 @@ export default function SubjectCard({
       title="What the model will assume (illustrative)"
       description={
         <>
-          Missing {formatMissingFor(summary.hoursElapsed)}; could have travelled about {km(summary.reachKm)}. Half of similar subjects are found within {km(summary.quartilesKm[1])}, three in four within{" "}
-          {km(summary.quartilesKm[2])}. Nearest grid edge is {km(summary.nearestEdgeKm)} away, so the model suggests about {(summary.suggestedRow * 100).toFixed(0)}% outside this grid. You set ROW.
+          Missing {formatMissingFor(summary.hoursElapsed)}; could have travelled up to about {km(summary.reachKm)}. Half of similar subjects are found within {km(summary.quartilesKm[1])}, three in four within{" "}
+          {km(summary.quartilesKm[2])}. The nearest grid edge is {km(summary.nearestEdgeKm)} away, so roughly {(summary.outsideShare * 100).toFixed(0)}% of similar subjects would already be beyond this grid
+          {summary.outsideShare > summary.suggestedRow + 0.005 ? `; the ROW slider suggestion is capped at ${(summary.suggestedRow * 100).toFixed(0)}%` : ""}. You set ROW; it is the search area decision, not the model&apos;s.
         </>
       }
     />

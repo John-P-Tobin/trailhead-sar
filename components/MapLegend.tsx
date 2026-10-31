@@ -8,9 +8,9 @@ const Item = ({ swatch, text }: { swatch: React.ReactNode; text: string }) => (
 );
 
 /** Legend for the map; terrain items appear only when the current terrain has them. */
-export default function MapLegend({ kinds, rings = false }: { kinds: Set<FeatureKind>; rings?: boolean }) {
+export default function MapLegend({ kinds, rings = false, direction = "horizontal" }: { kinds: Set<FeatureKind>; rings?: boolean; direction?: "horizontal" | "vertical" }) {
   return (
-    <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-fg-2">
+    <div className={`text-xs text-fg-2 ${direction === "vertical" ? "flex flex-col gap-1.5" : "flex flex-wrap gap-x-4 gap-y-1"}`}>
       {kinds.has("trail") && <Item swatch={<span className="h-0 w-5 border-t-2 border-dashed border-[#e9c27a]" />} text="Trail" />}
       {kinds.has("road") && <Item swatch={<span className="h-0 w-5 border-t-2 border-[#d6cfc2]" />} text="Road" />}
       {kinds.has("stream") && <Item swatch={<span className="h-0 w-5 border-t-[3px] border-[#6cb6ef]" />} text="Stream / drainage" />}
