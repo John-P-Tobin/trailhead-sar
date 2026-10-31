@@ -23,7 +23,7 @@ const TYPE_COLOR: Partial<Record<AuditType, TagColor>> = {
   reset: "error",
 };
 
-export default function AuditLog({ state }: { state: SearchState }) {
+export default function AuditLog({ state, onExportKml }: { state: SearchState; onExportKml?: () => void }) {
   const [all, setAll] = useState(false);
   const entries: AuditEntry[] = [...state.audit].reverse();
   const shown = all ? entries : entries.slice(0, 10);
@@ -50,9 +50,16 @@ export default function AuditLog({ state }: { state: SearchState }) {
       title={`Audit log (${state.audit.length})`}
       size="small"
       extra={
-        <Button size="sm" icon={<IconDownload width={14} height={14} />} onClick={download} disabled={!state.audit.length}>
-          Export JSON
-        </Button>
+        <>
+          {onExportKml && (
+            <Button size="sm" variant="text" onClick={onExportKml} title="CalTopo-ready KML with styles, as a fallback to the GeoJSON export">
+              KML
+            </Button>
+          )}
+          <Button size="sm" icon={<IconDownload width={14} height={14} />} onClick={download} disabled={!state.audit.length}>
+            Export JSON
+          </Button>
+        </>
       }
     >
       {entries.length === 0 ? (
