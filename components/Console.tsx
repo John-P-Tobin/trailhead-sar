@@ -198,10 +198,10 @@ export default function Console() {
     if (res.ok) {
       setSubjectDraft({ subject: res.subject, proposal: res.subject, source: "claude", rawText: text, unclear: res.unclear, key: Date.now() });
     } else if (canned) {
-      setSubjectError(`Claude unavailable: ${res.reason} Using the demo's canned subject — review it like any proposal.`);
+      setSubjectError(`Parser unavailable: ${res.reason} Using the demo's canned subject; review it like any proposal.`);
       setSubjectDraft({ subject: canned, proposal: canned, source: "canned", rawText: text, unclear: [], key: Date.now() });
     } else {
-      setSubjectError(`Claude unavailable: ${res.reason} Fill the card in by hand — the model works the same.`);
+      setSubjectError(`Parser unavailable: ${res.reason} Fill the card in by hand; the model works the same.`);
       setSubjectDraft({ subject: defaultSubject(state.profileId), proposal: null, source: "manual", rawText: text, unclear: [], key: Date.now() });
     }
   };
@@ -226,10 +226,10 @@ export default function Console() {
     if (res.ok) {
       setDraft({ report: res.report, proposal: res.report, source: "claude", rawText: text, key: Date.now(), demo });
     } else if (canned) {
-      setParseError(`Claude unavailable: ${res.reason} Using the demo's canned parse — review it like any proposal.`);
+      setParseError(`Parser unavailable: ${res.reason} Using the demo's canned parse; review it like any proposal.`);
       setDraft({ report: canned, proposal: canned, source: "canned", rawText: text, key: Date.now(), demo });
     } else {
-      setParseError(`Claude unavailable: ${res.reason} Switched to manual entry — the model works the same.`);
+      setParseError(`Parser unavailable: ${res.reason} Switched to manual entry; the model works the same.`);
       openManual(text);
     }
   };
@@ -560,7 +560,7 @@ export default function Console() {
           <h1 className="text-lg font-semibold tracking-tight">
             Trailhead <span className="text-fg-3">·</span> <span className="text-fg-2">Search Planner</span>
           </h1>
-          <p className="text-xs text-fg-3">Bayesian decision support for the incident commander · prototype with illustrative priors</p>
+          <p className="text-xs text-fg-3">Bayesian search planning for the incident commander · illustrative priors</p>
         </div>
         <div className="ml-auto flex flex-wrap gap-2">
           <Button onClick={loadDemo}>Load demo scenario</Button>

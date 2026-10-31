@@ -68,23 +68,23 @@ export default function DemoControls({
         <div className="mt-3 space-y-2">
           {current.kind === "callout" && (
             <>
-              <blockquote className={`${quote} border-primary font-sans`}>☎️ {current.text}</blockquote>
+              <blockquote className={`${quote} border-primary font-sans`}><span className="mr-2 text-fg-3">CALL-OUT</span>{current.text}</blockquote>
               <Button variant="primary" loading={busy} disabled={reviewing} onClick={() => onCallout(current)}>
-                {busy ? "Reading…" : reviewing ? "Review the subject card below, then Confirm" : "Receive call-out → pre-fill subject"}
+                {busy ? "Reading…" : reviewing ? "Review the subject card below, then Confirm" : "Receive call-out"}
               </Button>
             </>
           )}
           {current.kind === "report" && (
             <>
-              <blockquote className={`${quote} border-primary`}>📻 {current.text}</blockquote>
+              <blockquote className={`${quote} border-primary`}><span className="mr-2 font-sans text-fg-3">RADIO</span>{current.text}</blockquote>
               <Button variant="primary" loading={busy} disabled={reviewing} onClick={() => onReport(current)}>
-                {busy ? "Parsing…" : reviewing ? "Review the parse below, then Apply" : "Receive radio report → parse"}
+                {busy ? "Parsing…" : reviewing ? "Review the report below, then Apply" : "Receive radio report"}
               </Button>
             </>
           )}
           {current.kind === "clue" && (
             <>
-              <blockquote className={`${quote} border-purple`}>🔎 {current.text}</blockquote>
+              <blockquote className={`${quote} border-purple`}><span className="mr-2 font-sans text-fg-3">CLUE</span>{current.text}</blockquote>
               <div className="text-xs text-fg-2">IC: how much should this clue boost cells near {current.cell}?</div>
               <div className="flex flex-wrap gap-2">
                 {(["small", "medium", "large"] as BoostLevel[]).map((b) => (
@@ -97,7 +97,7 @@ export default function DemoControls({
           )}
           {current.kind === "override" && (
             <>
-              <blockquote className={`${quote} border-purple font-sans`}>👪 {current.tip}</blockquote>
+              <blockquote className={`${quote} border-purple font-sans`}><span className="mr-2 text-fg-3">FAMILY</span>{current.tip}</blockquote>
               <Button onClick={() => onPrefillOverride(current)}>
                 Prefill assignment: {current.team} → {current.cell}
               </Button>
@@ -106,7 +106,7 @@ export default function DemoControls({
           )}
           {current.kind === "found" && (
             <>
-              <blockquote className={`${quote} border-success`}>📻 {current.text}</blockquote>
+              <blockquote className={`${quote} border-success`}><span className="mr-2 font-sans text-fg-3">RADIO</span>{current.text}</blockquote>
               <Button variant="primary" onClick={() => onFound(current)}>
                 Log subject located
               </Button>

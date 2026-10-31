@@ -32,12 +32,12 @@ export default function ReportInput({
       {error && <Alert type="warning" compact description={error} />}
       <div className="flex flex-wrap items-center gap-2">
         <Button variant="primary" icon={<IconRadio />} loading={busy} disabled={!text.trim()} onClick={() => onParse(text.trim())}>
-          {busy ? "Parsing…" : "Parse with Claude"}
+          {busy ? "Parsing…" : "Parse report"}
         </Button>
         <Button disabled={busy} onClick={() => onManual(text.trim())}>
           Manual entry
         </Button>
-        <span className="text-xs text-fg-3">Claude proposes; you confirm before anything changes.</span>
+        <span className="text-xs text-fg-3">Parsed values are proposals. Nothing changes until you apply.</span>
       </div>
     </div>
   );

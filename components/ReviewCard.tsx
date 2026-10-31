@@ -10,8 +10,8 @@ import { ReportSource } from "@/lib/store";
 import { input, label } from "./ui/styles";
 
 const SOURCE_LABEL: Record<ReportSource, { text: string; color: "primary" | "warning" | "default" }> = {
-  claude: { text: "Proposed by Claude — review every value", color: "primary" },
-  canned: { text: "Demo fallback parse (Claude unavailable) — review every value", color: "warning" },
+  claude: { text: "Auto-parsed · review every value", color: "primary" },
+  canned: { text: "Demo fallback parse (parser offline) · review every value", color: "warning" },
   manual: { text: "Manual entry", color: "default" },
 };
 
@@ -53,8 +53,8 @@ export default function ReviewCard({
     <div className={`rounded-card border p-3 ${low ? "border-warning/60 bg-warning/5" : "border-primary/40 bg-surface-2/40"}`}>
       {low && <Alert type="warning" className="mb-3" title="Low confidence — verify with team before applying." />}
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <Tag color={SOURCE_LABEL[source].color}>{SOURCE_LABEL[source].text}</Tag>
-        {proposal && <span className="text-xs text-fg-3">Blue outline = edited by IC</span>}
+        <Tag color={SOURCE_LABEL[source].color} title={source === "claude" ? "Parsed by Claude (Anthropic). Proposal only." : undefined}>{SOURCE_LABEL[source].text}</Tag>
+        {proposal && <span className="text-xs text-fg-3">Blue outline = edited by you</span>}
       </div>
 
       {draft.unclear_points.length > 0 && (
@@ -120,7 +120,7 @@ export default function ReviewCard({
         <div className="col-span-2">
           <label className={label}>
             Estimated POD per cell: <span className="font-mono text-fg">{(draft.estimated_pod * 100).toFixed(0)}%</span>
-            {proposal && proposal.estimated_pod !== draft.estimated_pod && <span className="ml-2 text-primary-hover">(AI proposed {(proposal.estimated_pod * 100).toFixed(0)}%)</span>}
+            {proposal && proposal.estimated_pod !== draft.estimated_pod && <span className="ml-2 text-primary-hover">(parsed as {(proposal.estimated_pod * 100).toFixed(0)}%)</span>}
           </label>
           <input type="range" min={0} max={95} step={5} value={Math.round(draft.estimated_pod * 100)} onChange={(e) => set("estimated_pod", Number(e.target.value) / 100)} className="w-full" />
         </div>
