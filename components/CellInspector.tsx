@@ -20,6 +20,7 @@ export default function CellInspector({
   sweeps,
   editable,
   onEdit,
+  distance,
 }: {
   cell: string;
   terrain: CellTerrain;
@@ -28,6 +29,8 @@ export default function CellInspector({
   sweeps: number;
   editable: boolean;
   onEdit: (value: number) => void;
+  /** Distance from the LKP and the share of similar subjects the model expects within it. */
+  distance?: { km: number; withinShare: number; isLkp: boolean };
 }) {
   const [draft, setDraft] = useState((poa * 100).toFixed(2));
   const tags = describeCell(terrain).split(", ").filter(Boolean);
@@ -52,6 +55,17 @@ export default function CellInspector({
                   : undefined,
           },
           { label: "Slope", value: terrain.slopeDeg !== undefined ? `${terrain.slopeDeg}°${terrain.aspect && terrain.aspect !== "flat" ? ` facing ${terrain.aspect}` : ""}` : undefined },
+          ...(distance
+            ? [
+                {
+                  label: "From the LKP",
+                  span: 2 as const,
+                  value: distance.isLkp
+                    ? "This is the last known point"
+                    : `${distance.km < 1 ? `${Math.round(distance.km * 1000)} m` : `${distance.km.toFixed(1)} km`} · the model expects about ${Math.round(distance.withinShare * 100)}% of similar subjects within this distance by now (illustrative)`,
+                },
+              ]
+            : []),
           ...(terrain.demMeanM !== undefined && terrain.elevationM !== undefined ? [{ label: "Model's smoothed estimate", value: `~${terrain.elevationM} m (used for the downhill pull)` }] : []),
           { label: "Corners", value: <span className="font-mono text-xs">NW {formatLatLon(terrain.bounds.north, terrain.bounds.west)} · SE {formatLatLon(terrain.bounds.south, terrain.bounds.east)}</span>, span: 2 },
         ]}

@@ -17,6 +17,24 @@ import { Assignment } from "@/lib/store";
 
 const pct = (v: number, d = 1) => `${(v * 100).toFixed(d)}%`;
 
+/** Short, honest reasons a cell ranks where it does: terrain pulls, clue proximity, how little it has been searched. */
+function whyChips(s: Suggestion, t: CellTerrain | undefined, lkpCell: CellTerrain | undefined, clueCells: string[], terrain: Record<string, CellTerrain>): string[] {
+  if (!t) return [];
+  const out: string[] = [];
+  const near = (a: CellTerrain, b: CellTerrain) => Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y)) <= 1;
+  if (clueCells.some((c) => c === t.id)) out.push("clue here");
+  else if (clueCells.some((c) => (terrain[c] ? near(t, terrain[c]) : false))) out.push("next to a clue");
+  if (s.cumulativePod === 0) out.push("unsearched");
+  else if (s.cumulativePod < 0.5) out.push(`only ${pct(s.cumulativePod, 0)} searched`);
+  const lkpM = lkpCell?.demMeanM ?? lkpCell?.elevationM;
+  const cellM = t.demMeanM ?? t.elevationM;
+  if (lkpM !== undefined && cellM !== undefined && lkpM - cellM >= 75) out.push("downhill of LKP");
+  if (t.drainage) out.push("drainage");
+  if (lkpCell && near(t, lkpCell)) out.push("next to LKP");
+  return out.slice(0, 2);
+}
+
+
 export default function SuggestionsPanel({
   suggestions,
   modifiers,
@@ -26,6 +44,8 @@ export default function SuggestionsPanel({
   selectedCell,
   prefill,
   terrain,
+  clueCells = [],
+  lkp = null,
   onAssign,
 }: {
   suggestions: Suggestion[];
@@ -35,6 +55,9 @@ export default function SuggestionsPanel({
   assignments: Assignment[];
   selectedCell: string | null;
   terrain: Record<string, CellTerrain>;
+  /** For the "why" chips: cells with clues, and the LKP cell. */
+  clueCells?: string[];
+  lkp?: string | null;
   /** Initial values (used by demo mode). Remount with a new key to apply. */
   prefill?: { team: string; cell: string; reason: string } | null;
   onAssign: (a: { team: string; cell: string; suggestedRank: number | null; topSuggestion: string | null; reason?: string }) => void;
@@ -108,9 +131,13 @@ export default function SuggestionsPanel({
                       </Tooltip>
                     )}
                   </span>
-                  <div className="text-xs text-fg-3">
-                    {describeCell(terrain[s.cell])}
-                    {s.cumulativePod > 0 && ` · searched ${pct(s.cumulativePod, 0)}`}
+                  <div className="text-xs text-fg-3">{describeCell(terrain[s.cell])}</div>
+                  <div className="mt-0.5 flex flex-wrap gap-1">
+                    {whyChips(s, terrain[s.cell], lkp ? terrain[lkp] : undefined, clueCells, terrain).map((w) => (
+                      <Tag key={w} color={w.startsWith("clue") || w.includes("clue") ? "purple" : w === "unsearched" ? "info" : "default"}>
+                        {w}
+                      </Tag>
+                    ))}
                   </div>
                 </td>
                 <td className="px-2 text-right align-top font-mono tabular-nums">{pct(s.poa)}</td>

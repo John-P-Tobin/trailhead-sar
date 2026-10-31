@@ -34,7 +34,9 @@ import { DEMO_LKP, DEMO_PROFILE, DEMO_STEPS, demoSubject } from "@/lib/demo/scen
 import { combinedFactor, currentPeriod, exposureRisk, podModifiers, safetyFlags, upcoming } from "@/lib/weather";
 import { useWeather } from "@/lib/useWeather";
 import { rankCells } from "@/lib/engine/rank";
-import { priorSummary } from "@/lib/engine/priors";
+import { metresBetween, priorSummary } from "@/lib/engine/priors";
+import { truncatedCdf } from "@/lib/engine/behaviour";
+import { formatMissingFor, hoursSince } from "@/lib/subject";
 import { hazardsNearLkp, scoreUrgency, urgencyFactors } from "@/lib/engine/urgency";
 import { caltopoStatus, explainUpdate, OwnedFeature, parseReport, parseSubject, publishToCalTopo } from "@/lib/api";
 import { buildPublishFeatures } from "@/lib/caltopoPublish";
@@ -146,7 +148,13 @@ export default function Console() {
     const report = lastReport;
     const prob = state.prob;
     setExplaining(report.id);
-    explainUpdate(buildUpdateSummary(report, prob)).then((res) => {
+    const subj = stateRef.current.subject ?? defaultSubject(stateRef.current.profileId);
+    const hours = hoursSince(subj.lastSeenAt);
+    const context = [
+      `Subject: ${PROFILES[subj.category].label}, ${subj.ageBand.replace("_", " ")}, fitness ${subj.fitness}, experience ${subj.experience}; missing for ${formatMissingFor(hours)}.`,
+      `Prior model: lognormal distance from the LKP (hiker fit from ISRID via MapScore; other categories illustrative) × terrain × downhill pull. ROW is the IC's setting.`,
+    ];
+    explainUpdate(buildUpdateSummary(report, prob, context)).then((res) => {
       dispatch(
         res.ok
           ? { type: "set_explanation", reportId: report.id, explanation: res.explanation, source: "claude" }
@@ -457,6 +465,8 @@ export default function Console() {
           assignments={state.assignments}
           selectedCell={inspect}
           terrain={state.terrain.cells}
+          clueCells={state.clues.map((c) => c.cell)}
+          lkp={state.lkp}
           onAssign={(a) => {
             dispatch({ type: "assign", ...a });
             if (demoStep?.kind === "override" && a.cell === demoStep.cell) dispatch({ type: "demo_advance" });
@@ -477,6 +487,14 @@ export default function Console() {
         sweeps={state.pods[inspect]?.length ?? 0}
         editable={!state.started}
         onEdit={(value) => dispatch({ type: "edit_cell_poa", cell: inspect, value })}
+        distance={
+          state.lkp
+            ? (() => {
+                const km = metresBetween(state.terrain.cells[inspect], state.terrain.cells[state.lkp]) / 1000;
+                return { km, withinShare: truncatedCdf(effectiveSubject, hoursSince(effectiveSubject.lastSeenAt), km), isLkp: inspect === state.lkp };
+              })()
+            : undefined
+        }
       />
     ) : (
       <Card size="small">
