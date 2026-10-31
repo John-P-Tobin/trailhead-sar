@@ -1,6 +1,6 @@
 import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
-import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
+import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import type { z } from "zod";
 import { CLAUDE_EFFORT, CLAUDE_MODEL } from "../claude";
 
@@ -15,8 +15,9 @@ export type ClaudeResult<T> = { ok: true; data: T } | { ok: false; reason: strin
 
 /**
  * Ask Claude for JSON matching `outputSchema`, then validate it with `strictSchema`.
- * Retries once on invalid output; otherwise reports failure so the UI can fall
- * back to manual mode.
+ * Retries once on invalid output or a refusal; otherwise reports failure so the UI
+ * falls back to manual mode. There is deliberately no fallback to another model:
+ * manual entry is the failure path.
  */
 export async function askClaudeJson<T>(opts: {
   system: string;
@@ -31,14 +32,12 @@ export async function askClaudeJson<T>(opts: {
   let lastReason = "Claude returned invalid output.";
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
-      const response = await client.beta.messages.parse({
+      const response = await client.messages.parse({
         model: CLAUDE_MODEL,
         max_tokens: opts.maxTokens ?? 4000,
-        betas: ["server-side-fallback-2026-07-01"],
-        fallbacks: "default",
         system: opts.system,
         messages: [{ role: "user", content: opts.user }],
-        output_config: { effort: CLAUDE_EFFORT, format: betaZodOutputFormat(opts.outputSchema) },
+        output_config: { effort: CLAUDE_EFFORT, format: zodOutputFormat(opts.outputSchema) },
       });
       if (response.stop_reason === "refusal") {
         lastReason = "Claude declined to process this report.";
