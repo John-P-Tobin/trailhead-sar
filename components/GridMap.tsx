@@ -71,7 +71,7 @@ export default function GridMap({
 
   return (
     <div className="relative">
-      <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="block h-auto max-h-[calc(100vh-230px)] min-h-72 w-full select-none" role="img" aria-label="Search area grid map">
+      <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="block h-auto max-h-[calc(100vh-265px)] min-h-72 w-full select-none" role="img" aria-label="Search area grid map">
         <defs>
           <clipPath id="grid-clip">
             <rect x={X(0)} y={Y(0)} width={CELL_W * GRID_SIZE} height={CELL_H * GRID_SIZE} />

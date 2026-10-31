@@ -3,7 +3,7 @@
 
 import { ALL_CELLS, CellId, GRID_SIZE } from "./grid";
 import { ProbState, assertSumToOne } from "./bayes";
-import { arealDensity, gradedDownhill, reachKm, scaledQuartiles, suggestedRow } from "./behaviour";
+import { arealDensity, gradedDownhill, reachKm, scaledQuartiles, suggestedRow, truncatedCdf } from "./behaviour";
 import { M_PER_DEG_LAT, metersPerDegLon } from "../geo";
 import { PROFILES } from "../profiles";
 import { hoursSince, Subject } from "../subject";
@@ -76,7 +76,10 @@ export interface PriorSummary {
   /** 25 / 50 / 75 / 95 % distances for this subject, km. */
   quartilesKm: [number, number, number, number];
   nearestEdgeKm: number;
+  /** Clamped (5–60 %) suggestion for the ROW slider. */
   suggestedRow: number;
+  /** Unclamped share of the distribution beyond the nearest grid edge. */
+  outsideShare: number;
 }
 
 /** What the model assumed, for the subject card and the explanation prompt. */
@@ -92,5 +95,6 @@ export function priorSummary(lkp: CellId, subject: Subject, terrain: Record<Cell
     quartilesKm: scaledQuartiles(subject),
     nearestEdgeKm,
     suggestedRow: suggestedRow(subject, nearestEdgeKm, hours),
+    outsideShare: 1 - truncatedCdf(subject, hours, nearestEdgeKm),
   };
 }

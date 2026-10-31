@@ -591,24 +591,43 @@ export default function Console() {
                 <TerrainBadge source={state.terrain.source} label={state.terrain.label} fetchedAt={state.terrain.fetchedAt} loading={terrainLoading} />
               </>
             }
-            footer={<MapLegend kinds={new Set(mapTerrain.features.map((f) => f.kind))} rings={ringsOn && !!state.lkp} />}
+            footer={<div className="xl:hidden"><MapLegend kinds={new Set(mapTerrain.features.map((f) => f.kind))} rings={ringsOn && !!state.lkp} /></div>}
           >
-            <GridMap
-              terrain={mapTerrain}
-              poa={state.prob?.cells}
-              cumulativePod={cumPod}
-              lkp={state.lkp}
-              selected={selected}
-              suggested={draft ? [] : suggestions.map((s) => s.cell)}
-              clueCells={state.clues.map((c) => c.cell)}
-              found={state.found?.cell ?? null}
-              ringsKm={ringsOn && summary ? summary.quartilesKm.slice(0, 3) : []}
-              onCellClick={onCellClick}
-            />
-            {terrainNote && <Alert type="warning" compact className="mt-2" description={terrainNote} />}
+            <div className="flex gap-4">
+              <div className="min-w-0 flex-1">
+                <GridMap
+                  terrain={mapTerrain}
+                  poa={state.prob?.cells}
+                  cumulativePod={cumPod}
+                  lkp={state.lkp}
+                  selected={selected}
+                  suggested={draft ? [] : suggestions.map((s) => s.cell)}
+                  clueCells={state.clues.map((c) => c.cell)}
+                  found={state.found?.cell ?? null}
+                  ringsKm={ringsOn && summary ? summary.quartilesKm.slice(0, 3) : []}
+                  onCellClick={onCellClick}
+                />
+                {terrainNote && <Alert type="warning" compact className="mt-2" description={terrainNote} />}
+              </div>
+              {/* Wide screens: the map is height-capped, so use the spare width for ROW and the legend. */}
+              <aside className="hidden w-56 shrink-0 flex-col gap-4 xl:flex">
+                {state.prob ? (
+                  <div className="rounded-md border border-line bg-surface-2/60 p-3">
+                    <RowIndicator row={state.prob.row} history={state.rowHistory} compact />
+                    <p className="mt-2 text-xs leading-relaxed text-fg-3">Grows as the grid is searched without a find. The app never recommends ending or expanding the search.</p>
+                  </div>
+                ) : (
+                  <div className="rounded-md border border-dashed border-line p-3 text-xs text-fg-3">Place the LKP to see the probability map and Rest of World.</div>
+                )}
+                <div>
+                  <div className="mb-1.5 text-xs uppercase tracking-wide text-fg-3">Legend</div>
+                  <MapLegend kinds={new Set(mapTerrain.features.map((f) => f.kind))} rings={ringsOn && !!state.lkp} direction="vertical" />
+                </div>
+              </aside>
+            </div>
           </Card>
           {state.prob && (
-            <Card size="small" footer="Probability the subject is outside the grid. It grows as the grid is searched without a find. The app never recommends ending or expanding the search; that call stays with people.">
+            <Card size="small" className="xl:hidden" footer="Probability the subject is outside the grid. It grows as the grid is searched without a find. The app never recommends ending or expanding the search; that call stays with people.">
               <RowIndicator row={state.prob.row} history={state.rowHistory} />
             </Card>
           )}

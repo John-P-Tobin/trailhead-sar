@@ -1,4 +1,6 @@
-import { ReactNode } from "react";
+"use client";
+
+import { ReactNode, useEffect, useRef } from "react";
 import { IconCheck } from "./icons";
 
 export interface Step {
@@ -22,6 +24,12 @@ export default function Steps({
   onStepClick?: (i: number) => void;
 }) {
   const dot = size === "sm" ? "h-5 w-5 text-xs" : "h-6 w-6 text-xs";
+  const list = useRef<HTMLOListElement>(null);
+  useEffect(() => {
+    if (direction !== "horizontal") return;
+    const el = list.current?.children[current] as HTMLElement | undefined;
+    el?.scrollIntoView({ block: "nearest", inline: "center", behavior: "smooth" });
+  }, [current, direction]);
   if (direction === "vertical") {
     return (
       <ol className="space-y-3">
@@ -44,7 +52,7 @@ export default function Steps({
     );
   }
   return (
-    <ol className="flex items-center gap-1 overflow-x-auto scroll-thin">
+    <ol ref={list} className="flex items-center gap-1 overflow-x-auto scroll-thin">
       {steps.map((s, i) => {
         const st = i < current ? "finish" : i === current ? "process" : "wait";
         const clickable = !!onStepClick;
