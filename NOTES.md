@@ -48,7 +48,7 @@
 ## Demo script (Load demo scenario)
 Runs on the bundled real terrain. Subject: Dan, 58, day hiker; left the Lakes of the Clouds hut (E10, junction of the Crawford Path, Ammonoosuc Ravine and Dry River trails) for the summit in fog. Each step still goes through the real UI — the presenter applies each parse, picks the clue boost and makes the assignment.
 1. Team 1 hasty search of the Crawford Path toward the summit (E10, F10, G10, G9; POD 50%) → ROW 10.0 → 10.3%.
-2. Team 2 line search of the trail corridors at the hut (Ammonoosuc Ravine Trail E9/D9, Crawford Path E11/E12; POD 60%) → probability shifts downhill into the two drainages.
+2. Team 2 line search all around the hut (E10, D10, E9, D9, E11, E12, D12, F12, F11; POD 60%) → the hut cell and its neighbours drop out; probability shifts downhill into the two drainages. (Round 4: these extra cells are needed because the lognormal prior keeps a lot of mass in the cells next to the LKP.)
 3. Team 1 in fog down the Dry River Trail (F11, G11, G12) → **amber low-confidence card**, POD 25%: those cells are barely cleared.
 4. Clue: wrapper on the Dry River Trail at G13 — the IC picks the boost (**small ×1.5**: it's a busy trail). ROW drops slightly.
 5. Team 2 clears the Ammonoosuc Ravine (D8, D7, C7, B8, B9; POD 70%).

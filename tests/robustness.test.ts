@@ -4,7 +4,7 @@ import { emptyReport, ParsedReport } from "@/lib/schemas";
 import { assertSumToOne } from "@/lib/engine/bayes";
 import { ALL_CELLS, isCellId } from "@/lib/engine/grid";
 import { BoostLevel } from "@/lib/engine/clues";
-import { DEMO_LKP, DEMO_PROFILE, DEMO_STEPS } from "@/lib/demo/scenario";
+import { DEMO_LKP, DEMO_PROFILE, DEMO_STEPS, demoSubject } from "@/lib/demo/scenario";
 import { snapshotOf } from "@/lib/terrain";
 import { bundledTerrain } from "./helpers/bundled";
 
@@ -105,7 +105,7 @@ describe("robustness: refresh and reset", () => {
   });
 
   it("Reset mid-demo returns to a clean, unlocked state on the same terrain", () => {
-    let s = reducer(initialState(terrain), { type: "demo_load", lkp: DEMO_LKP, profileId: DEMO_PROFILE, terrain });
+    let s = reducer(initialState(terrain), { type: "demo_load", lkp: DEMO_LKP, profileId: DEMO_PROFILE, terrain, subject: demoSubject() });
     for (const step of DEMO_STEPS.slice(0, 3)) {
       if (step.kind === "report") s = reducer(s, { type: "apply_report", payload: { confirmed: step.canned, source: "canned" } });
       s = reducer(s, { type: "demo_advance" });
@@ -115,7 +115,7 @@ describe("robustness: refresh and reset", () => {
     expect(r).toMatchObject({ demo: false, demoStep: 0, started: false, lkp: null, prob: null, found: null, reports: [], clues: [] });
     expect(r.terrain).toBe(s.terrain);
     // A fresh demo can be loaded right after.
-    const again = reducer(r, { type: "demo_load", lkp: DEMO_LKP, profileId: DEMO_PROFILE, terrain });
+    const again = reducer(r, { type: "demo_load", lkp: DEMO_LKP, profileId: DEMO_PROFILE, terrain, subject: demoSubject() });
     assertSumToOne(again.prob!);
     expect(isCellId(again.lkp!)).toBe(true);
   });

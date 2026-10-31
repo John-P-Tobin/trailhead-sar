@@ -18,7 +18,7 @@ import DemoControls from "./DemoControls";
 import WelcomeCard from "./WelcomeCard";
 import SummitCard from "./SummitCard";
 import TerrainBadge from "./TerrainBadge";
-import { DEMO_LKP, DEMO_PROFILE, DEMO_STEPS } from "@/lib/demo/scenario";
+import { DEMO_LKP, DEMO_PROFILE, DEMO_STEPS, demoSubject } from "@/lib/demo/scenario";
 import { combinedFactor, currentPeriod, podModifiers, safetyFlags, upcoming } from "@/lib/weather";
 import { useWeather } from "@/lib/useWeather";
 import { rankCells } from "@/lib/engine/rank";
@@ -183,7 +183,7 @@ export default function Console() {
     const model = bundled ?? STYLIZED_TERRAIN;
     setTerrainModel(model);
     setTerrainNote(bundled ? null : "The bundled terrain failed to load; the demo story is tuned for it.");
-    dispatch({ type: "demo_load", lkp: DEMO_LKP, profileId: DEMO_PROFILE, terrain: snapshotOf(model) });
+    dispatch({ type: "demo_load", lkp: DEMO_LKP, profileId: DEMO_PROFILE, terrain: snapshotOf(model), subject: demoSubject() });
     requested.current.clear();
     setDraft(null);
     setInspect(null);
