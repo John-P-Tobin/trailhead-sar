@@ -40,6 +40,7 @@ export interface GridMapProps {
   selected?: CellId[];
   suggested?: CellId[];
   clueCells?: CellId[];
+  found?: CellId | null;
   showHeatmap?: boolean;
   onCellClick?: (id: CellId) => void;
 }
@@ -51,6 +52,7 @@ export default function GridMap({
   selected = [],
   suggested = [],
   clueCells = [],
+  found = null,
   showHeatmap = true,
   onCellClick,
 }: GridMapProps) {
@@ -164,7 +166,8 @@ export default function GridMap({
         </g>
       ))}
 
-      {/* POA labels */}
+      {/* POA labels (hidden on phone widths where they can't be read) */}
+      <g className="max-sm:hidden">
       {showHeatmap &&
         poa &&
         ALL_CELLS.map((id) => {
@@ -185,6 +188,7 @@ export default function GridMap({
             </text>
           );
         })}
+      </g>
 
       {/* Suggestions, selection, clues */}
       {suggested.map((id, i) => {
@@ -216,6 +220,31 @@ export default function GridMap({
         <g pointerEvents="none">
           <circle cx={center(lkp).cx} cy={center(lkp).cy} r={13} fill="none" stroke="#f43f5e" strokeWidth={3} />
           <circle cx={center(lkp).cx} cy={center(lkp).cy} r={3} fill="#f43f5e" />
+        </g>
+      )}
+
+      {found && TERRAIN[found] && (
+        <g pointerEvents="none">
+          <rect
+            x={center(found).cx - CELL / 2 + 1}
+            y={center(found).cy - CELL / 2 + 1}
+            width={CELL - 2}
+            height={CELL - 2}
+            fill="none"
+            stroke="#34d399"
+            strokeWidth={4}
+          />
+          <text
+            x={center(found).cx}
+            y={center(found).cy + CELL / 2 - 5}
+            textAnchor="middle"
+            fontSize="8"
+            fontWeight="700"
+            fill="#34d399"
+            style={{ paintOrder: "stroke", stroke: "#0b1220", strokeWidth: 2.5 }}
+          >
+            FOUND
+          </text>
         </g>
       )}
 

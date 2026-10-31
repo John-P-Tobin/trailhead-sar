@@ -39,7 +39,7 @@ Deadline: demo video by **Sat Oct 31, 10:00 a.m. ET**. Feature freeze **6:30 a.m
 - **Engine is pure:** no React, no fetch. Every state change to probabilities goes through `applySweep` / `applyClue` / `setPriors`, each of which asserts `|Σ − 1| < 1e-9` and renormalises only float drift (throws on real violations in tests).
 - **Claude never writes to the model directly.** API responses become a *draft* in the ReviewCard; only the IC's Apply dispatches the update.
 - **Fallback chain for parsing:** Claude → (invalid JSON) retry once → manual mode. In demo mode, a canned parse for each scripted report is used if the API call fails.
-- **Model ID** in one constant: `lib/claude.ts` → `export const CLAUDE_MODEL = "claude-sonnet-5-5"` (a current model from the Anthropic docs; confirmed via the claude-api reference before Milestone 4).
+- **Model ID** in one constant: `lib/claude.ts` → `export const CLAUDE_MODEL = "claude-opus-5-5"` (current default in the Anthropic docs), effort `low` for latency.
 - **No database.** localStorage only, wrapped in try/catch; app works if storage is unavailable.
 
 ## 2. ANTHROPIC_API_KEY handling
@@ -105,62 +105,62 @@ trailhead-sar/
 - [x] `npm run build` passes; commit; start NOTES.md
 
 ### M2 — Bayesian engine + priors (pure TS, tested)
-- [ ] `bayes.ts`: `P_i' = P_i(1−p)/(1−P_i·p)`, others `/ (1−P_i·p)`, sequential over cells, ROW included
-- [ ] `assertSumToOne`; `cumulativePod = 1 − Π(1−p_k)`
-- [ ] `priors.ts`: distance decay × terrain multipliers × profile tendency; ROW starts at 10%; normalise
-- [ ] `profiles.ts`: day hiker, child, hunter, older adult, trail runner — marked "illustrative estimates"
-- [ ] Tests: sum-to-1 after every op, hand-computed single update, p=0 no-op, p=1 zeroes cell, sequential = repeated single, cumulative POD, ROW grows after sweeps, priors sum to 1 for every profile
-- [ ] `npm test` + build pass; commit
+- [x] `bayes.ts`: `P_i' = P_i(1−p)/(1−P_i·p)`, others `/ (1−P_i·p)`, sequential over cells, ROW included
+- [x] `assertSumToOne`; `cumulativePod = 1 − Π(1−p_k)`
+- [x] `priors.ts`: distance decay × terrain multipliers × profile tendency; ROW starts at 10%; normalise
+- [x] `profiles.ts`: day hiker, child, hunter, older adult, trail runner — marked "illustrative estimates"
+- [x] Tests: sum-to-1 after every op, hand-computed single update, p=0 no-op, p=1 zeroes cell, sequential = repeated single, cumulative POD, ROW grows after sweeps, priors sum to 1 for every profile
+- [x] `npm test` + build pass; commit
 
 ### M3 — Interactive grid (first end-to-end, target ~midnight)
-- [ ] Store/reducer + localStorage (try/catch)
-- [ ] Click to place LKP; profile picker regenerates priors
-- [ ] Heatmap overlay with animated transitions; cell hover shows POA + cumulative POD
-- [ ] Prior editor (edit a cell's POA, auto-renormalise others) — only before search starts
-- [ ] ROW always visible, with trend
-- [ ] Manual report entry: team, cells, POD → Apply → update
-- [ ] Reset search; verify in browser; commit
+- [x] Store/reducer + localStorage (try/catch)
+- [x] Click to place LKP; profile picker regenerates priors
+- [x] Heatmap overlay with animated transitions; cell hover shows POA + cumulative POD
+- [x] Prior editor (edit a cell's POA, auto-renormalise others) — only before search starts
+- [x] ROW always visible, with trend
+- [x] Manual report entry: team, cells, POD → Apply → update
+- [x] Reset search; verify in browser; commit
 
 ### M4 — Claude parse + review + explain
-- [ ] Confirm current model ID via claude-api reference; set `CLAUDE_MODEL`
-- [ ] `/api/parse-report`: system prompt → JSON; zod validate; retry once; else `{ok:false}`
-- [ ] ReviewCard: every field editable; low confidence → amber + "verify with team" above details; unclear_points listed
-- [ ] Nothing changes until Apply; failure → manual mode with message
-- [ ] `/api/explain`: 2–3 sentences + least-certain assumption, given before/after diff
-- [ ] Audit: raw report, AI proposal, IC edits (diff), applied values
-- [ ] Schema tests; build; manual check with and without key; commit
+- [x] Confirm current model ID via claude-api reference; set `CLAUDE_MODEL`
+- [x] `/api/parse-report`: system prompt → JSON; zod validate; retry once; else `{ok:false}`
+- [x] ReviewCard: every field editable; low confidence → amber + "verify with team" above details; unclear_points listed
+- [x] Nothing changes until Apply; failure → manual mode with message
+- [x] `/api/explain`: 2–3 sentences + least-certain assumption, given before/after diff
+- [x] Audit: raw report, AI proposal, IC edits (diff), applied values
+- [x] Schema tests; build; manual check with and without key; commit
 
 ### M5 — Weather (NWS)
-- [ ] `/api/weather`: `/points/44.27,-71.30` → `forecastHourly`, `User-Agent: TrailheadSAR (hackathon demo)`, timeout
-- [ ] Cached demo weather fallback + "using cached weather" badge
-- [ ] POD modifiers (fog, rain, snow, darkness) with visible text, e.g. "fog: −30% expected detection"
-- [ ] Urgency panel: temp, wind, wind chill, exposure risk label (low/moderate/high/severe) — **no survival time**
-- [ ] Team safety flags (e.g. ridge cells + wind > 50 mph)
-- [ ] Tests for modifiers / wind chill / risk label; commit
+- [x] `/api/weather`: `/points/44.27,-71.30` → `forecastHourly`, `User-Agent: TrailheadSAR (hackathon demo)`, timeout
+- [x] Cached demo weather fallback + "using cached weather" badge
+- [x] POD modifiers (fog, rain, snow, darkness) with visible text, e.g. "fog: −30% expected detection"
+- [x] Urgency panel: temp, wind, wind chill, exposure risk label (low/moderate/high/severe) — **no survival time**
+- [x] Team safety flags (e.g. ridge cells + wind > 50 mph)
+- [x] Tests for modifiers / wind chill / risk label; commit
 
 ### M6 — Suggestions, overrides, clues, audit export
-- [ ] `rank.ts`: score = POA × expected POD (weather-adjusted); top 5 of unsearched/under-searched; tested
-- [ ] SuggestionsPanel labelled "suggestions"; IC assigns team to any cell
-- [ ] Picking non-top suggestion → optional one-line reason dialog → logged
-- [ ] CluePanel: text + cell + IC-chosen boost (none/small/medium/large) and radius; AI never weights clues; tested
-- [ ] Audit log view + Export JSON; never a "stop search" recommendation anywhere
-- [ ] Commit
+- [x] `rank.ts`: score = POA × expected POD (weather-adjusted); top 5 of unsearched/under-searched; tested
+- [x] SuggestionsPanel labelled "suggestions"; IC assigns team to any cell
+- [x] Picking non-top suggestion → optional one-line reason dialog → logged
+- [x] CluePanel: text + cell + IC-chosen boost (none/small/medium/large) and radius; AI never weights clues; tested
+- [x] Audit log view + Export JSON; never a "stop search" recommendation anywhere
+- [x] Commit
 
 ### M7 — Demo mode
-- [ ] "Load demo scenario": LKP at trail junction, day hiker
-- [ ] Step-through of 4 reports + 1 clue + family-tip override, per the scripted story (trail corridor cleared → fog sweep → clue shifts to drainage → override → found in cell both pointed to)
-- [ ] Canned parses/explanations used when Claude fails; cached weather when NWS fails
-- [ ] Run full demo with network blocked to API; commit
+- [x] "Load demo scenario": LKP at trail junction, day hiker
+- [x] Step-through of 4 reports + 1 clue + family-tip override, per the scripted story (trail corridor cleared → fog sweep → clue shifts to drainage → override → found in cell both pointed to)
+- [x] Canned parses/explanations used when Claude fails; cached weather when NWS fails
+- [x] Run full demo with network blocked to API; commit
 
 ### M8 — Polish
-- [ ] Serious dark ops-console styling, light mode friendly
-- [ ] Responsive layout (laptop + tablet), empty states, loading spinners/skeletons
-- [ ] Accessibility pass (labels, focus, color + text for amber warnings)
-- [ ] Update NOTES.md with pitch answers (who/what could go wrong/helps not decides); commit
+- [x] Serious dark ops-console styling (dark-only theme)
+- [x] Responsive layout (laptop + tablet), empty states, loading spinners/skeletons
+- [x] Accessibility pass (labels, focus, color + text for amber warnings)
+- [x] Update NOTES.md with pitch answers (who/what could go wrong/helps not decides); commit
 
 ### M9 — (Optional) Summit conditions card
-- [ ] Link-out card to Mount Washington Observatory webcam + Higher Summits Forecast (no scraping/hotlinking)
-- [ ] Commit
+- [x] Link-out card to Mount Washington Observatory webcam + Higher Summits Forecast (no scraping/hotlinking)
+- [x] Commit
 
 ## 5. Per-milestone routine
 Build → tests → run app and check the feature → commit → push to `claude/funny-johnson-necpxn` → tick box here. Main is never left broken; reliability of the demo path beats extra features.
