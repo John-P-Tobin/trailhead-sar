@@ -93,7 +93,7 @@ export default function SubjectCard({
     const set = <K extends keyof Subject>(k: K, v: Subject[K]) => onChangeDraft({ ...s, [k]: v });
     const changed = (k: keyof Subject) => (draft.proposal && JSON.stringify(draft.proposal[k]) !== JSON.stringify(s[k]) ? "border-primary ring-1 ring-primary/40" : "");
     const sourceTag =
-      draft.source === "claude" ? <Tag color="primary">Proposed by Claude — review every field</Tag> : draft.source === "canned" ? <Tag color="warning">Demo fallback (Claude unavailable) — review every field</Tag> : <Tag>Manual entry</Tag>;
+      draft.source === "claude" ? <Tag color="primary" title="Pre-filled by Claude (Anthropic). Proposal only.">Auto-filled · review every field</Tag> : draft.source === "canned" ? <Tag color="warning">Demo fallback · review every field</Tag> : <Tag>Manual entry</Tag>;
     return (
       <Card title="Subject" size="small" tone="primary" extra={sourceTag}>
         <div className="space-y-3">
@@ -236,12 +236,12 @@ export default function SubjectCard({
         {parseError && <Alert type="warning" compact description={parseError} />}
         <div className="flex flex-wrap items-center gap-2">
           <Button variant="primary" icon={<IconUser />} loading={parsing} disabled={!text.trim()} onClick={() => onParse(text.trim())}>
-            {parsing ? "Reading…" : "Pre-fill with Claude"}
+            {parsing ? "Reading…" : "Pre-fill from call-out"}
           </Button>
           <Button disabled={parsing} onClick={onOpenManual}>
             Fill in manually
           </Button>
-          <span className="text-xs text-fg-3">Claude proposes; you confirm every field. Details stay on this device.</span>
+          <span className="text-xs text-fg-3">Pre-filled values are proposals; you confirm every field. Details stay on this device.</span>
         </div>
         {model}
       </div>

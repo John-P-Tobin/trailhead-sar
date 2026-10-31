@@ -4,9 +4,9 @@ import Tag from "./ui/Tag";
 import { AppliedReport } from "@/lib/store";
 
 const SOURCE: Record<string, { text: string; color: "primary" | "warning" | "default" }> = {
-  claude: { text: "Written by Claude", color: "primary" },
-  canned: { text: "Demo fallback explanation (Claude unavailable)", color: "warning" },
-  local: { text: "Auto-generated summary (Claude unavailable)", color: "default" },
+  claude: { text: "AI explanation", color: "primary" },
+  canned: { text: "Demo fallback explanation", color: "warning" },
+  local: { text: "Rule-based summary (AI offline)", color: "default" },
 };
 
 export default function ExplanationCard({ report, loading }: { report: AppliedReport; loading: boolean }) {
@@ -17,7 +17,7 @@ export default function ExplanationCard({ report, loading }: { report: AppliedRe
         <span>
           After {report.team} · <span className="font-mono">{report.cells.join(", ")}</span>
         </span>
-        {e && <Tag color={SOURCE[e.source].color}>{SOURCE[e.source].text}</Tag>}
+        {e && <Tag color={SOURCE[e.source].color} title={e.source === "claude" ? "Written by Claude (Anthropic) from the engine's numbers only" : undefined}>{SOURCE[e.source].text}</Tag>}
       </div>
       {!e && loading && <Skeleton lines={3} />}
       {e && (
