@@ -16,6 +16,7 @@ import CluePanel from "./CluePanel";
 import AuditLog from "./AuditLog";
 import DemoControls from "./DemoControls";
 import WelcomeCard from "./WelcomeCard";
+import SummitCard from "./SummitCard";
 import { DEMO_LKP, DEMO_PROFILE, DEMO_STEPS } from "@/lib/demo/scenario";
 import { combinedFactor, currentPeriod, podModifiers, safetyFlags, upcoming, WeatherSnapshot } from "@/lib/weather";
 import { rankCells } from "@/lib/engine/rank";
@@ -312,6 +313,7 @@ export default function Console() {
           )}
 
           <WeatherPanel weather={weather} loading={weatherLoading} onRefresh={loadWeather} />
+          <SummitCard />
 
           {lastReport && (
             <Panel title="Why the map changed">

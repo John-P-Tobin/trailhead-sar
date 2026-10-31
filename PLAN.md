@@ -159,8 +159,8 @@ trailhead-sar/
 - [x] Update NOTES.md with pitch answers (who/what could go wrong/helps not decides); commit
 
 ### M9 — (Optional) Summit conditions card
-- [ ] Link-out card to Mount Washington Observatory webcam + Higher Summits Forecast (no scraping/hotlinking)
-- [ ] Commit
+- [x] Link-out card to Mount Washington Observatory webcam + Higher Summits Forecast (no scraping/hotlinking)
+- [x] Commit
 
 ## 5. Per-milestone routine
 Build → tests → run app and check the feature → commit → push to `claude/funny-johnson-necpxn` → tick box here. Main is never left broken; reliability of the demo path beats extra features.

@@ -52,3 +52,10 @@ It does the arithmetic and the transcription — the parts humans are bad at und
 ## UI notes
 - Layout: map + suggestions/clues/audit on the left; demo, ROW, setup, report, weather and explanation on the right. On phones the order is map → controls → suggestions; POA numbers hide below 640 px.
 - Persistent amber footer: "Decision support only. The incident commander directs all search operations."
+- Summit conditions card (`components/SummitCard.tsx`) only links out to the Mount Washington Observatory webcam and Higher Summits Forecast pages; no scraping or hotlinking. **The two deep links couldn't be verified from the build container — click them once before recording.**
+
+## Before recording the demo (checklist)
+1. Set `ANTHROPIC_API_KEY` in Vercel project env (and `.env.local` for local runs). Run one live report; confirm the review card fills and the explanation says "Written by Claude".
+2. Confirm the weather badge says "Live NWS" on Vercel (cached fallback is what the build container saw).
+3. Click both summit links.
+4. Load demo scenario → step through all 7 steps once. Reset before recording.
