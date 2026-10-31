@@ -8,7 +8,7 @@ export default function Tooltip({ content, placement = "top", children }: { cont
       {children}
       <span
         role="tooltip"
-        className={`pointer-events-none absolute left-1/2 z-30 w-max max-w-64 -translate-x-1/2 rounded-md border border-line-strong bg-surface-3 px-2 py-1 text-xs text-fg opacity-0 shadow-lg transition group-hover:opacity-100 group-focus-within:opacity-100 ${pos}`}
+        className={`pointer-events-none absolute left-1/2 z-30 w-max max-w-64 -translate-x-1/2 rounded-md border border-line-strong bg-surface-3 px-2 py-1 text-xs text-fg opacity-0 shadow-lg transition invisible group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 ${pos}`}
       >
         {content}
       </span>
