@@ -23,7 +23,7 @@ const PromptFeatureSchema = z.object({
 });
 
 const Body = z.object({
-  text: z.string().min(1).max(4000),
+  text: z.string().trim().min(1).max(4000),
   /** Named features of the map the IC is looking at, so "the Crawford Path" maps to cells. */
   features: z.array(PromptFeatureSchema).max(80).optional(),
 });

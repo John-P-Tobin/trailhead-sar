@@ -1,7 +1,7 @@
 // Search state and reducer. All probability changes go through lib/engine.
 
 import { AuditEntry, diffFields, makeAudit } from "./audit";
-import { ProbState, addPod, applySweeps, setCellPoa, setRow } from "./engine/bayes";
+import { ProbState, addPod, applySweeps, assertSumToOne, clampPod, setCellPoa, setRow } from "./engine/bayes";
 import { applyClue, BoostLevel, BOOST_FACTORS } from "./engine/clues";
 import { CellId, isCellId } from "./engine/grid";
 import { generatePriors, DEFAULT_ROW } from "./engine/priors";
@@ -132,7 +132,20 @@ function regenerate(state: SearchState, lkp: CellId, profileId: ProfileId): Sear
   return { ...state, lkp, profileId, prob, rowHistory: [prob.row], priorsEdited: false };
 }
 
+/**
+ * Never let a bad value crash the console mid-search: if the engine rejects an
+ * update (e.g. probabilities would not sum to 1), keep the previous state and log it.
+ */
 export function reducer(state: SearchState, action: Action): SearchState {
+  try {
+    return reduce(state, action);
+  } catch (e) {
+    const reason = e instanceof Error ? e.message : String(e);
+    return { ...state, audit: [...state.audit, makeAudit("note", `Update ignored (${action.type}): ${reason}`)] };
+  }
+}
+
+function reduce(state: SearchState, action: Action): SearchState {
   switch (action.type) {
     case "hydrate":
     case "load":
@@ -196,7 +209,7 @@ export function reducer(state: SearchState, action: Action): SearchState {
       const { confirmed, proposal, source, rawText } = action.payload;
       const cells = [...new Set(confirmed.cells.map((c) => c.toUpperCase()))].filter((c) => c in state.prob!.cells);
       if (cells.length === 0) return state;
-      const pod = Math.min(1, Math.max(0, confirmed.estimated_pod));
+      const pod = clampPod(confirmed.estimated_pod);
       const before = state.prob;
       const after = applySweeps(before, cells.map((cell) => ({ cell, pod })));
       const pods = { ...state.pods };
@@ -359,12 +372,27 @@ export function cumulativePodMap(pods: Record<CellId, number[]>): Record<CellId,
 
 const STORAGE_KEY = "trailhead:v1";
 
+/** Reject saved state that is old, truncated or hand-edited, so a refresh starts clean instead of crashing. */
+export function isUsableState(s: unknown): s is SearchState {
+  if (!s || typeof s !== "object") return false;
+  const st = s as Partial<SearchState>;
+  if (st.version !== 1 || !st.terrain?.cells || !Array.isArray(st.audit)) return false;
+  if (st.prob == null) return true;
+  if (typeof st.prob !== "object" || typeof st.prob.cells !== "object" || !st.prob.cells) return false;
+  try {
+    assertSumToOne(st.prob);
+    return Object.keys(st.prob.cells).every((c) => c in st.terrain!.cells);
+  } catch {
+    return false;
+  }
+}
+
 export function loadState(): SearchState | null {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     const s = JSON.parse(raw) as SearchState;
-    return s?.version === 1 ? { ...initialState(), ...s } : null;
+    return isUsableState(s) ? { ...initialState(), ...s } : null;
   } catch {
     return null;
   }

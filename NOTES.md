@@ -32,6 +32,13 @@
 - Data caveats: this OSM export has no `natural=cliff` features in the box, so no cliff cells; the ponds (Lakes of the Clouds, Hermit Lake, Spaulding Lake, Gem Pool) are smaller than a cell, so they are drawn but no cell is flagged water.
 - Attribution: "© OpenStreetMap contributors" (link to openstreetmap.org/copyright) sits on the map whenever OSM data is shown; the bundled file carries the ODbL attribution.
 
+## Robustness (round 3)
+- The reducer never throws: if the engine rejects an update (e.g. probabilities would not sum to 1) the previous state is kept and the audit log gets an "Update ignored (…)" note.
+- `loadState` rejects corrupt, old or hand-edited saved state (`isUsableState`: version, terrain, audit array, probabilities sum to 1, cells match the terrain) so a refresh starts clean instead of crashing.
+- `apply_report` clamps POD with the engine's `clampPod`; `/api/parse-report` trims the text, so a blank report is rejected without calling Claude.
+- `/api/terrain` asks two Overpass servers at once (overpass-api.de and overpass.private.coffee) and takes the first good answer; `OVERPASS_URL` still overrides with a single server. **Overpass was overloaded on the night of Oct 30**, so Live OSM may not appear; the demo always uses the bundled terrain regardless.
+- `tests/robustness.test.ts`: blank reports, out-of-grid cells, garbled POD, engine errors, 300 random sweeps/clues staying normalized, restore after refresh, corrupt saved state, Reset mid-demo, Overpass backup server.
+
 ## Export for CalTopo
 - Real SAR teams run searches in CalTopo; its API needs a team account, so Trailhead exports files the IC imports (Import → choose file). Button in the audit-log panel; every export is logged.
 - GeoJSON (`lib/export.ts`, RFC 7946: WGS84, `[lon, lat]`): one Polygon per cell (counterclockwise ring from the cell's real bounds) titled like "G14 – POA 1.7%", with a description (POA, cumulative POD, last searched by, sweeps, weather-adjusted vs base expected POD with active penalties, terrain, and any team-safety flag on ridgeline/exposed cells) and `fill` / `fill-opacity` / `stroke` from the same heatmap function the map uses (`lib/heat.ts`). Markers for the LKP, each clue (title = clue text) and the found location. Each team's assigned cells are merged into one outline polygon (adjacent cells merge, corner-only contacts split, holes kept), titled with the team name.
@@ -47,7 +54,7 @@ Runs on the bundled real terrain. Subject: Dan, 58, day hiker; left the Lakes of
 5. Team 2 clears the Ammonoosuc Ravine (D8, D7, C7, B8, B9; POD 70%).
 6. Family tip → suggestions are G13 (wrapper), G11 (fogged), **G14** (downstream); IC overrides to **G14** (model's #3) and logs the reason.
 7. Subject located in G14 beside the Dry River → banner shows "model suggestion #3 · IC override".
-The story depends on the **small** boost: at medium, G14 rises to #2. Works fully offline: canned parses if Claude fails, cached weather if NWS fails, local explanations if /api/explain fails, bundled terrain always. `tests/demo.test.ts` checks the story on the bundled file (clue cell #1, override cell #3, found there, downstream and lower).
+The story depends on the **small** boost: at medium, G14 rises to #2. In the demo panel, clicking any boost other than the scenario's `suggestedBoost` asks for confirmation first (`window.confirm` in `components/DemoControls.tsx`), so a misclick while recording can be cancelled. **UI teammate:** this is the only components/ change in round 3; no styles touched. Swap it for an inline confirm if you prefer. Click-by-click run sheet with lines to say: `DEMO.md`. Works fully offline: canned parses if Claude fails, cached weather if NWS fails, local explanations if /api/explain fails, bundled terrain always. `tests/demo.test.ts` checks the story on the bundled file (clue cell #1, override cell #3, found there, downstream and lower).
 
 ## Pitch: the three questions
 **1. Who is this for and why do they need it?**
