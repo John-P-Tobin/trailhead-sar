@@ -17,6 +17,8 @@ export interface UrgencyFactor {
   label: string;
   score: UrgencyScore;
   reason: string;
+  /** The score the app proposed, kept when the IC overrides. */
+  proposed?: UrgencyScore;
   overridden?: boolean;
 }
 
@@ -98,7 +100,7 @@ export function urgencyFactors(s: Subject, ctx: UrgencyContext): UrgencyFactor[]
 export function scoreUrgency(factors: UrgencyFactor[], overrides: Partial<Record<UrgencyKey, UrgencyScore>>): Urgency {
   const merged = factors.map((f) => {
     const o = overrides[f.key];
-    return o && o !== f.score ? { ...f, score: o, overridden: true, reason: `${f.reason} (IC set ${o})` } : { ...f, overridden: false };
+    return o && o !== f.score ? { ...f, score: o, proposed: f.score, overridden: true, reason: `${f.reason} (IC set ${o})` } : { ...f, proposed: f.score, overridden: false };
   });
   const total = merged.reduce((a, f) => a + f.score, 0);
   const band: UrgencyBand = total <= 11 ? "emergency" : total <= 16 ? "measured" : "evaluate";

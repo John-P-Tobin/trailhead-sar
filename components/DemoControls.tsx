@@ -13,6 +13,7 @@ export default function DemoControls({
   step,
   busy,
   reviewing = false,
+  onCallout,
   onReport,
   onClue,
   onPrefillOverride,
@@ -23,6 +24,7 @@ export default function DemoControls({
   busy: boolean;
   /** A parsed report is open in the review card; the presenter applies it there. */
   reviewing?: boolean;
+  onCallout: (s: Extract<DemoStep, { kind: "callout" }>) => void;
   onReport: (s: Extract<DemoStep, { kind: "report" }>) => void;
   onClue: (s: Extract<DemoStep, { kind: "clue" }>, boost: BoostLevel) => void;
   onPrefillOverride: (s: Extract<DemoStep, { kind: "override" }>) => void;
@@ -64,6 +66,14 @@ export default function DemoControls({
         <p className="mt-3 text-sm text-success">Scenario complete. Export the audit log for the after-action review.</p>
       ) : (
         <div className="mt-3 space-y-2">
+          {current.kind === "callout" && (
+            <>
+              <blockquote className={`${quote} border-primary font-sans`}>☎️ {current.text}</blockquote>
+              <Button variant="primary" loading={busy} disabled={reviewing} onClick={() => onCallout(current)}>
+                {busy ? "Reading…" : reviewing ? "Review the subject card below, then Confirm" : "Receive call-out → pre-fill subject"}
+              </Button>
+            </>
+          )}
           {current.kind === "report" && (
             <>
               <blockquote className={`${quote} border-primary`}>📻 {current.text}</blockquote>

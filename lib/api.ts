@@ -1,6 +1,7 @@
 // Browser-side calls to our own server routes (never to Anthropic directly).
 import { Explanation, ParsedReport } from "./schemas";
 import type { PromptFeature } from "./terrain";
+import type { Subject } from "./subject";
 
 type Result<T> = ({ ok: true } & T) | { ok: false; reason: string };
 
@@ -29,3 +30,10 @@ export const parseReport = (text: string, features: PromptFeature[] = []) =>
 
 export const explainUpdate = (summary: string) =>
   post<{ explanation: Explanation }>("/api/explain", { summary }, 45_000);
+
+export const parseSubject = (text: string) =>
+  post<{ subject: Subject; unclear: string[] }>(
+    "/api/parse-subject",
+    { text, now: new Date().toISOString(), timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone },
+    45_000,
+  );

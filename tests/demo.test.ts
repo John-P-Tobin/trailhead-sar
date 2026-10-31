@@ -14,6 +14,7 @@ const terrain = snapshotOf(bundledTerrain().model);
 function run(upTo: string): SearchState {
   let s = reducer(initialState(terrain), { type: "demo_load", lkp: DEMO_LKP, profileId: DEMO_PROFILE, terrain, subject: demoSubject() });
   for (const step of DEMO_STEPS) {
+    if (step.kind === "callout") s = reducer(s, { type: "set_subject", subject: demoSubject(), source: "canned" });
     if (step.kind === "report") s = reducer(s, { type: "apply_report", payload: { confirmed: step.canned, source: "canned" } });
     if (step.kind === "clue") s = reducer(s, { type: "add_clue", text: step.text, cell: step.cell, radius: step.radius, boost: step.suggestedBoost });
     if (step.id === upTo) break;

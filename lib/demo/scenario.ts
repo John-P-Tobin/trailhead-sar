@@ -39,12 +39,20 @@ export function demoSubject(now = Date.now()): Subject {
 }
 
 export type DemoStep =
+  | { kind: "callout"; id: string; title: string; text: string; note: string }
   | { kind: "report"; id: string; title: string; text: string; canned: ParsedReport; note: string }
   | { kind: "clue"; id: string; title: string; text: string; cell: CellId; radius: number; suggestedBoost: BoostLevel; note: string }
   | { kind: "override"; id: string; title: string; tip: string; team: string; cell: CellId; reason: string; note: string }
   | { kind: "found"; id: string; title: string; text: string; cell: CellId; note: string };
 
 export const DEMO_STEPS: DemoStep[] = [
+  {
+    kind: "callout",
+    id: "c0",
+    title: "Call-out",
+    text: DEMO_CALLOUT,
+    note: "Claude pre-fills the subject card from the call-out; the IC confirms every field. The urgency chart and the distance model follow from it.",
+  },
   {
     kind: "report",
     id: "r1",

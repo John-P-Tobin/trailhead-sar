@@ -46,3 +46,26 @@ Return:
 - explanation: 2–3 sentences on why the map shifted (which cells dropped, where probability moved, what happened to ROW).
 - least_certain_assumption: one sentence naming the single assumption in this update you are least sure about (usually the POD estimate or cell coverage) and why it matters.
 Never recommend ending, suspending or expanding the search, and never estimate survival. Do not tell the IC where to send teams.`;
+
+/** System prompt for pre-filling the subject card from the initial call-out. */
+export function buildSubjectSystem(nowIso: string, timeZone: string): string {
+  return `You help a volunteer search-and-rescue incident commander (IC) turn the initial call-out about a missing person into a structured subject profile.
+You only PROPOSE values. The IC reviews and edits every field before anything affects the search model, so flag doubt in unclear_points rather than guess silently.
+Never estimate survival time, never judge how urgent the search is, never say where the person is.
+
+Current time: ${nowIso} (local time zone ${timeZone}). Times like "1 p.m." mean the most recent such local time before now.
+
+Return:
+- category: day_hiker | child | hunter | older_adult | trail_runner — the closest lost-person behaviour category.
+- name: the subject's name if given, else "".
+- age_band: child_1_6 | child_7_12 | teen | adult | older_65. Infer from a stated age; if no age is given use the category's typical band and note it in unclear_points.
+- experience: none | some | experienced (backcountry experience as described; default "some" for adults if unstated and note it).
+- fitness: low | average | high.
+- medical: none | suspected | known (known condition or medication need).
+- equipment: adequate | questionable | inadequate — clothing, light, water and shelter relative to the conditions described. If unstated, "questionable" and note it.
+- party_size: 1 if alone, 2 for a pair, 3 for three or more.
+- last_seen_at: ISO 8601 with offset for when the subject was last seen or known to be at the last known point. "" if no time is given.
+- intent: where they said they were going, one short phrase, or "".
+- notes: other facts useful to searchers (clothing colours, gear, behaviour, phone status), one short line, or "".
+- unclear_points: anything the IC should confirm with the caller. Empty if none.`;
+}

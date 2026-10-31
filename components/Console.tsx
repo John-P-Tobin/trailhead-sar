@@ -18,6 +18,8 @@ import WelcomeCard from "./WelcomeCard";
 import SummitCard from "./SummitCard";
 import TerrainBadge from "./TerrainBadge";
 import StatusBar from "./StatusBar";
+import SubjectCard, { SubjectDraft } from "./SubjectCard";
+import UrgencyCard from "./UrgencyCard";
 import Alert from "./ui/Alert";
 import Button from "./ui/Button";
 import Card from "./ui/Card";
@@ -33,7 +35,8 @@ import { useWeather } from "@/lib/useWeather";
 import { rankCells } from "@/lib/engine/rank";
 import { priorSummary } from "@/lib/engine/priors";
 import { hazardsNearLkp, scoreUrgency, urgencyFactors } from "@/lib/engine/urgency";
-import { explainUpdate, parseReport } from "@/lib/api";
+import { explainUpdate, parseReport, parseSubject } from "@/lib/api";
+import { defaultSubject, Subject } from "@/lib/subject";
 import { buildUpdateSummary, localExplanation } from "@/lib/explain";
 import { cumulativePodMap, initialState, loadState, reducer, ReportSource, saveState } from "@/lib/store";
 import { CellId } from "@/lib/engine/grid";
@@ -64,6 +67,10 @@ export default function Console() {
   const [draft, setDraft] = useState<Draft | null>(null);
   const [tab, setTab] = useState<TabKey>("ops");
   const [highlight, setHighlight] = useState<CellId[]>([]);
+  const [ringsOn, setRingsOn] = useState(true);
+  const [subjectDraft, setSubjectDraft] = useState<SubjectDraft | null>(null);
+  const [subjectParsing, setSubjectParsing] = useState(false);
+  const [subjectError, setSubjectError] = useState<string | null>(null);
 
   const [parsing, setParsing] = useState(false);
   const [parseError, setParseError] = useState<string | null>(null);
@@ -141,6 +148,7 @@ export default function Console() {
   }, [lastReport, state.prob]);
 
   const cumPod = useMemo(() => cumulativePodMap(state.pods), [state.pods]);
+  const demoStep = state.demo ? DEMO_STEPS[state.demoStep] : undefined;
   const needLkp = !state.lkp || placingLkp;
 
   const onCellClick = (id: CellId) => {
@@ -159,6 +167,34 @@ export default function Console() {
     const next = id === inspect ? null : id;
     setInspect(next);
     if (next) setTab("cell");
+  };
+
+  const openSubjectManual = () =>
+    setSubjectDraft({ subject: state.subject ?? defaultSubject(state.profileId), proposal: null, source: "manual", unclear: [], key: Date.now() });
+
+  const onParseSubject = async (text: string, canned?: Subject) => {
+    setSubjectParsing(true);
+    setSubjectError(null);
+    setTab("ops");
+    const res = await parseSubject(text);
+    setSubjectParsing(false);
+    if (res.ok) {
+      setSubjectDraft({ subject: res.subject, proposal: res.subject, source: "claude", rawText: text, unclear: res.unclear, key: Date.now() });
+    } else if (canned) {
+      setSubjectError(`Claude unavailable: ${res.reason} Using the demo's canned subject — review it like any proposal.`);
+      setSubjectDraft({ subject: canned, proposal: canned, source: "canned", rawText: text, unclear: [], key: Date.now() });
+    } else {
+      setSubjectError(`Claude unavailable: ${res.reason} Fill the card in by hand — the model works the same.`);
+      setSubjectDraft({ subject: defaultSubject(state.profileId), proposal: null, source: "manual", rawText: text, unclear: [], key: Date.now() });
+    }
+  };
+
+  const confirmSubject = () => {
+    if (!subjectDraft) return;
+    dispatch({ type: "set_subject", subject: subjectDraft.subject, source: subjectDraft.source, proposal: subjectDraft.proposal, rawText: subjectDraft.rawText });
+    if (demoStep?.kind === "callout") dispatch({ type: "demo_advance" });
+    setSubjectDraft(null);
+    setSubjectError(null);
   };
 
   const openManual = (rawText?: string) => setDraft({ report: emptyReport(), proposal: null, source: "manual", rawText: rawText || undefined, key: Date.now() });
@@ -188,6 +224,8 @@ export default function Console() {
     setInspect(null);
     setParseError(null);
     setHighlight([]);
+    setSubjectDraft(null);
+    setSubjectError(null);
     setTab("ops");
   };
 
@@ -196,8 +234,6 @@ export default function Console() {
     dispatch({ type: "reset" });
     clearLocal();
   };
-
-  const demoStep = state.demo ? DEMO_STEPS[state.demoStep] : undefined;
 
   // Demo mode always uses the bundled terrain, so the video never depends on a live API.
   const loadDemo = async () => {
@@ -250,16 +286,20 @@ export default function Console() {
   const suggestions = useMemo(() => (state.prob ? rankCells(state.prob, cumPod, state.terrain.cells, weatherFactor) : []), [state.prob, cumPod, state.terrain.cells, weatherFactor]);
   const exposure = period ? exposureRisk(period).level : null;
   const exposureSoon = weather ? (upcoming(weather, 8).map((p) => exposureRisk(p).level).find((l) => l === "severe" || l === "high") ?? null) : null;
+  const effectiveSubject = useMemo(() => state.subject ?? defaultSubject(state.profileId), [state.subject, state.profileId]);
   const urgency = useMemo(() => {
-    if (!state.subject || !state.lkp) return null;
-    const f = urgencyFactors(state.subject, { exposureNow: exposure, exposureSoon, hazardsNearLkp: hazardsNearLkp(state.lkp, state.terrain.cells) });
+    if (!state.lkp) return null;
+    const f = urgencyFactors(effectiveSubject, { exposureNow: exposure, exposureSoon, hazardsNearLkp: hazardsNearLkp(state.lkp, state.terrain.cells) });
     return scoreUrgency(f, state.urgencyOverrides);
-  }, [state.subject, state.lkp, state.terrain.cells, state.urgencyOverrides, exposure, exposureSoon]);
-  const summary = useMemo(() => (state.lkp && state.subject && !state.started ? priorSummary(state.lkp, state.subject, state.terrain.cells) : null), [state.lkp, state.subject, state.started, state.terrain.cells]);
+  }, [effectiveSubject, state.lkp, state.terrain.cells, state.urgencyOverrides, exposure, exposureSoon]);
+  const summary = useMemo(
+    () => (state.lkp ? priorSummary(state.lkp, subjectDraft?.subject ?? effectiveSubject, state.terrain.cells) : null),
+    [state.lkp, subjectDraft, effectiveSubject, state.terrain.cells],
+  );
 
   // Cells come from the store (what the model uses); lines and shapes from the loaded terrain.
   const mapTerrain = { cells: state.terrain.cells, bbox: state.terrain.bbox, osm: state.terrain.source !== "stylized", features: terrainModel.features };
-  const subjectLabel = state.subject ? `${state.subject.name ? `${state.subject.name} · ` : ""}${PROFILES[state.subject.category].label}` : PROFILES[state.profileId].label;
+  const subjectLabel = `${state.subject?.name ? `${state.subject.name} · ` : ""}${PROFILES[effectiveSubject.category].label}${state.subjectConfirmed ? "" : " (unconfirmed)"}`;
 
   const opsTab = (
     <div className="space-y-3">
@@ -301,6 +341,25 @@ export default function Console() {
           onRow={(v) => dispatch({ type: "set_row", value: v })}
         />
       )}
+      {state.lkp && (
+        <SubjectCard
+          subject={state.subjectConfirmed ? state.subject : null}
+          draft={subjectDraft}
+          summary={state.started ? null : summary}
+          started={state.started}
+          parsing={subjectParsing}
+          parseError={subjectError}
+          onParse={(t) => onParseSubject(t)}
+          onOpenManual={openSubjectManual}
+          onChangeDraft={(subject) => subjectDraft && setSubjectDraft({ ...subjectDraft, subject })}
+          onConfirm={confirmSubject}
+          onCancel={() => {
+            setSubjectDraft(null);
+            setSubjectError(null);
+          }}
+        />
+      )}
+      {urgency && state.lkp && <UrgencyCard urgency={urgency} onOverride={(key, score, proposed) => dispatch({ type: "set_urgency_override", key, score, proposed })} />}
       {state.prob && (
         <Card title="Radio report" size="small" tone={draft ? "primary" : "default"} extra={draft && <Tag color="primary">Review before applying</Tag>}>
           {draft ? (
@@ -468,10 +527,15 @@ export default function Console() {
                     Clear highlight
                   </Button>
                 ) : null}
+                {state.lkp && (
+                  <Button size="sm" variant="text" onClick={() => setRingsOn((v) => !v)} title="25 / 50 / 75 % distance rings for this subject (illustrative)">
+                    {ringsOn ? "Hide rings" : "Show rings"}
+                  </Button>
+                )}
                 <TerrainBadge source={state.terrain.source} label={state.terrain.label} fetchedAt={state.terrain.fetchedAt} loading={terrainLoading} />
               </>
             }
-            footer={<MapLegend kinds={new Set(mapTerrain.features.map((f) => f.kind))} />}
+            footer={<MapLegend kinds={new Set(mapTerrain.features.map((f) => f.kind))} rings={ringsOn && !!state.lkp} />}
           >
             <GridMap
               terrain={mapTerrain}
@@ -482,6 +546,7 @@ export default function Console() {
               suggested={draft ? [] : suggestions.map((s) => s.cell)}
               clueCells={state.clues.map((c) => c.cell)}
               found={state.found?.cell ?? null}
+              ringsKm={ringsOn && summary ? summary.quartilesKm.slice(0, 3) : []}
               onCellClick={onCellClick}
             />
             {terrainNote && <Alert type="warning" compact className="mt-2" description={terrainNote} />}
@@ -497,8 +562,9 @@ export default function Console() {
           {state.demo && (
             <DemoControls
               step={state.demoStep}
-              busy={parsing}
-              reviewing={!!draft}
+              busy={parsing || subjectParsing}
+              reviewing={!!draft || !!subjectDraft}
+              onCallout={(s) => onParseSubject(s.text, demoSubject())}
               onReport={(s) => onParse(s.text, s.canned)}
               onClue={(s, boost) => {
                 dispatch({ type: "add_clue", text: s.text, cell: s.cell, radius: s.radius, boost });
