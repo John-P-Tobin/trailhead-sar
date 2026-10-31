@@ -4,6 +4,7 @@
 // Thresholds and the elevation estimate are ILLUSTRATIVE, tuned for this demo.
 
 import { ALL_CELLS, GRID_SIZE } from "./engine/grid";
+import { CellElevation } from "./elevation";
 import { BBox, cellBounds, cellSizeM, expandBbox, toGrid } from "./geo";
 import { CellTerrain, Cover, FeatureKind, MapFeature, SOURCE_LABEL, TerrainModel, TerrainSource } from "./terrain";
 
@@ -397,7 +398,7 @@ export function buildTerrainModel(
   fc: TerrainFeatureCollection,
   bbox: BBox,
   source: TerrainSource,
-  opts: { fetchedAt?: string; label?: string } = {},
+  opts: { fetchedAt?: string; label?: string; elevation?: Record<string, CellElevation> } = {},
 ): TerrainModel {
   const P = TERRAIN_PARAMS;
   const N = GRID_SIZE * GRID_SIZE;
@@ -488,6 +489,9 @@ export function buildTerrainModel(
     for (const k of known) best = Math.max(best, k.ele - P.slope * Math.hypot((cx - k.gx) * cellW, (cy - k.gy) * cellH));
     est[i] = best - (len.stream[i] >= P.streamMinM ? P.drainageDropM : 0);
   }
+  // A bundled DEM grid is attached per cell for display and safety checks; the smoothed
+  // estimate stays the model's elevation so the behaviour priors are not driven by DEM noise.
+  const dem = opts.elevation;
   const hasElevation = known.length > 0;
   const lo = hasElevation ? Math.min(...est) : 0;
   const hi = hasElevation ? Math.max(...est) : 0;
@@ -497,6 +501,7 @@ export function buildTerrainModel(
     const x = i % GRID_SIZE;
     const y = Math.floor(i / GRID_SIZE);
     const m = est[i];
+    const d = dem?.[id];
     const cover: Cover = !hasElevation ? "hardwood" : m >= P.treelineM ? "alpine" : m >= P.hardwoodBelowM ? "spruce" : "hardwood";
     cells[id] = {
       id,
@@ -506,6 +511,7 @@ export function buildTerrainModel(
       cover,
       elevation: hasElevation && hi > lo ? (m - lo) / (hi - lo) : 0.5,
       ...(hasElevation ? { elevationM: Math.round(m) } : {}),
+      ...(d && Number.isFinite(d.meanM) ? { demMeanM: Math.round(d.meanM), elevationMinM: Math.round(d.minM), elevationMaxM: Math.round(d.maxM), slopeDeg: d.slopeDeg, aspect: d.aspect } : {}),
       trail: len.trail[i] >= P.trailMinM,
       drainage: len.stream[i] >= P.streamMinM,
       ridge: onRidge[i] === 1 || len.ridge[i] >= P.ridgeMinM,

@@ -4,20 +4,28 @@
 import { BBox, bboxKey, DEFAULT_BBOX } from "./geo";
 import { buildTerrainModel, normalizeTerrainData, TerrainFeatureCollection } from "./osm";
 import { STYLIZED_TERRAIN, TerrainModel, TerrainSnapshot } from "./terrain";
+import { CellElevation } from "./elevation";
 
 const CACHE_PREFIX = "trailhead:terrain:v1:";
 export const TERRAIN_CACHE_MAX_AGE_MS = 7 * 24 * 3600_000;
 
 let bundled: Promise<TerrainModel | null> | null = null;
 
+/** data/elevation.json ships with the app; null if it is missing or unreadable. */
+export function loadBundledElevation(): Promise<Record<string, CellElevation> | null> {
+  return import("@/data/elevation.json")
+    .then((mod) => (mod.default as { cells?: Record<string, CellElevation> }).cells ?? null)
+    .catch(() => null);
+}
+
 /** data/terrain.geojson ships with the app, so demo mode never depends on a live API. */
 export function loadBundledTerrain(): Promise<TerrainModel | null> {
-  bundled ??= import("@/data/terrain.geojson")
-    .then((mod) => {
+  bundled ??= Promise.all([import("@/data/terrain.geojson"), loadBundledElevation()])
+    .then(([mod, elevation]) => {
       const fc = normalizeTerrainData(mod.default);
       const b = fc.trailhead?.bbox;
       const bbox: BBox = b ? { south: b[0], west: b[1], north: b[2], east: b[3] } : DEFAULT_BBOX;
-      return buildTerrainModel(fc, bbox, "bundled", { fetchedAt: fc.trailhead?.osm_timestamp });
+      return buildTerrainModel(fc, bbox, "bundled", { fetchedAt: fc.trailhead?.osm_timestamp, elevation: elevation ?? undefined });
     })
     .catch(() => null);
   return bundled;

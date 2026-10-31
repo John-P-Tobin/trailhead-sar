@@ -27,6 +27,8 @@ export function cachedWeather(now = Date.now(), note?: string): WeatherSnapshot 
   return {
     source: "cached",
     fetchedAt: new Date(now).toISOString(),
+    elevationM: 1722, // the NWS gridpoint for 44.27,-71.30
+
     location: `${MAP_ANCHOR.label} (cached demo weather)`,
     note,
     periods: SCRIPT.map((p, i) => ({

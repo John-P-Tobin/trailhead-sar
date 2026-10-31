@@ -25,6 +25,7 @@ import Button from "./ui/Button";
 import Card from "./ui/Card";
 import Empty from "./ui/Empty";
 import Tabs from "./ui/Tabs";
+import Segmented from "./ui/Segmented";
 import Tag from "./ui/Tag";
 import { useConfirm } from "./ui/ConfirmProvider";
 import { IconDownload, IconTarget, IconUpload } from "./ui/icons";
@@ -69,6 +70,7 @@ export default function Console() {
   const [tab, setTab] = useState<TabKey>("ops");
   const [highlight, setHighlight] = useState<CellId[]>([]);
   const [ringsOn, setRingsOn] = useState(true);
+  const [layer, setLayer] = useState<"probability" | "elevation">("probability");
   const [subjectDraft, setSubjectDraft] = useState<SubjectDraft | null>(null);
   const [subjectParsing, setSubjectParsing] = useState(false);
   const [subjectError, setSubjectError] = useState<string | null>(null);
@@ -348,6 +350,10 @@ export default function Console() {
     [state.lkp, subjectDraft, effectiveSubject, state.terrain.cells],
   );
 
+  const demRange = useMemo(() => {
+    const vals = Object.values(state.terrain.cells).map((c) => c.demMeanM ?? c.elevationM).filter((v): v is number => v !== undefined);
+    return vals.length ? { lo: Math.min(...vals), hi: Math.max(...vals), dem: Object.values(state.terrain.cells).some((c) => c.demMeanM !== undefined) } : null;
+  }, [state.terrain.cells]);
   // Cells come from the store (what the model uses); lines and shapes from the loaded terrain.
   const mapTerrain = { cells: state.terrain.cells, bbox: state.terrain.bbox, osm: state.terrain.source !== "stylized", features: terrainModel.features };
   const subjectLabel = `${state.subject?.name ? `${state.subject.name} · ` : ""}${PROFILES[effectiveSubject.category].label}${state.subjectConfirmed ? "" : " (unconfirmed)"}`;
@@ -520,6 +526,7 @@ export default function Console() {
             terrain={state.terrain.cells}
             onRefresh={refreshWeather}
             onHighlightCells={(cells) => setHighlight(cells)}
+            lkpElevationM={state.lkp ? (state.terrain.cells[state.lkp].demMeanM ?? state.terrain.cells[state.lkp].elevationM) : undefined}
           />
           <SummitCard />
         </div>
@@ -583,6 +590,16 @@ export default function Console() {
                     Clear highlight
                   </Button>
                 ) : null}
+                <Segmented
+                  size="sm"
+                  aria-label="Map layer"
+                  value={layer}
+                  onChange={setLayer}
+                  options={[
+                    { value: "probability", label: "Probability" },
+                    { value: "elevation", label: "Elevation", title: "Digital elevation model: tint by height, hatching on steep cells" },
+                  ]}
+                />
                 {state.lkp && (
                   <Button size="sm" variant="text" onClick={() => setRingsOn((v) => !v)} title="25 / 50 / 75 % distance rings for this subject (illustrative)">
                     {ringsOn ? "Hide rings" : "Show rings"}
@@ -591,7 +608,7 @@ export default function Console() {
                 <TerrainBadge source={state.terrain.source} label={state.terrain.label} fetchedAt={state.terrain.fetchedAt} loading={terrainLoading} />
               </>
             }
-            footer={<div className="xl:hidden"><MapLegend kinds={new Set(mapTerrain.features.map((f) => f.kind))} rings={ringsOn && !!state.lkp} /></div>}
+            footer={<div className="xl:hidden"><MapLegend kinds={new Set(mapTerrain.features.map((f) => f.kind))} rings={ringsOn && !!state.lkp} layer={layer} demRange={demRange} /></div>}
           >
             <div className="flex gap-4">
               <div className="min-w-0 flex-1">
@@ -605,6 +622,7 @@ export default function Console() {
                   clueCells={state.clues.map((c) => c.cell)}
                   found={state.found?.cell ?? null}
                   ringsKm={ringsOn && summary ? summary.quartilesKm.slice(0, 3) : []}
+                  layer={layer}
                   onCellClick={onCellClick}
                 />
                 {terrainNote && <Alert type="warning" compact className="mt-2" description={terrainNote} />}
@@ -621,7 +639,7 @@ export default function Console() {
                 )}
                 <div>
                   <div className="mb-1.5 text-xs uppercase tracking-wide text-fg-3">Legend</div>
-                  <MapLegend kinds={new Set(mapTerrain.features.map((f) => f.kind))} rings={ringsOn && !!state.lkp} direction="vertical" />
+                  <MapLegend kinds={new Set(mapTerrain.features.map((f) => f.kind))} rings={ringsOn && !!state.lkp} direction="vertical" layer={layer} demRange={demRange} />
                 </div>
               </aside>
             </div>

@@ -1,4 +1,19 @@
 import { describe, expect, it } from "vitest";
+import { parseNwsElevation, tempAtElevation } from "@/lib/weather";
+
+describe("elevation-adjusted temperature", () => {
+  it("cools 6.5 °C per km going up and is unchanged without elevations", () => {
+    expect(tempAtElevation(40, 1722, 1917)).toBe(38);
+    expect(tempAtElevation(40, 1722, 1261)).toBe(45);
+    expect(tempAtElevation(40, undefined, 1917)).toBe(40);
+    expect(tempAtElevation(40, 1722, undefined)).toBe(40);
+  });
+  it("reads the NWS gridpoint elevation in metres or feet", () => {
+    expect(parseNwsElevation({ properties: { elevation: { unitCode: "wmoUnit:m", value: 1722.12 } } })).toBeCloseTo(1722.12);
+    expect(parseNwsElevation({ properties: { elevation: { unitCode: "wmoUnit:ft", value: 1000 } } })).toBeCloseTo(304.8);
+    expect(parseNwsElevation({ properties: {} })).toBeUndefined();
+  });
+});
 import {
   combinedFactor,
   currentPeriod,

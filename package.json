@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "convert-terrain": "tsx scripts/convert-terrain.ts"
+    "convert-terrain": "tsx scripts/convert-terrain.ts",
+    "fetch-elevation": "tsx scripts/fetch-elevation.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.3.0",

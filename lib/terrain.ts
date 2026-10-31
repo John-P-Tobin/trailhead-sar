@@ -6,6 +6,7 @@
 //   stylized — the original hand-drawn fictional map, the last-resort fallback
 
 import { ALL_CELLS, CellId, parseCellId } from "./engine/grid";
+import { Aspect, STEEP_DEG } from "./elevation";
 import { BBox, cellBounds, DEFAULT_BBOX } from "./geo";
 
 export type Cover = "hardwood" | "spruce" | "alpine" | "open";
@@ -18,8 +19,14 @@ export interface CellTerrain {
   bounds: BBox;
   cover: Cover;
   elevation: number; // 0 (lowest cell in the grid) – 1 (highest)
-  /** Rough estimate in meters (OSM terrain only). */
+  /** Smoothed estimate in metres from peak heights (what the behaviour model's downhill pull uses). */
   elevationM?: number;
+  /** Digital elevation model (bundled grid): mean, range, slope and aspect for the cell. Shown to the IC; not used by the prior. */
+  demMeanM?: number;
+  elevationMinM?: number;
+  elevationMaxM?: number;
+  slopeDeg?: number;
+  aspect?: Aspect;
   trail: boolean;
   drainage: boolean;
   ridge: boolean;
@@ -83,7 +90,9 @@ export function describeCell(t: CellTerrain | undefined): string {
   if (t.ridge) tags.push("ridgeline");
   if (t.cliff) tags.push("cliffs");
   if (t.water) tags.push("open water");
-  if (t.elevationM !== undefined) tags.push(`~${Math.round(t.elevationM / 10) * 10} m`);
+  if (t.slopeDeg !== undefined && t.slopeDeg >= STEEP_DEG) tags.push("steep");
+  const m = t.demMeanM ?? t.elevationM;
+  if (m !== undefined) tags.push(`~${Math.round(m / 10) * 10} m`);
   return tags.join(", ");
 }
 

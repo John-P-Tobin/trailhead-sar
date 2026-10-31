@@ -1,0 +1,1593 @@
+{
+ "source": "Open-Meteo elevation API (Copernicus DEM GLO-90), 9 samples per cell",
+ "attribution": "Elevation: Copernicus DEM GLO-90 via Open-Meteo; spot-checked against USGS 3DEP",
+ "fetchedAt": "2026-10-31T04:02:17.865Z",
+ "bbox": [
+  44.245,
+  -71.335,
+  44.285,
+  -71.285
+ ],
+ "samplesPerCell": 9,
+ "cells": {
+  "A1": {
+   "minM": 1188,
+   "meanM": 1242.8,
+   "maxM": 1286,
+   "slopeDeg": 21.2,
+   "aspect": "NW"
+  },
+  "B1": {
+   "minM": 1267,
+   "meanM": 1300.7,
+   "maxM": 1327,
+   "slopeDeg": 10.1,
+   "aspect": "NW"
+  },
+  "C1": {
+   "minM": 1313,
+   "meanM": 1346.7,
+   "maxM": 1378,
+   "slopeDeg": 15.8,
+   "aspect": "W"
+  },
+  "D1": {
+   "minM": 1384,
+   "meanM": 1428.3,
+   "maxM": 1468,
+   "slopeDeg": 21.8,
+   "aspect": "W"
+  },
+  "E1": {
+   "minM": 1476,
+   "meanM": 1532.7,
+   "maxM": 1578,
+   "slopeDeg": 25.8,
+   "aspect": "W"
+  },
+  "F1": {
+   "minM": 1587,
+   "meanM": 1627.3,
+   "maxM": 1677,
+   "slopeDeg": 21.4,
+   "aspect": "W"
+  },
+  "G1": {
+   "minM": 1501,
+   "meanM": 1573.4,
+   "maxM": 1657,
+   "slopeDeg": 39.5,
+   "aspect": "E"
+  },
+  "H1": {
+   "minM": 1309,
+   "meanM": 1365.6,
+   "maxM": 1448,
+   "slopeDeg": 36.9,
+   "aspect": "E"
+  },
+  "I1": {
+   "minM": 1283,
+   "meanM": 1296.8,
+   "maxM": 1312,
+   "slopeDeg": 5.6,
+   "aspect": "N"
+  },
+  "J1": {
+   "minM": 1297,
+   "meanM": 1335.2,
+   "maxM": 1409,
+   "slopeDeg": 24.1,
+   "aspect": "NW"
+  },
+  "K1": {
+   "minM": 1359,
+   "meanM": 1455.3,
+   "maxM": 1525,
+   "slopeDeg": 33,
+   "aspect": "NW"
+  },
+  "L1": {
+   "minM": 1445,
+   "meanM": 1498.6,
+   "maxM": 1545,
+   "slopeDeg": 24.9,
+   "aspect": "N"
+  },
+  "M1": {
+   "minM": 1451,
+   "meanM": 1508.9,
+   "maxM": 1564,
+   "slopeDeg": 26.1,
+   "aspect": "N"
+  },
+  "N1": {
+   "minM": 1496,
+   "meanM": 1554,
+   "maxM": 1597,
+   "slopeDeg": 21.1,
+   "aspect": "NW"
+  },
+  "O1": {
+   "minM": 1544,
+   "meanM": 1577.2,
+   "maxM": 1609,
+   "slopeDeg": 15.7,
+   "aspect": "N"
+  },
+  "A2": {
+   "minM": 1122,
+   "meanM": 1190.1,
+   "maxM": 1259,
+   "slopeDeg": 30.6,
+   "aspect": "S"
+  },
+  "B2": {
+   "minM": 1117,
+   "meanM": 1188.2,
+   "maxM": 1266,
+   "slopeDeg": 32.9,
+   "aspect": "S"
+  },
+  "C2": {
+   "minM": 1148,
+   "meanM": 1236.9,
+   "maxM": 1308,
+   "slopeDeg": 29.6,
+   "aspect": "SW"
+  },
+  "D2": {
+   "minM": 1273,
+   "meanM": 1350.7,
+   "maxM": 1407,
+   "slopeDeg": 30.3,
+   "aspect": "W"
+  },
+  "E2": {
+   "minM": 1419,
+   "meanM": 1490.1,
+   "maxM": 1547,
+   "slopeDeg": 31,
+   "aspect": "W"
+  },
+  "F2": {
+   "minM": 1560,
+   "meanM": 1610.8,
+   "maxM": 1666,
+   "slopeDeg": 26.9,
+   "aspect": "W"
+  },
+  "G2": {
+   "minM": 1508,
+   "meanM": 1588.2,
+   "maxM": 1666,
+   "slopeDeg": 38.5,
+   "aspect": "E"
+  },
+  "H2": {
+   "minM": 1318,
+   "meanM": 1384.9,
+   "maxM": 1489,
+   "slopeDeg": 35.7,
+   "aspect": "E"
+  },
+  "I2": {
+   "minM": 1309,
+   "meanM": 1342.1,
+   "maxM": 1402,
+   "slopeDeg": 18.6,
+   "aspect": "NW"
+  },
+  "J2": {
+   "minM": 1359,
+   "meanM": 1453.7,
+   "maxM": 1532,
+   "slopeDeg": 34.5,
+   "aspect": "NW"
+  },
+  "K2": {
+   "minM": 1488,
+   "meanM": 1570.2,
+   "maxM": 1641,
+   "slopeDeg": 29.7,
+   "aspect": "NW"
+  },
+  "L2": {
+   "minM": 1575,
+   "meanM": 1622.2,
+   "maxM": 1670,
+   "slopeDeg": 22.1,
+   "aspect": "N"
+  },
+  "M2": {
+   "minM": 1592,
+   "meanM": 1641.6,
+   "maxM": 1684,
+   "slopeDeg": 22.5,
+   "aspect": "N"
+  },
+  "N2": {
+   "minM": 1611,
+   "meanM": 1650.6,
+   "maxM": 1682,
+   "slopeDeg": 17.3,
+   "aspect": "N"
+  },
+  "O2": {
+   "minM": 1629,
+   "meanM": 1660.1,
+   "maxM": 1687,
+   "slopeDeg": 15.2,
+   "aspect": "N"
+  },
+  "A3": {
+   "minM": 1017,
+   "meanM": 1057.7,
+   "maxM": 1076,
+   "slopeDeg": 6.1,
+   "aspect": "W"
+  },
+  "B3": {
+   "minM": 1067,
+   "meanM": 1106.8,
+   "maxM": 1138,
+   "slopeDeg": 18.5,
+   "aspect": "W"
+  },
+  "C3": {
+   "minM": 1140,
+   "meanM": 1195,
+   "maxM": 1256,
+   "slopeDeg": 25.1,
+   "aspect": "SW"
+  },
+  "D3": {
+   "minM": 1222,
+   "meanM": 1290.9,
+   "maxM": 1360,
+   "slopeDeg": 27.6,
+   "aspect": "SW"
+  },
+  "E3": {
+   "minM": 1328,
+   "meanM": 1411.1,
+   "maxM": 1492,
+   "slopeDeg": 33.8,
+   "aspect": "SW"
+  },
+  "F3": {
+   "minM": 1466,
+   "meanM": 1542.4,
+   "maxM": 1613,
+   "slopeDeg": 31.3,
+   "aspect": "SW"
+  },
+  "G3": {
+   "minM": 1595,
+   "meanM": 1633.1,
+   "maxM": 1671,
+   "slopeDeg": 8.3,
+   "aspect": "N"
+  },
+  "H3": {
+   "minM": 1410,
+   "meanM": 1535.8,
+   "maxM": 1675,
+   "slopeDeg": 47,
+   "aspect": "NE"
+  },
+  "I3": {
+   "minM": 1397,
+   "meanM": 1492.2,
+   "maxM": 1613,
+   "slopeDeg": 41.1,
+   "aspect": "N"
+  },
+  "J3": {
+   "minM": 1486,
+   "meanM": 1601.1,
+   "maxM": 1706,
+   "slopeDeg": 39.8,
+   "aspect": "NW"
+  },
+  "K3": {
+   "minM": 1604,
+   "meanM": 1699.7,
+   "maxM": 1784,
+   "slopeDeg": 34.4,
+   "aspect": "NW"
+  },
+  "L3": {
+   "minM": 1688,
+   "meanM": 1730.1,
+   "maxM": 1788,
+   "slopeDeg": 22.3,
+   "aspect": "N"
+  },
+  "M3": {
+   "minM": 1702,
+   "meanM": 1724.2,
+   "maxM": 1749,
+   "slopeDeg": 8.8,
+   "aspect": "N"
+  },
+  "N3": {
+   "minM": 1654,
+   "meanM": 1700.4,
+   "maxM": 1738,
+   "slopeDeg": 13.1,
+   "aspect": "SE"
+  },
+  "O3": {
+   "minM": 1542,
+   "meanM": 1652.3,
+   "maxM": 1705,
+   "slopeDeg": 35.6,
+   "aspect": "S"
+  },
+  "A4": {
+   "minM": 1086,
+   "meanM": 1127.4,
+   "maxM": 1166,
+   "slopeDeg": 17,
+   "aspect": "NW"
+  },
+  "B4": {
+   "minM": 1111,
+   "meanM": 1156.6,
+   "maxM": 1208,
+   "slopeDeg": 21.8,
+   "aspect": "N"
+  },
+  "C4": {
+   "minM": 1146,
+   "meanM": 1223.7,
+   "maxM": 1289,
+   "slopeDeg": 28.2,
+   "aspect": "NW"
+  },
+  "D4": {
+   "minM": 1252,
+   "meanM": 1330.4,
+   "maxM": 1397,
+   "slopeDeg": 29.7,
+   "aspect": "NW"
+  },
+  "E4": {
+   "minM": 1362,
+   "meanM": 1444.7,
+   "maxM": 1513,
+   "slopeDeg": 30.9,
+   "aspect": "NW"
+  },
+  "F4": {
+   "minM": 1488,
+   "meanM": 1556.2,
+   "maxM": 1611,
+   "slopeDeg": 27,
+   "aspect": "W"
+  },
+  "G4": {
+   "minM": 1625,
+   "meanM": 1666.6,
+   "maxM": 1702,
+   "slopeDeg": 19.8,
+   "aspect": "W"
+  },
+  "H4": {
+   "minM": 1669,
+   "meanM": 1717.2,
+   "maxM": 1756,
+   "slopeDeg": 15.9,
+   "aspect": "N"
+  },
+  "I4": {
+   "minM": 1637,
+   "meanM": 1713.9,
+   "maxM": 1782,
+   "slopeDeg": 31.9,
+   "aspect": "N"
+  },
+  "J4": {
+   "minM": 1690,
+   "meanM": 1773.6,
+   "maxM": 1828,
+   "slopeDeg": 28,
+   "aspect": "NW"
+  },
+  "K4": {
+   "minM": 1782,
+   "meanM": 1821.4,
+   "maxM": 1846,
+   "slopeDeg": 13.2,
+   "aspect": "N"
+  },
+  "L4": {
+   "minM": 1763,
+   "meanM": 1798,
+   "maxM": 1845,
+   "slopeDeg": 18.3,
+   "aspect": "E"
+  },
+  "M4": {
+   "minM": 1656,
+   "meanM": 1706.3,
+   "maxM": 1755,
+   "slopeDeg": 23.1,
+   "aspect": "SE"
+  },
+  "N4": {
+   "minM": 1499,
+   "meanM": 1601.3,
+   "maxM": 1683,
+   "slopeDeg": 37.1,
+   "aspect": "SE"
+  },
+  "O4": {
+   "minM": 1313,
+   "meanM": 1418.7,
+   "maxM": 1527,
+   "slopeDeg": 39.1,
+   "aspect": "SE"
+  },
+  "A5": {
+   "minM": 1116,
+   "meanM": 1146.6,
+   "maxM": 1174,
+   "slopeDeg": 13.1,
+   "aspect": "SW"
+  },
+  "B5": {
+   "minM": 1158,
+   "meanM": 1208.4,
+   "maxM": 1241,
+   "slopeDeg": 19.4,
+   "aspect": "SW"
+  },
+  "C5": {
+   "minM": 1248,
+   "meanM": 1297.4,
+   "maxM": 1343,
+   "slopeDeg": 21,
+   "aspect": "W"
+  },
+  "D5": {
+   "minM": 1323,
+   "meanM": 1359,
+   "maxM": 1414,
+   "slopeDeg": 18.8,
+   "aspect": "SW"
+  },
+  "E5": {
+   "minM": 1338,
+   "meanM": 1422.2,
+   "maxM": 1498,
+   "slopeDeg": 30.8,
+   "aspect": "SW"
+  },
+  "F5": {
+   "minM": 1439,
+   "meanM": 1506.7,
+   "maxM": 1572,
+   "slopeDeg": 27.4,
+   "aspect": "SW"
+  },
+  "G5": {
+   "minM": 1553,
+   "meanM": 1634.1,
+   "maxM": 1705,
+   "slopeDeg": 32.4,
+   "aspect": "W"
+  },
+  "H5": {
+   "minM": 1687,
+   "meanM": 1741.8,
+   "maxM": 1774,
+   "slopeDeg": 19.8,
+   "aspect": "W"
+  },
+  "I5": {
+   "minM": 1774,
+   "meanM": 1804.6,
+   "maxM": 1848,
+   "slopeDeg": 16.1,
+   "aspect": "NW"
+  },
+  "J5": {
+   "minM": 1817,
+   "meanM": 1841.6,
+   "maxM": 1861,
+   "slopeDeg": 9.5,
+   "aspect": "NW"
+  },
+  "K5": {
+   "minM": 1824,
+   "meanM": 1846.8,
+   "maxM": 1864,
+   "slopeDeg": 4.8,
+   "aspect": "E"
+  },
+  "L5": {
+   "minM": 1687,
+   "meanM": 1763,
+   "maxM": 1840,
+   "slopeDeg": 33.1,
+   "aspect": "SE"
+  },
+  "M5": {
+   "minM": 1628,
+   "meanM": 1657.9,
+   "maxM": 1707,
+   "slopeDeg": 16.5,
+   "aspect": "SE"
+  },
+  "N5": {
+   "minM": 1494,
+   "meanM": 1566.3,
+   "maxM": 1635,
+   "slopeDeg": 34.3,
+   "aspect": "E"
+  },
+  "O5": {
+   "minM": 1285,
+   "meanM": 1358.2,
+   "maxM": 1471,
+   "slopeDeg": 39.9,
+   "aspect": "E"
+  },
+  "A6": {
+   "minM": 994,
+   "meanM": 1064.6,
+   "maxM": 1114,
+   "slopeDeg": 24.3,
+   "aspect": "SW"
+  },
+  "B6": {
+   "minM": 1089,
+   "meanM": 1142.9,
+   "maxM": 1194,
+   "slopeDeg": 22,
+   "aspect": "SW"
+  },
+  "C6": {
+   "minM": 1155,
+   "meanM": 1203.3,
+   "maxM": 1264,
+   "slopeDeg": 25.1,
+   "aspect": "S"
+  },
+  "D6": {
+   "minM": 1138,
+   "meanM": 1204.3,
+   "maxM": 1263,
+   "slopeDeg": 28.3,
+   "aspect": "S"
+  },
+  "E6": {
+   "minM": 1213,
+   "meanM": 1301.2,
+   "maxM": 1369,
+   "slopeDeg": 34.3,
+   "aspect": "W"
+  },
+  "F6": {
+   "minM": 1385,
+   "meanM": 1442.3,
+   "maxM": 1504,
+   "slopeDeg": 31.1,
+   "aspect": "W"
+  },
+  "G6": {
+   "minM": 1530,
+   "meanM": 1591.4,
+   "maxM": 1643,
+   "slopeDeg": 31.5,
+   "aspect": "W"
+  },
+  "H6": {
+   "minM": 1676,
+   "meanM": 1738.7,
+   "maxM": 1792,
+   "slopeDeg": 30.7,
+   "aspect": "W"
+  },
+  "I6": {
+   "minM": 1807,
+   "meanM": 1837.6,
+   "maxM": 1869,
+   "slopeDeg": 15.1,
+   "aspect": "W"
+  },
+  "J6": {
+   "minM": 1869,
+   "meanM": 1890.9,
+   "maxM": 1908,
+   "slopeDeg": 7.4,
+   "aspect": "NW"
+  },
+  "K6": {
+   "minM": 1778,
+   "meanM": 1832.3,
+   "maxM": 1887,
+   "slopeDeg": 28,
+   "aspect": "E"
+  },
+  "L6": {
+   "minM": 1652,
+   "meanM": 1698,
+   "maxM": 1763,
+   "slopeDeg": 26.8,
+   "aspect": "E"
+  },
+  "M6": {
+   "minM": 1604,
+   "meanM": 1626.2,
+   "maxM": 1650,
+   "slopeDeg": 10.1,
+   "aspect": "SE"
+  },
+  "N6": {
+   "minM": 1546,
+   "meanM": 1581.7,
+   "maxM": 1617,
+   "slopeDeg": 18,
+   "aspect": "E"
+  },
+  "O6": {
+   "minM": 1368,
+   "meanM": 1454.3,
+   "maxM": 1527,
+   "slopeDeg": 34.5,
+   "aspect": "E"
+  },
+  "A7": {
+   "minM": 963,
+   "meanM": 998.4,
+   "maxM": 1042,
+   "slopeDeg": 14.9,
+   "aspect": "W"
+  },
+  "B7": {
+   "minM": 1016,
+   "meanM": 1058.8,
+   "maxM": 1113,
+   "slopeDeg": 21.8,
+   "aspect": "S"
+  },
+  "C7": {
+   "minM": 1038,
+   "meanM": 1077.4,
+   "maxM": 1112,
+   "slopeDeg": 12.1,
+   "aspect": "SW"
+  },
+  "D7": {
+   "minM": 1094,
+   "meanM": 1138.9,
+   "maxM": 1181,
+   "slopeDeg": 20.2,
+   "aspect": "W"
+  },
+  "E7": {
+   "minM": 1183,
+   "meanM": 1272.6,
+   "maxM": 1340,
+   "slopeDeg": 37.5,
+   "aspect": "W"
+  },
+  "F7": {
+   "minM": 1378,
+   "meanM": 1432.8,
+   "maxM": 1496,
+   "slopeDeg": 31.6,
+   "aspect": "W"
+  },
+  "G7": {
+   "minM": 1512,
+   "meanM": 1570.8,
+   "maxM": 1619,
+   "slopeDeg": 27.9,
+   "aspect": "W"
+  },
+  "H7": {
+   "minM": 1643,
+   "meanM": 1693.3,
+   "maxM": 1753,
+   "slopeDeg": 26.3,
+   "aspect": "W"
+  },
+  "I7": {
+   "minM": 1732,
+   "meanM": 1786.7,
+   "maxM": 1846,
+   "slopeDeg": 24.7,
+   "aspect": "SW"
+  },
+  "J7": {
+   "minM": 1803,
+   "meanM": 1845.2,
+   "maxM": 1887,
+   "slopeDeg": 19.6,
+   "aspect": "S"
+  },
+  "K7": {
+   "minM": 1722,
+   "meanM": 1789.1,
+   "maxM": 1868,
+   "slopeDeg": 29.7,
+   "aspect": "SE"
+  },
+  "L7": {
+   "minM": 1614,
+   "meanM": 1658.1,
+   "maxM": 1723,
+   "slopeDeg": 24.5,
+   "aspect": "E"
+  },
+  "M7": {
+   "minM": 1550,
+   "meanM": 1587.8,
+   "maxM": 1624,
+   "slopeDeg": 16.5,
+   "aspect": "SE"
+  },
+  "N7": {
+   "minM": 1438,
+   "meanM": 1507.6,
+   "maxM": 1572,
+   "slopeDeg": 27.2,
+   "aspect": "SE"
+  },
+  "O7": {
+   "minM": 1350,
+   "meanM": 1415.1,
+   "maxM": 1497,
+   "slopeDeg": 28.7,
+   "aspect": "SE"
+  },
+  "A8": {
+   "minM": 991,
+   "meanM": 1038.9,
+   "maxM": 1101,
+   "slopeDeg": 23.7,
+   "aspect": "NE"
+  },
+  "B8": {
+   "minM": 1011,
+   "meanM": 1060.2,
+   "maxM": 1113,
+   "slopeDeg": 22.2,
+   "aspect": "NW"
+  },
+  "C8": {
+   "minM": 1084,
+   "meanM": 1147,
+   "maxM": 1240,
+   "slopeDeg": 30.5,
+   "aspect": "NW"
+  },
+  "D8": {
+   "minM": 1129,
+   "meanM": 1231,
+   "maxM": 1311,
+   "slopeDeg": 34.9,
+   "aspect": "NW"
+  },
+  "E8": {
+   "minM": 1245,
+   "meanM": 1325.6,
+   "maxM": 1377,
+   "slopeDeg": 27.3,
+   "aspect": "NW"
+  },
+  "F8": {
+   "minM": 1390,
+   "meanM": 1441.9,
+   "maxM": 1508,
+   "slopeDeg": 29.2,
+   "aspect": "W"
+  },
+  "G8": {
+   "minM": 1516,
+   "meanM": 1571.1,
+   "maxM": 1608,
+   "slopeDeg": 24.1,
+   "aspect": "W"
+  },
+  "H8": {
+   "minM": 1622,
+   "meanM": 1658.6,
+   "maxM": 1695,
+   "slopeDeg": 17.4,
+   "aspect": "W"
+  },
+  "I8": {
+   "minM": 1679,
+   "meanM": 1715.2,
+   "maxM": 1768,
+   "slopeDeg": 18.5,
+   "aspect": "SW"
+  },
+  "J8": {
+   "minM": 1656,
+   "meanM": 1723,
+   "maxM": 1775,
+   "slopeDeg": 26.4,
+   "aspect": "S"
+  },
+  "K8": {
+   "minM": 1583,
+   "meanM": 1667.6,
+   "maxM": 1754,
+   "slopeDeg": 33.8,
+   "aspect": "SE"
+  },
+  "L8": {
+   "minM": 1526,
+   "meanM": 1588.3,
+   "maxM": 1656,
+   "slopeDeg": 25.4,
+   "aspect": "SE"
+  },
+  "M8": {
+   "minM": 1513,
+   "meanM": 1548.8,
+   "maxM": 1589,
+   "slopeDeg": 16.7,
+   "aspect": "SE"
+  },
+  "N8": {
+   "minM": 1422,
+   "meanM": 1470.1,
+   "maxM": 1527,
+   "slopeDeg": 26.4,
+   "aspect": "E"
+  },
+  "O8": {
+   "minM": 1311,
+   "meanM": 1356.8,
+   "maxM": 1424,
+   "slopeDeg": 26.1,
+   "aspect": "E"
+  },
+  "A9": {
+   "minM": 1096,
+   "meanM": 1151.7,
+   "maxM": 1196,
+   "slopeDeg": 21.8,
+   "aspect": "N"
+  },
+  "B9": {
+   "minM": 1075,
+   "meanM": 1126.7,
+   "maxM": 1168,
+   "slopeDeg": 17.4,
+   "aspect": "NW"
+  },
+  "C9": {
+   "minM": 1158,
+   "meanM": 1237.9,
+   "maxM": 1310,
+   "slopeDeg": 31.8,
+   "aspect": "NW"
+  },
+  "D9": {
+   "minM": 1280,
+   "meanM": 1336.8,
+   "maxM": 1395,
+   "slopeDeg": 25.5,
+   "aspect": "NW"
+  },
+  "E9": {
+   "minM": 1343,
+   "meanM": 1392.9,
+   "maxM": 1430,
+   "slopeDeg": 17.8,
+   "aspect": "NW"
+  },
+  "F9": {
+   "minM": 1421,
+   "meanM": 1470.7,
+   "maxM": 1517,
+   "slopeDeg": 24.5,
+   "aspect": "W"
+  },
+  "G9": {
+   "minM": 1541,
+   "meanM": 1582.1,
+   "maxM": 1616,
+   "slopeDeg": 21.3,
+   "aspect": "W"
+  },
+  "H9": {
+   "minM": 1624,
+   "meanM": 1648.6,
+   "maxM": 1667,
+   "slopeDeg": 11.4,
+   "aspect": "W"
+  },
+  "I9": {
+   "minM": 1669,
+   "meanM": 1674.8,
+   "maxM": 1681,
+   "slopeDeg": 2.8,
+   "aspect": "S"
+  },
+  "J9": {
+   "minM": 1626,
+   "meanM": 1647,
+   "maxM": 1676,
+   "slopeDeg": 12.6,
+   "aspect": "E"
+  },
+  "K9": {
+   "minM": 1504,
+   "meanM": 1563.6,
+   "maxM": 1614,
+   "slopeDeg": 27.5,
+   "aspect": "E"
+  },
+  "L9": {
+   "minM": 1346,
+   "meanM": 1417.3,
+   "maxM": 1512,
+   "slopeDeg": 32.3,
+   "aspect": "SE"
+  },
+  "M9": {
+   "minM": 1322,
+   "meanM": 1376.8,
+   "maxM": 1440,
+   "slopeDeg": 28.2,
+   "aspect": "S"
+  },
+  "N9": {
+   "minM": 1264,
+   "meanM": 1356.7,
+   "maxM": 1448,
+   "slopeDeg": 38,
+   "aspect": "S"
+  },
+  "O9": {
+   "minM": 1187,
+   "meanM": 1280,
+   "maxM": 1415,
+   "slopeDeg": 40.9,
+   "aspect": "SE"
+  },
+  "A10": {
+   "minM": 1212,
+   "meanM": 1256,
+   "maxM": 1307,
+   "slopeDeg": 20.8,
+   "aspect": "NW"
+  },
+  "B10": {
+   "minM": 1182,
+   "meanM": 1256.2,
+   "maxM": 1325,
+   "slopeDeg": 32.1,
+   "aspect": "NE"
+  },
+  "C10": {
+   "minM": 1217,
+   "meanM": 1304.7,
+   "maxM": 1375,
+   "slopeDeg": 32.5,
+   "aspect": "NW"
+  },
+  "D10": {
+   "minM": 1344,
+   "meanM": 1411.1,
+   "maxM": 1467,
+   "slopeDeg": 25.8,
+   "aspect": "NW"
+  },
+  "E10": {
+   "minM": 1433,
+   "meanM": 1475.9,
+   "maxM": 1517,
+   "slopeDeg": 18.3,
+   "aspect": "NW"
+  },
+  "F10": {
+   "minM": 1477,
+   "meanM": 1522.7,
+   "maxM": 1560,
+   "slopeDeg": 18.3,
+   "aspect": "NW"
+  },
+  "G10": {
+   "minM": 1554,
+   "meanM": 1595.6,
+   "maxM": 1624,
+   "slopeDeg": 16.5,
+   "aspect": "W"
+  },
+  "H10": {
+   "minM": 1613,
+   "meanM": 1629.3,
+   "maxM": 1643,
+   "slopeDeg": 6.2,
+   "aspect": "SW"
+  },
+  "I10": {
+   "minM": 1631,
+   "meanM": 1649.3,
+   "maxM": 1663,
+   "slopeDeg": 7.2,
+   "aspect": "SW"
+  },
+  "J10": {
+   "minM": 1636,
+   "meanM": 1652.2,
+   "maxM": 1659,
+   "slopeDeg": 5.4,
+   "aspect": "NE"
+  },
+  "K10": {
+   "minM": 1518,
+   "meanM": 1594,
+   "maxM": 1648,
+   "slopeDeg": 28.2,
+   "aspect": "NE"
+  },
+  "L10": {
+   "minM": 1357,
+   "meanM": 1457.2,
+   "maxM": 1560,
+   "slopeDeg": 38.2,
+   "aspect": "NE"
+  },
+  "M10": {
+   "minM": 1301,
+   "meanM": 1375.9,
+   "maxM": 1476,
+   "slopeDeg": 34.3,
+   "aspect": "NE"
+  },
+  "N10": {
+   "minM": 1202,
+   "meanM": 1250.6,
+   "maxM": 1345,
+   "slopeDeg": 29.3,
+   "aspect": "E"
+  },
+  "O10": {
+   "minM": 1182,
+   "meanM": 1191.3,
+   "maxM": 1214,
+   "slopeDeg": 6.4,
+   "aspect": "E"
+  },
+  "A11": {
+   "minM": 1241,
+   "meanM": 1289.7,
+   "maxM": 1332,
+   "slopeDeg": 23.7,
+   "aspect": "W"
+  },
+  "B11": {
+   "minM": 1345,
+   "meanM": 1388.6,
+   "maxM": 1441,
+   "slopeDeg": 20.4,
+   "aspect": "NW"
+  },
+  "C11": {
+   "minM": 1366,
+   "meanM": 1434.7,
+   "maxM": 1496,
+   "slopeDeg": 27.9,
+   "aspect": "N"
+  },
+  "D11": {
+   "minM": 1429,
+   "meanM": 1501.8,
+   "maxM": 1558,
+   "slopeDeg": 25,
+   "aspect": "NW"
+  },
+  "E11": {
+   "minM": 1511,
+   "meanM": 1551,
+   "maxM": 1592,
+   "slopeDeg": 15.3,
+   "aspect": "N"
+  },
+  "F11": {
+   "minM": 1533,
+   "meanM": 1548.8,
+   "maxM": 1567,
+   "slopeDeg": 6.7,
+   "aspect": "NW"
+  },
+  "G11": {
+   "minM": 1563,
+   "meanM": 1582.4,
+   "maxM": 1605,
+   "slopeDeg": 9.5,
+   "aspect": "SW"
+  },
+  "H11": {
+   "minM": 1585,
+   "meanM": 1597.8,
+   "maxM": 1611,
+   "slopeDeg": 6.5,
+   "aspect": "S"
+  },
+  "I11": {
+   "minM": 1595,
+   "meanM": 1616.1,
+   "maxM": 1647,
+   "slopeDeg": 11.2,
+   "aspect": "SW"
+  },
+  "J11": {
+   "minM": 1630,
+   "meanM": 1656.8,
+   "maxM": 1669,
+   "slopeDeg": 7.7,
+   "aspect": "SW"
+  },
+  "K11": {
+   "minM": 1622,
+   "meanM": 1653.1,
+   "maxM": 1673,
+   "slopeDeg": 10.2,
+   "aspect": "NE"
+  },
+  "L11": {
+   "minM": 1559,
+   "meanM": 1602.7,
+   "maxM": 1641,
+   "slopeDeg": 17,
+   "aspect": "NE"
+  },
+  "M11": {
+   "minM": 1428,
+   "meanM": 1498.8,
+   "maxM": 1586,
+   "slopeDeg": 37.3,
+   "aspect": "E"
+  },
+  "N11": {
+   "minM": 1226,
+   "meanM": 1315.1,
+   "maxM": 1396,
+   "slopeDeg": 34.9,
+   "aspect": "NE"
+  },
+  "O11": {
+   "minM": 1195,
+   "meanM": 1244.7,
+   "maxM": 1312,
+   "slopeDeg": 26.5,
+   "aspect": "N"
+  },
+  "A12": {
+   "minM": 1238,
+   "meanM": 1298.2,
+   "maxM": 1351,
+   "slopeDeg": 29.6,
+   "aspect": "W"
+  },
+  "B12": {
+   "minM": 1369,
+   "meanM": 1421.8,
+   "maxM": 1467,
+   "slopeDeg": 26.8,
+   "aspect": "W"
+  },
+  "C12": {
+   "minM": 1491,
+   "meanM": 1535.9,
+   "maxM": 1573,
+   "slopeDeg": 18.5,
+   "aspect": "NW"
+  },
+  "D12": {
+   "minM": 1539,
+   "meanM": 1576.4,
+   "maxM": 1608,
+   "slopeDeg": 12.7,
+   "aspect": "W"
+  },
+  "E12": {
+   "minM": 1542,
+   "meanM": 1577.2,
+   "maxM": 1624,
+   "slopeDeg": 18.3,
+   "aspect": "SE"
+  },
+  "F12": {
+   "minM": 1450,
+   "meanM": 1512.7,
+   "maxM": 1546,
+   "slopeDeg": 18.9,
+   "aspect": "SE"
+  },
+  "G12": {
+   "minM": 1430,
+   "meanM": 1488.6,
+   "maxM": 1552,
+   "slopeDeg": 27.9,
+   "aspect": "S"
+  },
+  "H12": {
+   "minM": 1422,
+   "meanM": 1499.9,
+   "maxM": 1569,
+   "slopeDeg": 33,
+   "aspect": "S"
+  },
+  "I12": {
+   "minM": 1443,
+   "meanM": 1524.9,
+   "maxM": 1589,
+   "slopeDeg": 30.8,
+   "aspect": "S"
+  },
+  "J12": {
+   "minM": 1525,
+   "meanM": 1582.2,
+   "maxM": 1626,
+   "slopeDeg": 21,
+   "aspect": "SW"
+  },
+  "K12": {
+   "minM": 1582,
+   "meanM": 1619.4,
+   "maxM": 1642,
+   "slopeDeg": 12.7,
+   "aspect": "SW"
+  },
+  "L12": {
+   "minM": 1629,
+   "meanM": 1645.3,
+   "maxM": 1661,
+   "slopeDeg": 4.7,
+   "aspect": "N"
+  },
+  "M12": {
+   "minM": 1489,
+   "meanM": 1590,
+   "maxM": 1652,
+   "slopeDeg": 33.4,
+   "aspect": "NE"
+  },
+  "N12": {
+   "minM": 1386,
+   "meanM": 1477.9,
+   "maxM": 1577,
+   "slopeDeg": 36.6,
+   "aspect": "NE"
+  },
+  "O12": {
+   "minM": 1348,
+   "meanM": 1419.6,
+   "maxM": 1515,
+   "slopeDeg": 32.1,
+   "aspect": "NE"
+  },
+  "A13": {
+   "minM": 1272,
+   "meanM": 1377,
+   "maxM": 1464,
+   "slopeDeg": 36,
+   "aspect": "NW"
+  },
+  "B13": {
+   "minM": 1394,
+   "meanM": 1461.3,
+   "maxM": 1505,
+   "slopeDeg": 23.6,
+   "aspect": "NW"
+  },
+  "C13": {
+   "minM": 1352,
+   "meanM": 1478.4,
+   "maxM": 1545,
+   "slopeDeg": 34.8,
+   "aspect": "S"
+  },
+  "D13": {
+   "minM": 1345,
+   "meanM": 1463.6,
+   "maxM": 1543,
+   "slopeDeg": 41.6,
+   "aspect": "S"
+  },
+  "E13": {
+   "minM": 1424,
+   "meanM": 1509.6,
+   "maxM": 1548,
+   "slopeDeg": 22.8,
+   "aspect": "SW"
+  },
+  "F13": {
+   "minM": 1377,
+   "meanM": 1472.8,
+   "maxM": 1523,
+   "slopeDeg": 31.8,
+   "aspect": "E"
+  },
+  "G13": {
+   "minM": 1255,
+   "meanM": 1342.9,
+   "maxM": 1409,
+   "slopeDeg": 32.8,
+   "aspect": "SE"
+  },
+  "H13": {
+   "minM": 1254,
+   "meanM": 1320.2,
+   "maxM": 1381,
+   "slopeDeg": 28.1,
+   "aspect": "S"
+  },
+  "I13": {
+   "minM": 1309,
+   "meanM": 1396.9,
+   "maxM": 1474,
+   "slopeDeg": 32,
+   "aspect": "SW"
+  },
+  "J13": {
+   "minM": 1442,
+   "meanM": 1504.8,
+   "maxM": 1548,
+   "slopeDeg": 22.2,
+   "aspect": "SW"
+  },
+  "K13": {
+   "minM": 1527,
+   "meanM": 1573,
+   "maxM": 1611,
+   "slopeDeg": 18.4,
+   "aspect": "SW"
+  },
+  "L13": {
+   "minM": 1596,
+   "meanM": 1633.3,
+   "maxM": 1655,
+   "slopeDeg": 13.1,
+   "aspect": "SW"
+  },
+  "M13": {
+   "minM": 1598,
+   "meanM": 1642.2,
+   "maxM": 1662,
+   "slopeDeg": 11.9,
+   "aspect": "SE"
+  },
+  "N13": {
+   "minM": 1418,
+   "meanM": 1536.9,
+   "maxM": 1617,
+   "slopeDeg": 37.3,
+   "aspect": "SE"
+  },
+  "O13": {
+   "minM": 1295,
+   "meanM": 1414.1,
+   "maxM": 1523,
+   "slopeDeg": 40.8,
+   "aspect": "SE"
+  },
+  "A14": {
+   "minM": 1461,
+   "meanM": 1482.7,
+   "maxM": 1501,
+   "slopeDeg": 2.6,
+   "aspect": "SW"
+  },
+  "B14": {
+   "minM": 1409,
+   "meanM": 1472.6,
+   "maxM": 1511,
+   "slopeDeg": 19.2,
+   "aspect": "SE"
+  },
+  "C14": {
+   "minM": 1276,
+   "meanM": 1330.9,
+   "maxM": 1417,
+   "slopeDeg": 30,
+   "aspect": "SE"
+  },
+  "D14": {
+   "minM": 1269,
+   "meanM": 1301.1,
+   "maxM": 1344,
+   "slopeDeg": 15.8,
+   "aspect": "SW"
+  },
+  "E14": {
+   "minM": 1318,
+   "meanM": 1398.2,
+   "maxM": 1467,
+   "slopeDeg": 31.1,
+   "aspect": "SW"
+  },
+  "F14": {
+   "minM": 1313,
+   "meanM": 1402.1,
+   "maxM": 1476,
+   "slopeDeg": 35.5,
+   "aspect": "E"
+  },
+  "G14": {
+   "minM": 1230,
+   "meanM": 1261.3,
+   "maxM": 1316,
+   "slopeDeg": 20.8,
+   "aspect": "E"
+  },
+  "H14": {
+   "minM": 1231,
+   "meanM": 1246.3,
+   "maxM": 1268,
+   "slopeDeg": 8.8,
+   "aspect": "SW"
+  },
+  "I14": {
+   "minM": 1279,
+   "meanM": 1328.1,
+   "maxM": 1402,
+   "slopeDeg": 27.4,
+   "aspect": "W"
+  },
+  "J14": {
+   "minM": 1357,
+   "meanM": 1421.9,
+   "maxM": 1477,
+   "slopeDeg": 24.1,
+   "aspect": "SW"
+  },
+  "K14": {
+   "minM": 1447,
+   "meanM": 1515.1,
+   "maxM": 1572,
+   "slopeDeg": 26.9,
+   "aspect": "SW"
+  },
+  "L14": {
+   "minM": 1548,
+   "meanM": 1590.9,
+   "maxM": 1620,
+   "slopeDeg": 13.8,
+   "aspect": "SW"
+  },
+  "M14": {
+   "minM": 1522,
+   "meanM": 1571,
+   "maxM": 1618,
+   "slopeDeg": 20.8,
+   "aspect": "SE"
+  },
+  "N14": {
+   "minM": 1351,
+   "meanM": 1431.3,
+   "maxM": 1529,
+   "slopeDeg": 38.6,
+   "aspect": "E"
+  },
+  "O14": {
+   "minM": 1237,
+   "meanM": 1281,
+   "maxM": 1348,
+   "slopeDeg": 26.3,
+   "aspect": "E"
+  },
+  "A15": {
+   "minM": 1272,
+   "meanM": 1345.2,
+   "maxM": 1439,
+   "slopeDeg": 34.5,
+   "aspect": "S"
+  },
+  "B15": {
+   "minM": 1285,
+   "meanM": 1355,
+   "maxM": 1423,
+   "slopeDeg": 24.8,
+   "aspect": "S"
+  },
+  "C15": {
+   "minM": 1242,
+   "meanM": 1279.9,
+   "maxM": 1329,
+   "slopeDeg": 21.8,
+   "aspect": "E"
+  },
+  "D15": {
+   "minM": 1233,
+   "meanM": 1249.8,
+   "maxM": 1272,
+   "slopeDeg": 9.2,
+   "aspect": "S"
+  },
+  "E15": {
+   "minM": 1247,
+   "meanM": 1302.8,
+   "maxM": 1364,
+   "slopeDeg": 24.4,
+   "aspect": "SW"
+  },
+  "F15": {
+   "minM": 1265,
+   "meanM": 1318.8,
+   "maxM": 1384,
+   "slopeDeg": 26.1,
+   "aspect": "SE"
+  },
+  "G15": {
+   "minM": 1225,
+   "meanM": 1240.8,
+   "maxM": 1272,
+   "slopeDeg": 11.5,
+   "aspect": "E"
+  },
+  "H15": {
+   "minM": 1222,
+   "meanM": 1231.4,
+   "maxM": 1247,
+   "slopeDeg": 5.8,
+   "aspect": "W"
+  },
+  "I15": {
+   "minM": 1248,
+   "meanM": 1275.6,
+   "maxM": 1315,
+   "slopeDeg": 14.5,
+   "aspect": "SW"
+  },
+  "J15": {
+   "minM": 1306,
+   "meanM": 1362.8,
+   "maxM": 1406,
+   "slopeDeg": 26.6,
+   "aspect": "W"
+  },
+  "K15": {
+   "minM": 1430,
+   "meanM": 1470.9,
+   "maxM": 1508,
+   "slopeDeg": 22,
+   "aspect": "W"
+  },
+  "L15": {
+   "minM": 1517,
+   "meanM": 1545.7,
+   "maxM": 1576,
+   "slopeDeg": 12.8,
+   "aspect": "SW"
+  },
+  "M15": {
+   "minM": 1458,
+   "meanM": 1511.8,
+   "maxM": 1559,
+   "slopeDeg": 20.9,
+   "aspect": "SE"
+  },
+  "N15": {
+   "minM": 1305,
+   "meanM": 1374.3,
+   "maxM": 1462,
+   "slopeDeg": 36.6,
+   "aspect": "E"
+  },
+  "O15": {
+   "minM": 1221,
+   "meanM": 1244.7,
+   "maxM": 1291,
+   "slopeDeg": 18.1,
+   "aspect": "E"
+  }
+ },
+ "spotCheck": {
+  "points": 6,
+  "maxDiffM": 70
+ }
+}

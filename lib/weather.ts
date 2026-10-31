@@ -20,7 +20,25 @@ export interface WeatherSnapshot {
   fetchedAt: string;
   location: string;
   periods: HourlyPeriod[];
+  /** Elevation of the forecast gridpoint (metres), when the source provides it. */
+  elevationM?: number;
   note?: string;
+}
+
+/** Standard lapse rate, 6.5 °C per km, expressed in °F per metre. */
+export const LAPSE_F_PER_M = 0.0117;
+
+/** Temperature adjusted from one elevation to another; unchanged when either elevation is unknown. ILLUSTRATIVE. */
+export function tempAtElevation(tempF: number, fromM: number | undefined, toM: number | undefined): number {
+  if (fromM === undefined || toM === undefined || !Number.isFinite(fromM) || !Number.isFinite(toM)) return tempF;
+  return Math.round(tempF - (toM - fromM) * LAPSE_F_PER_M);
+}
+
+/** The `properties.elevation` of an NWS forecast response, in metres, if present. */
+export function parseNwsElevation(json: unknown): number | undefined {
+  const e = (json as { properties?: { elevation?: { value?: number; unitCode?: string } } })?.properties?.elevation;
+  if (!e || typeof e.value !== "number") return undefined;
+  return /ft/i.test(e.unitCode ?? "") ? e.value * 0.3048 : e.value;
 }
 
 /** "5 to 10 mph" → 10, "15 mph" → 15. */

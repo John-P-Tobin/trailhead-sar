@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { buildTerrainModel } from "@/lib/osm";
+import { describeCell } from "@/lib/terrain";
 import { bboxKey, cellAt, cellSizeM, DEFAULT_BBOX, fromGrid, parseBbox, toGrid } from "@/lib/geo";
 import { initialState, reducer } from "@/lib/store";
 import { snapshotOf, STYLIZED_TERRAIN } from "@/lib/terrain";
@@ -98,5 +100,30 @@ describe("terrain in the search state", () => {
   it("reset keeps the loaded terrain", () => {
     const s = reducer(initialState(bundled), { type: "reset" });
     expect(s.terrain.source).toBe("bundled");
+  });
+});
+
+describe("bundled DEM elevation", () => {
+  const { fc, bbox, elevation, model } = bundledTerrain();
+  it("attaches DEM mean, range, slope and aspect per cell while the model estimate stays unchanged", () => {
+    expect(Math.abs(model.cells.J6.demMeanM! - elevation.J6.meanM)).toBeLessThan(1);
+    expect(model.cells.J6.slopeDeg).toBeGreaterThan(0);
+    expect(model.cells.J6.elevationMinM).toBeLessThanOrEqual(model.cells.J6.demMeanM!);
+    const est = buildTerrainModel(fc, bbox, "bundled");
+    expect(model.cells.J6.elevationM).toBe(est.cells.J6.elevationM); // prior input unaffected by the DEM
+    const partial = buildTerrainModel(fc, bbox, "bundled", { elevation: { J6: elevation.J6 } });
+    expect(partial.cells.J6.demMeanM).toBeDefined();
+    expect(partial.cells.E10.demMeanM).toBeUndefined();
+    for (const c of Object.values(partial.cells)) expect(Number.isFinite(c.elevation) && c.elevation >= 0 && c.elevation <= 1).toBe(true);
+  });
+  it("without a grid no DEM fields are present (old behaviour)", () => {
+    const est = buildTerrainModel(fc, bbox, "bundled");
+    expect(Object.values(est.cells).every((c) => c.demMeanM === undefined && c.slopeDeg === undefined)).toBe(true);
+  });
+  it("describeCell flags steep cells only when a slope is known", () => {
+    const base = model.cells.J6;
+    expect(describeCell({ ...base, slopeDeg: 40 })).toContain("steep");
+    expect(describeCell({ ...base, slopeDeg: undefined })).not.toContain("steep");
+    expect(describeCell({ ...base, slopeDeg: undefined })).toMatch(/~\d+ m$/);
   });
 });
