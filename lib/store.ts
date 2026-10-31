@@ -60,8 +60,10 @@ export interface SearchState {
   lkp: CellId | null;
   /** Mirrors subject.category; kept for exports and older saved states. */
   profileId: ProfileId;
-  /** Who is missing and since when. Null until the IC confirms one (a category alone uses defaults). */
+  /** Who is missing and since when. Null until set; the category's defaults are used for the priors meanwhile. */
   subject: Subject | null;
+  /** True once the IC has confirmed the subject card (demo pre-seeds a subject but leaves this false). */
+  subjectConfirmed: boolean;
   /** IC overrides of the proposed urgency factor scores. */
   urgencyOverrides: Partial<Record<UrgencyKey, UrgencyScore>>;
   prob: ProbState | null;
@@ -88,6 +90,7 @@ export const initialState = (terrain: TerrainSnapshot = snapshotOf(STYLIZED_TERR
   lkp: null,
   profileId: "day_hiker",
   subject: null,
+  subjectConfirmed: false,
   urgencyOverrides: {},
   prob: null,
   started: false,
@@ -142,9 +145,10 @@ function topShifts(before: ProbState, after: ProbState, n = 5) {
 
 /** Re-seed the priors for the current subject (or the category's defaults) at the current time. */
 function regenerate(state: SearchState, lkp: CellId, profileId: ProfileId, subject?: Subject): SearchState {
-  const subj = subject ?? state.subject ?? defaultSubject(profileId);
+  const stored = subject ?? state.subject;
+  const subj = stored ?? defaultSubject(profileId);
   const prob = generatePriors(lkp, subj, state.terrain.cells, { row: state.prob?.row ?? DEFAULT_ROW });
-  return { ...state, lkp, profileId: subj.category, subject: subj, prob, rowHistory: [prob.row], priorsEdited: false };
+  return { ...state, lkp, profileId: subj.category, subject: stored, prob, rowHistory: [prob.row], priorsEdited: false };
 }
 
 /** Switching category keeps what the IC already typed about the person; the behaviour defaults follow the category. */
@@ -186,9 +190,9 @@ function reduce(state: SearchState, action: Action): SearchState {
 
     case "set_profile": {
       if (state.started) return state;
-      const subject = subjectForCategory(state.subject, action.profileId);
-      if (!state.lkp) return { ...state, profileId: action.profileId, subject };
-      const next = regenerate(state, state.lkp, action.profileId, subject);
+      const subject = state.subject ? subjectForCategory(state.subject, action.profileId) : undefined;
+      if (!state.lkp) return { ...state, profileId: action.profileId, subject: subject ?? null };
+      const next = regenerate({ ...state, subject: subject ?? null }, state.lkp, action.profileId, subject);
       return {
         ...next,
         audit: [...state.audit, makeAudit("setup", `Profile set to ${PROFILES[action.profileId].label}; priors regenerated`)],
@@ -205,6 +209,7 @@ function reduce(state: SearchState, action: Action): SearchState {
         return {
           ...state,
           subject,
+          subjectConfirmed: true,
           profileId: subject.category,
           audit: [...state.audit, makeAudit("subject", `Subject details ${state.started ? "updated (priors locked)" : "set"}: ${who} (${source})`, data)],
         };
@@ -212,6 +217,7 @@ function reduce(state: SearchState, action: Action): SearchState {
       const next = regenerate(state, state.lkp, subject.category, subject);
       return {
         ...next,
+        subjectConfirmed: true,
         audit: [...state.audit, makeAudit("subject", `Subject confirmed: ${who} (${source}); priors regenerated`, data)],
       };
     }

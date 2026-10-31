@@ -2,10 +2,38 @@ import { describe, expect, it } from "vitest";
 import { cumulativePodMap, initialState, reducer } from "@/lib/store";
 import { emptyReport } from "@/lib/schemas";
 import { total } from "@/lib/engine/bayes";
+import { defaultSubject } from "@/lib/subject";
 
 const withLkp = () => reducer(initialState(), { type: "set_lkp", cell: "H8" });
 
 describe("store reducer", () => {
+  it("confirming a subject regenerates priors before the search and only logs after it starts", () => {
+    let s = withLkp();
+    expect(s.subject).toBeNull();
+    const kid = { ...defaultSubject("child"), name: "Sam" };
+    s = reducer(s, { type: "set_subject", subject: kid, source: "manual" });
+    expect(s.subject?.name).toBe("Sam");
+    expect(s.subjectConfirmed).toBe(true);
+    expect(s.profileId).toBe("child");
+    expect(total(s.prob!)).toBeCloseTo(1, 9);
+    const before = s.prob!.cells;
+    s = reducer(s, { type: "apply_report", payload: { confirmed: { ...emptyReport(), cells: ["H9"], estimated_pod: 0.5 }, source: "manual" } });
+    const after = reducer(s, { type: "set_subject", subject: { ...kid, medical: "known" }, source: "manual" });
+    expect(after.subject?.medical).toBe("known");
+    expect(after.prob!.cells.A1).toBe(s.prob!.cells.A1); // priors locked
+    expect(after.audit.at(-1)!.type).toBe("subject");
+    expect(before.H9).toBeGreaterThan(0);
+  });
+
+  it("urgency overrides are stored and logged; restoring the proposed score clears them", () => {
+    let s = withLkp();
+    s = reducer(s, { type: "set_urgency_override", key: "medical", score: 1, proposed: 3, reason: "diabetic per family" });
+    expect(s.urgencyOverrides.medical).toBe(1);
+    expect(s.audit.at(-1)!.type).toBe("urgency");
+    s = reducer(s, { type: "set_urgency_override", key: "medical", score: 3, proposed: 3 });
+    expect(s.urgencyOverrides.medical).toBeUndefined();
+  });
+
   it("places LKP and seeds priors", () => {
     const s = withLkp();
     expect(s.lkp).toBe("H8");

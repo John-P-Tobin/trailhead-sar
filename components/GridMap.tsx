@@ -34,6 +34,8 @@ export interface GridMapProps {
   suggested?: CellId[];
   clueCells?: CellId[];
   found?: CellId | null;
+  /** Radii (km) of dashed distance rings drawn around the LKP. */
+  ringsKm?: number[];
   showHeatmap?: boolean;
   onCellClick?: (id: CellId) => void;
 }
@@ -47,6 +49,7 @@ export default function GridMap({
   suggested = [],
   clueCells = [],
   found = null,
+  ringsKm = [],
   showHeatmap = true,
   onCellClick,
 }: GridMapProps) {
@@ -70,6 +73,9 @@ export default function GridMap({
     <div className="relative">
       <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="block h-auto max-h-[calc(100vh-230px)] min-h-72 w-full select-none" role="img" aria-label="Search area grid map">
         <defs>
+          <clipPath id="grid-clip">
+            <rect x={X(0)} y={Y(0)} width={CELL_W * GRID_SIZE} height={CELL_H * GRID_SIZE} />
+          </clipPath>
           <pattern id="cliff" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
             <line x1="0" y1="0" x2="0" y2="6" stroke="#1b1b1b" strokeWidth="2.5" />
           </pattern>
@@ -255,6 +261,21 @@ export default function GridMap({
         })}
         {lkp && terrain.cells[lkp] && (
           <g pointerEvents="none">
+            {ringsKm.map((r, i) => {
+              const rx = ((r * 1000) / w) * CELL_W;
+              const ry = ((r * 1000) / h) * CELL_H;
+              const pct = [25, 50, 75][i];
+              return (
+                <g key={r} clipPath="url(#grid-clip)">
+                  <ellipse cx={cellBox(lkp).cx} cy={cellBox(lkp).cy} rx={rx} ry={ry} fill="none" stroke="#fda4af" strokeWidth={1.2} strokeDasharray="5 4" opacity={0.85} />
+                  {pct !== undefined && cellBox(lkp).cy - ry > PAD + 10 && (
+                    <text x={cellBox(lkp).cx + 4} y={cellBox(lkp).cy - ry - 3} fontSize={10} fill="#fda4af">
+                      {pct}%
+                    </text>
+                  )}
+                </g>
+              );
+            })}
             <circle cx={cellBox(lkp).cx} cy={cellBox(lkp).cy} r={13} fill="none" stroke="#f43f5e" strokeWidth={3} />
             <circle cx={cellBox(lkp).cx} cy={cellBox(lkp).cy} r={3} fill="#f43f5e" />
           </g>
