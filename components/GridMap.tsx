@@ -127,8 +127,19 @@ export default function GridMap({
             const t = terrain.cells[id];
             const m = t.demMeanM ?? t.elevationM;
             if (m === undefined) return null;
+            const tt = demRange.hi > demRange.lo ? (m - demRange.lo) / (demRange.hi - demRange.lo) : 0.5;
+            const dark = tt < 0.45;
             return (
-              <text key={`e-${id}`} x={X(t.x + 0.5)} y={Y(t.y + 0.5) + 4} textAnchor="middle" fontSize="9" fontFamily="ui-monospace, monospace" fill="#111827" style={{ pointerEvents: "none" }}>
+              <text
+                key={`e-${id}`}
+                x={X(t.x + 0.5)}
+                y={Y(t.y + 0.5) + 4}
+                textAnchor="middle"
+                fontSize="9"
+                fontFamily="ui-monospace, monospace"
+                fill={dark ? "#f1f5f9" : "#111827"}
+                style={{ pointerEvents: "none", paintOrder: "stroke", stroke: dark ? "#0b1220" : "rgba(255,255,255,0.55)", strokeWidth: dark ? 2 : 1.5 }}
+              >
                 {Math.round(m / 10) * 10}
               </text>
             );
