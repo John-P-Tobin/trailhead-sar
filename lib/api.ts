@@ -2,6 +2,7 @@
 import { Explanation, ParsedReport } from "./schemas";
 import type { PromptFeature } from "./terrain";
 import type { Subject } from "./subject";
+import type { PublishFeature } from "./caltopoPublish";
 
 type Result<T> = ({ ok: true } & T) | { ok: false; reason: string };
 
@@ -37,3 +38,17 @@ export const parseSubject = (text: string) =>
     { text, now: new Date().toISOString(), timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone },
     45_000,
   );
+
+export async function caltopoStatus(): Promise<{ configured: boolean; mapUrl?: string; mapId?: string }> {
+  try {
+    const res = await fetch("/api/caltopo", { signal: AbortSignal.timeout(8000) });
+    return (await res.json()) as { configured: boolean; mapUrl?: string };
+  } catch {
+    return { configured: false };
+  }
+}
+
+export type OwnedFeature = { id: string; class: "Marker" | "Shape" | "Folder" };
+
+export const publishToCalTopo = (features: PublishFeature[], previous: OwnedFeature[], label: string) =>
+  post<{ created: OwnedFeature[]; deleted: number; leftovers: OwnedFeature[]; mapUrl: string }>("/api/caltopo", { features, previous, label }, 60_000);
