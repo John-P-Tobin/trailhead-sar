@@ -2,7 +2,7 @@
 
 ## Decisions
 - Next.js 16 (App Router) + Tailwind 4 + TypeScript; vitest for engine tests.
-- Grid is 15×15, columns A–O (west→east), rows 1–15 (north→south). Terrain is fictional, hand-authored in `lib/terrain.ts`: ridge to the NE, valley to the SW, trail junction at H8 (demo LKP), Hollow Brook draining SW from G9, Ledge Brook on the east, cliffs at I3/J3/J4/C3/D3, pond at B9/B10/C10.
+- Grid is 15×15, columns A–O (west→east), rows 1–15 (north→south), over a real bounding box: Mt Washington / Lakes of the Clouds, 44.245–44.285 N, 71.335–71.285 W (`lib/geo.ts`). Each cell has real lat/lon bounds and is about 266 m × 297 m; the map draws cells at that true aspect ratio.
 - System fonts only (no Google Fonts fetch at build time).
 - `ANTHROPIC_API_KEY` is server-only; `.env*` is git-ignored except `.env.example` (empty value).
 - Engine (`lib/engine/`) is pure TS: `bayes.ts` (update formula, sequential sweeps, cumulative POD, sum-to-1 assertion, prior editing), `priors.ts` (exp(−d/scale) × terrain × profile multipliers, ROW 10%), `clues.ts` (IC-chosen likelihood-ratio boost with distance falloff, renormalized incl. ROW — so a clue on the grid slightly lowers ROW).
@@ -12,7 +12,7 @@
 - Once any report or clue is applied, setup (LKP, profile, priors, ROW) locks.
 - The review card is shared by manual entry and the Claude parse: same fields, same Apply button. Map clicks add/remove cells while a report draft is open.
 - Claude: `CLAUDE_MODEL` in `lib/claude.ts`, effort `low` (short extraction tasks; keeps latency down). Calls use `client.messages.parse` with a zod structured-output format, then a strict zod check. An invalid output or a refusal is retried once; after that the route returns `{ok:false}` and the UI switches to manual mode. There is deliberately **no fallback to another model**: manual entry is the failure path and the safeguard story.
-- Prompts in `lib/prompts.ts`. The parse prompt includes the named trail/stream cells so "swept the Hollow Trail to H11" maps to cells. Claude lists clues but never weights them.
+- Prompts in `lib/prompts.ts`. The parse prompt lists the current map's named features with the cells they pass through (sent by the client from the loaded terrain), so "the Dry River Trail through G11" maps to cells. Claude lists clues but never weights them.
 - Explanation: `/api/explain` gets a text summary of the update (top shifts, ROW change, top cells). If Claude is down, a deterministic local explanation is shown, clearly labelled.
 - **Not yet tested against the live API** (no key in the build container). Before the demo: put the key in `.env.local` / Vercel env and run one report through.
 - Weather: `/api/weather` → NWS `/points/44.27,-71.3` → `forecastHourly` with `User-Agent: TrailheadSAR (hackathon demo)`, 8 s timeouts, 10-min in-memory cache. Any failure returns cached demo weather (`lib/demo/weather.ts`, times relative to now, day/night from Eastern time) and the UI shows a "Using cached weather" badge. **api.weather.gov is blocked from the build container, so the live path is untested here** — check it once on Vercel.
@@ -23,16 +23,25 @@
 - Clues: IC picks cell, radius (0–2) and boost (log only / ×1.5 / ×2.5 / ×4) and sees a preview of the probability shift before applying. Claude may list clues in a parsed report but they are never applied automatically.
 - Audit export: JSON with every entry plus reports, clues, assignments, ROW history, LKP, profile and the Claude model ID.
 
+## Terrain (OpenStreetMap)
+- Three sources, shown as a badge on the map: **Live OSM** (Overpass, fetched when the IC places the LKP), **Bundled Mt Washington** (`data/terrain.geojson`, shipped with the app), **Stylized** (the original fictional map, last-resort fallback).
+- `/api/terrain?bbox=s,w,n,e` queries Overpass (trails/roads, streams, water, cliffs/ridges, peaks) with `User-Agent: TrailheadSAR (hackathon demo)` and a 30 s timeout, then returns normalized GeoJSON clipped to the grid + one cell. The client caches it in localStorage for 7 days. If it fails, the bundled terrain stays and a note under the map says why. **Overpass is blocked from the build container, so the live path is tested with mocks only — check the badge turns "Live OSM" on Vercel.**
+- Live terrain only replaces the bundled terrain before the first report or clue (priors regenerate; IC-edited priors are kept). Once the search starts, terrain is locked so the map never shifts under applied updates. The terrain cells persist with the search.
+- `data/terrain.geojson`: the team's Overpass Turbo export of 2026-10-31 00:49 UTC, converted with `npm run convert-terrain -- <export.geojson>` (normalized properties `kind/name/ele/osm_id`, 148 features, 177 KB). Imported as JSON via a Turbopack rule, so demo mode never touches a live API.
+- Mapping (`lib/osm.ts`, illustrative): lines are sampled every 10 m; a cell is trail/road or drainage with ≥40 m of it, cliff or ridgeline with ≥60 m (or a peak in the cell), water if ≥30% covered. Elevation is a rough estimate falling 0.3 m per m from known peak heights (−40 m in drainages); alpine above 1,450 m (treeline). Mt Washington lands in J6 at ~1,912 m (actual 1,917 m).
+- Data caveats: this OSM export has no `natural=cliff` features in the box, so no cliff cells; the ponds (Lakes of the Clouds, Hermit Lake, Spaulding Lake, Gem Pool) are smaller than a cell, so they are drawn but no cell is flagged water.
+- Attribution: "© OpenStreetMap contributors" (link to openstreetmap.org/copyright) sits on the map whenever OSM data is shown; the bundled file carries the ODbL attribution.
+
 ## Demo script (Load demo scenario)
-Subject: Dan, 58, day hiker, LKP H8 (trail junction). Each step still goes through the real UI — the presenter applies each parse, picks the clue boost and makes the assignment.
-1. Team 1 hasty search of Hollow Trail H8–H12 (POD 50%) → trail cells cool, ROW 10.0 → 10.5%.
-2. Team 2 line search of the trail corridor (POD 60%) → ROW 11.2%.
-3. Team 1 in fog on Hollow Brook G9/F10 → **amber low-confidence card**, POD 25%: those cells are barely cleared.
-4. Clue: wrapper at E11 — the IC picks the boost (medium ×2.5). ROW drops slightly (evidence the subject is on the grid).
-5. Team 2 clears Ledge Brook (POD 70%).
-6. Family tip → top suggestion is E11 (the wrapper cell); IC overrides to **E12** (model's #3, downstream) and logs the reason.
-7. Subject located in E12 → banner shows "model suggestion #3 · IC override".
-Works fully offline: canned parses (`lib/demo/scenario.ts`, labelled "Demo fallback parse") if Claude fails, cached weather if NWS fails, local explanations if /api/explain fails. `tests/demo.test.ts` checks the story holds numerically (E12 in top-5 but not #1 before the override).
+Runs on the bundled real terrain. Subject: Dan, 58, day hiker; left the Lakes of the Clouds hut (E10, junction of the Crawford Path, Ammonoosuc Ravine and Dry River trails) for the summit in fog. Each step still goes through the real UI — the presenter applies each parse, picks the clue boost and makes the assignment.
+1. Team 1 hasty search of the Crawford Path toward the summit (E10, F10, G10, G9; POD 50%) → ROW 10.0 → 10.3%.
+2. Team 2 line search of the trail corridors at the hut (Ammonoosuc Ravine Trail E9/D9, Crawford Path E11/E12; POD 60%) → probability shifts downhill into the two drainages.
+3. Team 1 in fog down the Dry River Trail (F11, G11, G12) → **amber low-confidence card**, POD 25%: those cells are barely cleared.
+4. Clue: wrapper on the Dry River Trail at G13 — the IC picks the boost (**small ×1.5**: it's a busy trail). ROW drops slightly.
+5. Team 2 clears the Ammonoosuc Ravine (D8, D7, C7, B8, B9; POD 70%).
+6. Family tip → suggestions are G13 (wrapper), G11 (fogged), **G14** (downstream); IC overrides to **G14** (model's #3) and logs the reason.
+7. Subject located in G14 beside the Dry River → banner shows "model suggestion #3 · IC override".
+The story depends on the **small** boost: at medium, G14 rises to #2. Works fully offline: canned parses if Claude fails, cached weather if NWS fails, local explanations if /api/explain fails, bundled terrain always. `tests/demo.test.ts` checks the story on the bundled file (clue cell #1, override cell #3, found there, downstream and lower).
 
 ## Pitch: the three questions
 **1. Who is this for and why do they need it?**

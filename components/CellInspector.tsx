@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import Panel from "./ui/Panel";
-import { describeCell } from "@/lib/terrain";
+import { CellTerrain, describeCell } from "@/lib/terrain";
+import { formatLatLon } from "@/lib/geo";
 import { btnSecondary, input } from "./ui/styles";
 
 export default function CellInspector({
   cell,
+  terrain,
   poa,
   cumPod,
   sweeps,
@@ -14,6 +16,7 @@ export default function CellInspector({
   onEdit,
 }: {
   cell: string;
+  terrain: CellTerrain;
   poa: number;
   cumPod: number;
   sweeps: number;
@@ -28,7 +31,10 @@ export default function CellInspector({
         <Stat label="Cumulative POD" value={`${(cumPod * 100).toFixed(0)}%`} />
         <Stat label="Sweeps" value={String(sweeps)} />
       </div>
-      <div className="mt-2 text-xs text-slate-400">Terrain: {describeCell(cell)}</div>
+      <div className="mt-2 text-xs text-slate-400">Terrain: {describeCell(terrain)}</div>
+      <div className="mt-1 font-mono text-[11px] text-slate-500">
+        NW {formatLatLon(terrain.bounds.north, terrain.bounds.west)} · SE {formatLatLon(terrain.bounds.south, terrain.bounds.east)}
+      </div>
       {editable && (
         <form
           className="mt-3 flex items-end gap-2"

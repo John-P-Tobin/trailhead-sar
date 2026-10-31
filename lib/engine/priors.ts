@@ -4,7 +4,7 @@
 import { ALL_CELLS, CellId, distance } from "./grid";
 import { ProbState, assertSumToOne } from "./bayes";
 import { Profile } from "../profiles";
-import { CellTerrain, TERRAIN } from "../terrain";
+import { CellTerrain } from "../terrain";
 
 export const DEFAULT_ROW = 0.1;
 
@@ -24,8 +24,8 @@ export function cellWeight(cell: CellTerrain, lkp: CellTerrain, profile: Profile
 export function generatePriors(
   lkp: CellId,
   profile: Profile,
+  terrain: Record<CellId, CellTerrain>,
   row: number = DEFAULT_ROW,
-  terrain: Record<CellId, CellTerrain> = TERRAIN,
 ): ProbState {
   const l = terrain[lkp];
   if (!l) throw new Error(`Unknown LKP ${lkp}`);

@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
         loaders: ["@tailwindcss/turbopack"],
         as: "*.css",
       },
+      // Bundled OpenStreetMap terrain (data/terrain.geojson) is plain JSON.
+      "*.geojson": {
+        type: "json",
+      },
     },
   },
 };

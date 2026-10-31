@@ -15,6 +15,7 @@ import {
   WeatherSnapshot,
   windChillF,
 } from "@/lib/weather";
+import { CellTerrain } from "@/lib/terrain";
 
 /** Live NWS data older than this is flagged as stale. */
 const STALE_MS = 45 * 60_000;
@@ -78,9 +79,11 @@ export default function WeatherPanel({
   lastAttemptAt,
   refreshFailed,
   autoRefresh,
+  terrain,
   onRefresh,
 }: {
   weather: WeatherSnapshot | null;
+  terrain: Record<string, CellTerrain>;
   loading: boolean;
   lastAttemptAt: number | null;
   refreshFailed: boolean;
@@ -92,7 +95,7 @@ export default function WeatherPanel({
   const risk = exposureRisk(now);
   const mods = podModifiers(now);
   const next = weather ? upcoming(weather, 12) : [];
-  const flags = safetyFlags(next);
+  const flags = safetyFlags(next, terrain);
 
   return (
     <Panel

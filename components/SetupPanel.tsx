@@ -3,10 +3,10 @@
 import Panel from "./ui/Panel";
 import { PROFILE_LIST, ProfileId } from "@/lib/profiles";
 import { btnSecondary, input, label } from "./ui/styles";
-import { describeCell } from "@/lib/terrain";
 
 export default function SetupPanel({
   lkp,
+  lkpInfo,
   profileId,
   row,
   started,
@@ -16,6 +16,8 @@ export default function SetupPanel({
   onRow,
 }: {
   lkp: string | null;
+  /** Terrain description of the LKP cell. */
+  lkpInfo?: string;
   profileId: ProfileId;
   row: number | null;
   started: boolean;
@@ -33,7 +35,7 @@ export default function SetupPanel({
             {lkp ? (
               <div className="text-sm">
                 <span className="font-mono font-semibold text-rose-400">{lkp}</span>{" "}
-                <span className="text-slate-400">· {describeCell(lkp)}</span>
+                <span className="text-slate-400">· {lkpInfo}</span>
               </div>
             ) : (
               <div className="text-sm text-amber-300">Click the map to place the LKP.</div>

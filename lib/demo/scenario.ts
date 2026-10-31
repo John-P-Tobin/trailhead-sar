@@ -1,4 +1,5 @@
-// Scripted demo: a day hiker overdue from the Hollow Trail junction.
+// Scripted demo on the bundled OpenStreetMap terrain (Mt Washington / Lakes of the
+// Clouds): a day hiker overdue after leaving the Lakes of the Clouds hut in fog.
 // Every step still goes through the normal UI: the IC reviews each parse,
 // picks the clue boost, and makes the assignment.
 import { ParsedReport } from "../schemas";
@@ -6,9 +7,11 @@ import { BoostLevel } from "../engine/clues";
 import { CellId } from "../engine/grid";
 import { ProfileId } from "../profiles";
 
-export const DEMO_LKP: CellId = "H8";
+/** Lakes of the Clouds hut: junction of the Crawford Path, Ammonoosuc Ravine and Dry River trails. */
+export const DEMO_LKP: CellId = "E10";
 export const DEMO_PROFILE: ProfileId = "day_hiker";
-export const DEMO_SUBJECT = "Dan, 58, day hiker. Left the Hollow Trail junction (H8) around 1 p.m.; overdue since 5 p.m.";
+export const DEMO_SUBJECT =
+  "Dan, 58, day hiker. Left the Lakes of the Clouds hut (E10) for the summit around 1 p.m. in fog; overdue since 5 p.m.";
 
 export type DemoStep =
   | { kind: "report"; id: string; title: string; text: string; canned: ParsedReport; note: string }
@@ -20,15 +23,15 @@ export const DEMO_STEPS: DemoStep[] = [
   {
     kind: "report",
     id: "r1",
-    title: "Hasty search of the Hollow Trail",
-    text: "Command, Team 1. Hasty search done on the Hollow Trail from the junction down to H12, two of us calling and whistling the whole way, good visibility. Nothing. No clues.",
+    title: "Hasty search toward the summit",
+    text: "Command, Team 1. Hasty search done on the Crawford Path from the hut up through F10, G10 and G9, two of us calling and whistling the whole way, visibility okay. Nothing. No clues.",
     canned: {
       team: "Team 1",
-      cells: ["H8", "H9", "H10", "H11", "H12"],
+      cells: ["E10", "F10", "G10", "G9"],
       coverage_description: "Hasty trail search, 2 searchers calling and whistling",
       estimated_pod: 0.5,
       pod_confidence: "med",
-      conditions: ["good visibility"],
+      conditions: ["fair visibility"],
       clues: [],
       unclear_points: ["Off-trail width covered on each side not stated"],
     },
@@ -37,63 +40,63 @@ export const DEMO_STEPS: DemoStep[] = [
   {
     kind: "report",
     id: "r2",
-    title: "Trail corridor line search",
-    text: "Team 2 to command. We line-searched the Notch Trail G8 through E7 and up the Ridge Trail to J6. Spacing about 15 meters, mixed hardwood and spruce. Negative, no clues.",
+    title: "Trail corridors at the hut",
+    text: "Team 2 to command. We line-searched the top of the Ammonoosuc Ravine Trail through E9 and D9, then the Crawford Path toward Monroe, E11 and E12. Spacing about 15 meters, krummholz and rock. Negative, no clues.",
     canned: {
       team: "Team 2",
-      cells: ["G8", "F7", "E7", "I7", "J6"],
-      coverage_description: "Line search ~15 m spacing, mixed hardwood and spruce",
+      cells: ["E9", "D9", "E11", "E12"],
+      coverage_description: "Line search ~15 m spacing, krummholz and rock",
       estimated_pod: 0.6,
       pod_confidence: "high",
       conditions: [],
       clues: [],
       unclear_points: [],
     },
-    note: "The corridor is mostly cleared. Probability shifts off-trail toward the drainages.",
+    note: "The corridors around the hut are mostly cleared. Probability shifts downhill into the two drainages.",
   },
   {
     kind: "report",
     id: "r3",
-    title: "Fog on Hollow Brook",
-    text: "Team 1, we pushed down Hollow Brook through G9 and F10 but fog came in thick, maybe 10 meters visibility, spacing maybe 25. Not sure we really covered the east half of G9. No clues.",
+    title: "Fog on the Dry River Trail",
+    text: "Team 1, we pushed down the Dry River Trail into Oakes Gulf through F11, G11 and G12 but the fog came in thick, maybe 10 meters visibility, spacing maybe 25. Not sure we really covered the east half of G11. No clues.",
     canned: {
       team: "Team 1",
-      cells: ["G9", "F10"],
+      cells: ["F11", "G11", "G12"],
       coverage_description: "Line search ~25 m spacing in thick fog",
       estimated_pod: 0.25,
       pod_confidence: "low",
       conditions: ["fog", "~10 m visibility"],
       clues: [],
-      unclear_points: ["Coverage of the east half of G9 is uncertain", "Spacing was estimated (\"maybe 25\")"],
+      unclear_points: ["Coverage of the east half of G11 is uncertain", 'Spacing was estimated ("maybe 25")'],
     },
     note: "Low-confidence parse is flagged amber. Fog keeps POD low, so these cells are NOT cleared much.",
   },
   {
     kind: "clue",
     id: "c1",
-    title: "Clue on the brook",
-    text: "Team 4 found a fresh granola-bar wrapper on the Hollow Brook bank at E11 — same brand his wife packed.",
-    cell: "E11",
+    title: "Clue on the Dry River Trail",
+    text: "Team 4, coming up from the Dry River trailhead, found a fresh granola-bar wrapper on the Dry River Trail at G13. Same brand his wife packed, but it's a busy trail.",
+    cell: "G13",
     radius: 1,
-    suggestedBoost: "medium",
-    note: "The IC decides how much the wrapper matters. The AI never weights clues.",
+    suggestedBoost: "small",
+    note: "The IC decides how much the wrapper matters. On a busy trail a cautious small boost is reasonable. The AI never weights clues.",
   },
   {
     kind: "report",
     id: "r4",
-    title: "Ledge Brook cleared",
-    text: "Team 2, we swept Ledge Brook K8 down to L11. Open hardwood, 15 meter spacing, good light. Negative.",
+    title: "Ammonoosuc Ravine cleared",
+    text: "Team 2, we swept the Ammonoosuc Ravine below the hut, D8 and D7 down to C7, B8 and B9 by Gem Pool. 15 meter spacing, good light under the fog. Negative.",
     canned: {
       team: "Team 2",
-      cells: ["K8", "K9", "L10", "L11"],
-      coverage_description: "Line search ~15 m spacing, open hardwood",
+      cells: ["D8", "D7", "C7", "B8", "B9"],
+      coverage_description: "Line search ~15 m spacing, spruce, good light",
       estimated_pod: 0.7,
       pod_confidence: "high",
       conditions: ["good light"],
       clues: [],
       unclear_points: [],
     },
-    note: "The other drainage is ruled down. Hollow Brook now stands out.",
+    note: "The other drainage is ruled down. The Dry River drainage now stands out.",
   },
   {
     kind: "override",
@@ -101,16 +104,16 @@ export const DEMO_STEPS: DemoStep[] = [
     title: "Family tip → IC override",
     tip: "Command post: his wife says when he's turned around he always follows water downhill to find a road.",
     team: "Team 3",
-    cell: "E12",
-    reason: "Family tip: follows water downhill; E12 is downstream of the wrapper",
-    note: "The IC sends Team 3 downstream to E12 instead of the top suggestion, and logs why.",
+    cell: "G14",
+    reason: "Family tip: follows water downhill; G14 is downstream of the wrapper on the Dry River",
+    note: "The model ranks the wrapper cell (G13) first and the fogged G11 second. The IC sends Team 3 downstream to G14, the model's #3, and logs why.",
   },
   {
     kind: "found",
     id: "f1",
     title: "Subject located",
-    text: "Team 3: subject located in E12 beside Hollow Brook. Cold and tired, responsive, walking with assistance.",
-    cell: "E12",
+    text: "Team 3: subject located in G14 beside the Dry River. Cold and tired, responsive, walking with assistance.",
+    cell: "G14",
     note: "Found where the model ranked high and the human judgment pointed.",
   },
 ];

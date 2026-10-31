@@ -2,7 +2,7 @@
 // All thresholds and multipliers are ILLUSTRATIVE ESTIMATES for decision support.
 
 import { CellId } from "./engine/grid";
-import { TERRAIN } from "./terrain";
+import { CellTerrain } from "./terrain";
 
 export interface HourlyPeriod {
   startTime: string;
@@ -148,15 +148,11 @@ export interface SafetyFlag {
   cells: CellId[];
 }
 
-const EXPOSED: CellId[] = Object.values(TERRAIN)
-  .filter((t) => t.ridge || t.cover === "alpine")
-  .map((t) => t.id);
-const RIDGE: CellId[] = Object.values(TERRAIN)
-  .filter((t) => t.ridge)
-  .map((t) => t.id);
-
 /** Team safety flags over the next hours. These inform the IC; they never block an assignment. */
-export function safetyFlags(periods: HourlyPeriod[]): SafetyFlag[] {
+export function safetyFlags(periods: HourlyPeriod[], terrain: Record<CellId, CellTerrain>): SafetyFlag[] {
+  const all = Object.values(terrain);
+  const RIDGE = all.filter((t) => t.ridge).map((t) => t.id);
+  const EXPOSED = all.filter((t) => t.ridge || t.cover === "alpine").map((t) => t.id);
   if (!periods.length) return [];
   const flags: SafetyFlag[] = [];
   const maxWind = Math.max(...periods.map((p) => p.windMph));

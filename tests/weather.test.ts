@@ -11,6 +11,7 @@ import {
   windChillF,
 } from "@/lib/weather";
 import { cachedWeather } from "@/lib/demo/weather";
+import { STYLIZED_TERRAIN } from "@/lib/terrain";
 
 const fixture = {
   properties: {
@@ -92,7 +93,7 @@ describe("derived weather", () => {
     expect(JSON.stringify(exposureRisk(period({ temperatureF: 10, windMph: 30 })))).not.toMatch(/hour|minute|surviv/i);
   });
   it("flags high ridge winds and thunderstorms", () => {
-    const flags = safetyFlags(parseNwsHourly(fixture));
+    const flags = safetyFlags(parseNwsHourly(fixture), STYLIZED_TERRAIN.cells);
     expect(flags.some((f) => /50 mph/.test(f.text) && f.cells.length > 0)).toBe(true);
     expect(flags.some((f) => /Thunder/.test(f.text))).toBe(true);
   });
