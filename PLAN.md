@@ -167,5 +167,15 @@ trailhead-sar/
 - [x] Demo clue step guards against picking a non-suggested boost
 - [x] DEMO.md run sheet; NOTES updated
 
+### Round 4 — Final product (lost-person model, subject, urgency, UI kit, CalTopo publishing)
+- [x] Lognormal distance priors (ISRID hiker fit), subject-scaled, time-aware reach, graded downhill, suggested ROW (PR #5)
+- [x] Subject model + relative urgency chart in the store with logged overrides (PR #5)
+- [x] Ant-style UI kit, tabbed console, status bar, confirm modals (PR #6)
+- [x] Subject card with Claude pre-fill (`/api/parse-subject`), urgency card, distance rings, demo call-out step (PR #7)
+- [x] Publish to CalTopo via signed API into an app-owned folder (PR #8)
+- [x] Docs: NOTES, DEMO.md (8 steps), PLAN, CLAUDE, README
+- [ ] Vercel: add `CALTOPO_*` env vars (user action) and publish once from the live site
+- [ ] Stretch (not done): bundled USGS elevation grid + elevation map layer; NWS gridpoint extras + 12-hour weather chart
+
 ## 5. Per-milestone routine
 Build → tests → run app and check the feature → commit → push to `claude/funny-johnson-necpxn` → tick box here. Main is never left broken; reliability of the demo path beats extra features.
