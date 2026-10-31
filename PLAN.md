@@ -175,7 +175,8 @@ trailhead-sar/
 - [x] Publish to CalTopo via signed API into an app-owned folder (PR #8)
 - [x] Docs: NOTES, DEMO.md (8 steps), PLAN, CLAUDE, README
 - [ ] Vercel: add `CALTOPO_*` env vars (user action) and publish once from the live site
-- [ ] Stretch (not done): bundled USGS elevation grid + elevation map layer; NWS gridpoint extras + 12-hour weather chart
+- [x] Bundled DEM grid (Open-Meteo/Copernicus, spot-checked vs USGS) → Elevation map layer, inspector slope/aspect, steep tags, urgency terrain hazard, lapse-rate temperatures (display/safety only; prior keeps the smoothed estimate)
+- [ ] Stretch (not done): NWS gridpoint extras + 12-hour weather chart; DEM into the prior after a calibration pass
 
 ## 5. Per-milestone routine
 Build → tests → run app and check the feature → commit → push to `claude/funny-johnson-necpxn` → tick box here. Main is never left broken; reliability of the demo path beats extra features.

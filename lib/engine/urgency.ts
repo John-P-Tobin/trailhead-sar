@@ -8,6 +8,7 @@ import { CellId, cellsWithin } from "./grid";
 import { Subject } from "../subject";
 import { CellTerrain } from "../terrain";
 import { ExposureLevel } from "../weather";
+import { STEEP_DEG } from "../elevation";
 
 export type UrgencyKey = "age" | "medical" | "subjects" | "experience" | "weather" | "equipment" | "terrain";
 export type UrgencyScore = 1 | 2 | 3;
@@ -92,7 +93,7 @@ export function urgencyFactors(s: Subject, ctx: UrgencyContext): UrgencyFactor[]
     reason: s.equipment === "inadequate" ? "Inadequate for conditions" : s.equipment === "questionable" ? "Questionable for conditions" : "Adequate for conditions",
   };
   const terrain: UrgencyFactor = ctx.hazardsNearLkp
-    ? { key: "terrain", label: "Terrain hazards", score: 1, reason: "Cliffs, open water or alpine ground near the LKP" }
+    ? { key: "terrain", label: "Terrain hazards", score: 1, reason: "Cliffs, water, alpine ground or steep slopes near the LKP" }
     : { key: "terrain", label: "Terrain hazards", score: 3, reason: "No major hazards mapped near the LKP" };
   return [age, medical, subjects, experience, weather, equipment, terrain];
 }
@@ -107,10 +108,10 @@ export function scoreUrgency(factors: UrgencyFactor[], overrides: Partial<Record
   return { factors: merged, total, band, bandLabel: BAND_LABEL[band] };
 }
 
-/** Cliffs, open water or alpine ground within a few cells of the LKP. */
+/** Cliffs, open water, alpine ground or steep slopes (DEM) within a few cells of the LKP. */
 export function hazardsNearLkp(lkp: CellId, terrain: Record<CellId, CellTerrain>, radiusCells = 3): boolean {
   return cellsWithin(lkp, radiusCells).some((c) => {
     const t = terrain[c];
-    return !!t && (t.cliff || t.water || t.cover === "alpine");
+    return !!t && (t.cliff || t.water || t.cover === "alpine" || (t.slopeDeg !== undefined && t.slopeDeg >= STEEP_DEG));
   });
 }

@@ -21,6 +21,7 @@ import {
   upcoming,
   WeatherSnapshot,
   windChillF,
+  tempAtElevation,
 } from "@/lib/weather";
 import { CellTerrain } from "@/lib/terrain";
 
@@ -73,6 +74,7 @@ export default function WeatherPanel({
   terrain,
   onRefresh,
   onHighlightCells,
+  lkpElevationM,
 }: {
   weather: WeatherSnapshot | null;
   terrain: Record<string, CellTerrain>;
@@ -83,6 +85,8 @@ export default function WeatherPanel({
   autoRefresh: boolean;
   onRefresh: () => void;
   onHighlightCells?: (cells: string[]) => void;
+  /** Elevation of the LKP cell (metres) for the lapse-rate estimate. */
+  lkpElevationM?: number;
 }) {
   const now = currentPeriod(weather ?? { source: "cached", fetchedAt: "", location: "", periods: [] });
   const risk = exposureRisk(now);
@@ -127,8 +131,17 @@ export default function WeatherPanel({
               { label: "Wind chill", value: `${windChillF(now.temperatureF, now.windMph)}°F` },
               { label: "Precip chance", value: `${now.precipChance}%` },
               { label: "Daylight", value: now.isDaytime ? "Day" : "Night" },
+              ...(weather.elevationM !== undefined
+                ? [
+                    { label: `Est. at summit (1,917 m)`, value: `${tempAtElevation(now.temperatureF, weather.elevationM, 1917)}°F` },
+                    { label: lkpElevationM !== undefined ? `Est. at LKP (${lkpElevationM.toLocaleString()} m)` : "Est. at LKP", value: lkpElevationM !== undefined ? `${tempAtElevation(now.temperatureF, weather.elevationM, lkpElevationM)}°F` : undefined },
+                  ]
+                : []),
             ]}
           />
+          {weather.elevationM !== undefined && (
+            <p className="text-xs text-fg-3">Forecast point is at {weather.elevationM.toLocaleString()} m; the summit and LKP figures apply a standard 6.5 °C/km lapse rate and are estimates.</p>
+          )}
           <Alert type={RISK_ALERT[risk.level]} compact description={risk.reasons.join(" · ")} />
 
           {mods.length > 0 && (

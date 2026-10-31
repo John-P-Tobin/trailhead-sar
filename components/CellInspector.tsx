@@ -6,6 +6,8 @@ import Card from "./ui/Card";
 import Descriptions from "./ui/Descriptions";
 import Statistic from "./ui/Statistic";
 import Tag from "./ui/Tag";
+import Alert from "./ui/Alert";
+import { STEEP_DEG } from "@/lib/elevation";
 import { CellTerrain, describeCell } from "@/lib/terrain";
 import { formatLatLon } from "@/lib/geo";
 import { input } from "./ui/styles";
@@ -40,10 +42,23 @@ export default function CellInspector({
         className="mt-3"
         items={[
           { label: "Terrain", span: 2, value: <span className="flex flex-wrap gap-1">{tags.map((t) => <Tag key={t}>{t}</Tag>)}</span> },
-          { label: "Elevation", value: terrain.elevationM !== undefined ? `~${terrain.elevationM} m (estimate)` : undefined },
+          {
+            label: "Elevation",
+            value:
+              terrain.demMeanM !== undefined
+                ? `${terrain.demMeanM} m · range ${terrain.elevationMinM}–${terrain.elevationMaxM} m`
+                : terrain.elevationM !== undefined
+                  ? `~${terrain.elevationM} m (estimate)`
+                  : undefined,
+          },
+          { label: "Slope", value: terrain.slopeDeg !== undefined ? `${terrain.slopeDeg}°${terrain.aspect && terrain.aspect !== "flat" ? ` facing ${terrain.aspect}` : ""}` : undefined },
+          ...(terrain.demMeanM !== undefined && terrain.elevationM !== undefined ? [{ label: "Model's smoothed estimate", value: `~${terrain.elevationM} m (used for the downhill pull)` }] : []),
           { label: "Corners", value: <span className="font-mono text-xs">NW {formatLatLon(terrain.bounds.north, terrain.bounds.west)} · SE {formatLatLon(terrain.bounds.south, terrain.bounds.east)}</span>, span: 2 },
         ]}
       />
+      {terrain.slopeDeg !== undefined && terrain.slopeDeg >= STEEP_DEG && (
+        <Alert type="warning" compact className="mt-3" title={`Steep ground (${terrain.slopeDeg}°)`} description="Consider team safety and slower movement when assigning this cell." />
+      )}
       {editable && (
         <form
           className="mt-3 flex items-end gap-2"

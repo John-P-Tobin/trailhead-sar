@@ -2,7 +2,8 @@
 
 import { ALL_CELLS, COLS, CellId, GRID_SIZE } from "@/lib/engine/grid";
 import { cellSizeM } from "@/lib/geo";
-import { heatCss, heatOpacity } from "@/lib/heat";
+import { heatCss, heatOpacity, hypsoCss } from "@/lib/heat";
+import { STEEP_DEG } from "@/lib/elevation";
 import { Cover, describeCell, MapFeature, TerrainModel } from "@/lib/terrain";
 
 const CELL_H = 40;
@@ -36,6 +37,8 @@ export interface GridMapProps {
   found?: CellId | null;
   /** Radii (km) of dashed distance rings drawn around the LKP. */
   ringsKm?: number[];
+  /** What the cells show: the probability heatmap or a hypsometric elevation tint. */
+  layer?: "probability" | "elevation";
   showHeatmap?: boolean;
   onCellClick?: (id: CellId) => void;
 }
@@ -50,6 +53,7 @@ export default function GridMap({
   clueCells = [],
   found = null,
   ringsKm = [],
+  layer = "probability",
   showHeatmap = true,
   onCellClick,
 }: GridMapProps) {
@@ -66,6 +70,9 @@ export default function GridMap({
   const linePath = (pts: [number, number][]) => pts.map(([gx, gy], i) => `${i ? "L" : "M"}${X(gx).toFixed(1)},${Y(gy).toFixed(1)}`).join("");
   const ringsPath = (rings: [number, number][][]) => rings.map((r) => `${linePath(r)}Z`).join("");
   const max = poa ? Math.max(...ALL_CELLS.map((c) => poa[c] ?? 0), 1e-9) : 1;
+  const demValues = ALL_CELLS.map((c) => terrain.cells[c].demMeanM ?? terrain.cells[c].elevationM).filter((v): v is number => v !== undefined);
+  const demRange = { lo: demValues.length ? Math.min(...demValues) : 0, hi: demValues.length ? Math.max(...demValues) : 0 };
+  const showHeat = showHeatmap && layer === "probability";
   const byKind = (k: MapFeature["kind"]) => terrain.features.filter((f) => f.kind === k);
   const labelled = peaksToLabel(terrain.features);
 
@@ -73,6 +80,9 @@ export default function GridMap({
     <div className="relative">
       <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="block h-auto max-h-[calc(100vh-265px)] min-h-72 w-full select-none" role="img" aria-label="Search area grid map">
         <defs>
+          <pattern id="steep" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <line x1="0" y1="0" x2="0" y2="7" stroke="#7f1d1d" strokeWidth="1.6" opacity="0.8" />
+          </pattern>
           <clipPath id="grid-clip">
             <rect x={X(0)} y={Y(0)} width={CELL_W * GRID_SIZE} height={CELL_H * GRID_SIZE} />
           </clipPath>
@@ -81,6 +91,9 @@ export default function GridMap({
           </pattern>
           <pattern id="searched" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)">
             <line x1="0" y1="0" x2="0" y2="8" stroke="#e8f1ff" strokeWidth="1.2" />
+          </pattern>
+          <pattern id="steep" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <line x1="0" y1="0" x2="0" y2="7" stroke="#7f1d1d" strokeWidth="1.6" opacity="0.8" />
           </pattern>
           <clipPath id="grid-clip">
             <rect x={PAD} y={PAD} width={CELL_W * GRID_SIZE} height={CELL_H * GRID_SIZE} />
@@ -99,21 +112,32 @@ export default function GridMap({
           </g>
         ))}
 
-        {/* Terrain base */}
+        {/* Terrain base: land cover, or a hypsometric tint of the DEM on the elevation layer */}
         {ALL_CELLS.map((id) => {
           const t = terrain.cells[id];
-          return (
-            <rect
-              key={id}
-              x={X(t.x)}
-              y={Y(t.y)}
-              width={CELL_W}
-              height={CELL_H}
-              fill={COVER_FILL[t.cover]}
-              fillOpacity={0.75 + 0.25 * t.elevation}
-            />
-          );
+          if (layer === "elevation") {
+            const m = t.demMeanM ?? t.elevationM;
+            const tt = m === undefined ? t.elevation : demRange.hi > demRange.lo ? (m - demRange.lo) / (demRange.hi - demRange.lo) : 0.5;
+            return <rect key={id} x={X(t.x)} y={Y(t.y)} width={CELL_W} height={CELL_H} fill={hypsoCss(tt)} />;
+          }
+          return <rect key={id} x={X(t.x)} y={Y(t.y)} width={CELL_W} height={CELL_H} fill={COVER_FILL[t.cover]} fillOpacity={0.75 + 0.25 * t.elevation} />;
         })}
+        {layer === "elevation" &&
+          ALL_CELLS.map((id) => {
+            const t = terrain.cells[id];
+            const m = t.demMeanM ?? t.elevationM;
+            if (m === undefined) return null;
+            return (
+              <text key={`e-${id}`} x={X(t.x + 0.5)} y={Y(t.y + 0.5) + 4} textAnchor="middle" fontSize="9" fontFamily="ui-monospace, monospace" fill="#111827" style={{ pointerEvents: "none" }}>
+                {Math.round(m / 10) * 10}
+              </text>
+            );
+          })}
+        {layer === "elevation" &&
+          ALL_CELLS.filter((id) => (terrain.cells[id].slopeDeg ?? 0) >= STEEP_DEG).map((id) => {
+            const t = terrain.cells[id];
+            return <rect key={`steep-${id}`} x={X(t.x)} y={Y(t.y)} width={CELL_W} height={CELL_H} fill="url(#steep)" pointerEvents="none" />;
+          })}
 
         {/* Map features */}
         <g clipPath="url(#grid-clip)" pointerEvents="none">
@@ -142,7 +166,7 @@ export default function GridMap({
         </g>
 
         {/* Heatmap */}
-        {showHeatmap &&
+        {showHeat &&
           poa &&
           ALL_CELLS.map((id) => {
             const t = terrain.cells[id];
@@ -215,7 +239,7 @@ export default function GridMap({
 
         {/* POA labels (hidden on phone widths where they can't be read) */}
         <g className="max-sm:hidden">
-          {showHeatmap &&
+          {showHeat &&
             poa &&
             ALL_CELLS.map((id) => {
               const { cx, cy } = cellBox(id);

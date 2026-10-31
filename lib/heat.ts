@@ -30,3 +30,25 @@ export function heatHex(t: number): string {
   };
   return `#${f(0)}${f(8)}${f(4)}`;
 }
+
+/** Hypsometric tint for a normalised elevation (0 valley → 1 summit): green → tan → pale grey. */
+export function hypsoCss(t: number): string {
+  const x = Math.min(1, Math.max(0, t));
+  const stops: [number, [number, number, number]][] = [
+    [0, [45, 90, 61]],
+    [0.35, [120, 130, 70]],
+    [0.65, [176, 138, 78]],
+    [0.85, [205, 190, 170]],
+    [1, [243, 244, 246]],
+  ];
+  for (let i = 1; i < stops.length; i++) {
+    const [t0, c0] = stops[i - 1];
+    const [t1, c1] = stops[i];
+    if (x <= t1) {
+      const k = (x - t0) / (t1 - t0);
+      const c = c0.map((v, j) => Math.round(v + (c1[j] - v) * k));
+      return `rgb(${c[0]}, ${c[1]}, ${c[2]})`;
+    }
+  }
+  return "rgb(243, 244, 246)";
+}

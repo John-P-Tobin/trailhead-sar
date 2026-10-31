@@ -1,6 +1,6 @@
 import { cachedWeather } from "@/lib/demo/weather";
 import { MAP_ANCHOR } from "@/lib/terrain";
-import { parseNwsHourly, WeatherSnapshot } from "@/lib/weather";
+import { parseNwsElevation, parseNwsHourly, WeatherSnapshot } from "@/lib/weather";
 
 const UA = "TrailheadSAR (hackathon demo)";
 const TTL_MS = 10 * 60_000;
@@ -31,14 +31,17 @@ export async function GET(req: Request) {
     };
     const hourlyUrl = points.properties?.forecastHourly;
     if (!hourlyUrl) throw new Error("No forecastHourly URL");
-    const periods = parseNwsHourly(await getJson(hourlyUrl)).slice(0, 24);
+    const hourly = await getJson(hourlyUrl);
+    const periods = parseNwsHourly(hourly).slice(0, 24);
     if (!periods.length) throw new Error("Empty forecast");
+    const elevationM = parseNwsElevation(hourly);
     const rel = points.properties?.relativeLocation?.properties;
     const snap: WeatherSnapshot = {
       source: "live",
       fetchedAt: new Date().toISOString(),
       location: rel?.city ? `Near ${rel.city}, ${rel.state} (${MAP_ANCHOR.label})` : MAP_ANCHOR.label,
       periods,
+      ...(elevationM !== undefined ? { elevationM: Math.round(elevationM) } : {}),
     };
     cache = { at: Date.now(), key, snap };
     return Response.json(snap);
