@@ -356,7 +356,7 @@ export default function Console() {
   }, [state.terrain.cells]);
   // Cells come from the store (what the model uses); lines and shapes from the loaded terrain.
   const mapTerrain = { cells: state.terrain.cells, bbox: state.terrain.bbox, osm: state.terrain.source !== "stylized", features: terrainModel.features };
-  const subjectLabel = `${state.subject?.name ? `${state.subject.name} · ` : ""}${PROFILES[effectiveSubject.category].label}${state.subjectConfirmed ? "" : " (unconfirmed)"}`;
+  const subjectLabel = `${state.subject?.name ? `${state.subject.name} · ` : ""}${PROFILES[effectiveSubject.category].label}`;
 
   const opsTab = (
     <div className="space-y-3">
@@ -503,7 +503,7 @@ export default function Console() {
           </ul>
         </Card>
       )}
-      <AuditLog state={state} />
+      <AuditLog state={state} onExportKml={state.prob ? () => exportCalTopo("kml") : undefined} />
     </div>
   );
 
@@ -554,9 +554,6 @@ export default function Console() {
           <Button icon={<IconDownload width={14} height={14} />} onClick={() => exportCalTopo("geojson")} disabled={!state.prob} title={CALTOPO_HINT}>
             Export for CalTopo
           </Button>
-          <Button variant="text" onClick={() => exportCalTopo("kml")} disabled={!state.prob} title="KML with styles, as a fallback">
-            KML
-          </Button>
           <Button variant="danger" onClick={resetAll}>
             Reset
           </Button>
@@ -566,6 +563,7 @@ export default function Console() {
       <StatusBar
         lkp={state.lkp}
         subjectLabel={subjectLabel}
+        subjectConfirmed={state.subjectConfirmed}
         lastSeenAt={state.subject?.lastSeenAt ?? null}
         row={state.prob?.row ?? null}
         rowStart={state.rowHistory[0] ?? null}
@@ -581,15 +579,11 @@ export default function Console() {
             size="small"
             extra={
               <>
-                {needLkp ? (
-                  <Tag color="warning">Click a cell to place the last known point</Tag>
-                ) : draft ? (
-                  <Tag color="primary">Click cells to add or remove them from the report</Tag>
-                ) : highlight.length ? (
+                {highlight.length > 0 && !needLkp && !draft && (
                   <Button size="sm" variant="text" onClick={() => setHighlight([])}>
                     Clear highlight
                   </Button>
-                ) : null}
+                )}
                 <Segmented
                   size="sm"
                   aria-label="Map layer"
@@ -611,7 +605,15 @@ export default function Console() {
             footer={<div className="xl:hidden"><MapLegend kinds={new Set(mapTerrain.features.map((f) => f.kind))} rings={ringsOn && !!state.lkp} layer={layer} demRange={demRange} /></div>}
           >
             <div className="flex gap-4">
-              <div className="min-w-0 flex-1">
+              <div className="relative min-w-0 flex-1">
+                {(needLkp || draft) && (
+                  <div className="pointer-events-none absolute left-1/2 top-2 z-10 -translate-x-1/2">
+                    <span className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium shadow-lg backdrop-blur ${needLkp ? "border-warning/60 bg-warning/15 text-warning" : "border-primary/60 bg-primary/20 text-primary-hover"}`}>
+                      <IconTarget width={14} height={14} />
+                      {needLkp ? "Click a cell to place the last known point" : "Click cells to add or remove them from the report"}
+                    </span>
+                  </div>
+                )}
                 <GridMap
                   terrain={mapTerrain}
                   poa={state.prob?.cells}

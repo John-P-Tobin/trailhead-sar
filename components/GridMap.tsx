@@ -222,12 +222,13 @@ export default function GridMap({
                 <path d={`M${px},${py - 4}L${px + 3.5},${py + 2.5}L${px - 3.5},${py + 2.5}Z`} fill="#f1f5f9" stroke="#0b1220" strokeWidth={0.8} />
                 {labelled.has(f) && (
                   <text
-                    x={px + (right ? -5 : 5)}
-                    y={py - 4}
+                    x={px + (right ? -6 : 6)}
+                    y={py - 7}
                     textAnchor={right ? "end" : "start"}
-                    fontSize="8"
-                    fill="#f1f5f9"
-                    style={{ paintOrder: "stroke", stroke: "#0b1220", strokeWidth: 2.5 }}
+                    fontSize="9"
+                    fontWeight="600"
+                    fill="#f8fafc"
+                    style={{ paintOrder: "stroke", stroke: "#0b1220", strokeWidth: 3 }}
                   >
                     {f.name}
                   </text>

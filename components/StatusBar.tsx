@@ -15,6 +15,7 @@ const BAND_COLOR: Record<UrgencyBand, TagColor> = { emergency: "error", measured
 export default function StatusBar({
   lkp,
   subjectLabel,
+  subjectConfirmed,
   lastSeenAt,
   row,
   rowStart,
@@ -24,6 +25,7 @@ export default function StatusBar({
 }: {
   lkp: string | null;
   subjectLabel: string;
+  subjectConfirmed: boolean;
   lastSeenAt: string | null;
   row: number | null;
   rowStart: number | null;
@@ -41,7 +43,21 @@ export default function StatusBar({
   return (
     <div className="flex flex-wrap items-end gap-x-6 gap-y-3 rounded-card border border-line bg-surface px-4 py-3">
       <Statistic size="sm" label="LKP" value={lkp} tone="error" />
-      <Statistic size="sm" mono={false} label="Subject" value={subjectLabel} />
+      <Statistic
+        size="sm"
+        mono={false}
+        label="Subject"
+        value={
+          <span className="inline-flex items-center gap-2">
+            {subjectLabel}
+            {!subjectConfirmed && (
+              <Tag color="warning" title="The subject card has not been confirmed; the category's defaults are in use">
+                unconfirmed
+              </Tag>
+            )}
+          </span>
+        }
+      />
       {lastSeenAt && (
         <Statistic
           size="sm"

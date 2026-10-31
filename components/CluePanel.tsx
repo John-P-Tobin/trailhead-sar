@@ -50,7 +50,7 @@ export default function CluePanel({
       <p className="mb-2 text-xs text-fg-2">You decide how much a clue matters. The AI never weights clues on its own.</p>
       <div className="space-y-2">
         <input className={input} value={text} onChange={(e) => setText(e.target.value)} placeholder="e.g. Granola wrapper found at F10 / wife says he always takes the ridge" />
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 gap-2">
           <div>
             <label className={label}>Near cell</label>
             <input className={`${input} font-mono uppercase`} value={cell || selectedCell || ""} onChange={(e) => setCell(e.target.value)} placeholder="F10" />
@@ -63,16 +63,16 @@ export default function CluePanel({
               <option value={2}>2 cells</option>
             </select>
           </div>
-          <div>
-            <label className={label}>Boost (your call)</label>
-            <select className={input} value={boost} onChange={(e) => setBoost(e.target.value as BoostLevel)}>
-              {BOOSTS.map((b) => (
-                <option key={b.id} value={b.id}>
-                  {b.text}
-                </option>
-              ))}
-            </select>
-          </div>
+        </div>
+        <div>
+          <label className={label}>Boost (your call)</label>
+          <select className={input} value={boost} onChange={(e) => setBoost(e.target.value as BoostLevel)}>
+            {BOOSTS.map((b) => (
+              <option key={b.id} value={b.id}>
+                {b.text}
+              </option>
+            ))}
+          </select>
         </div>
         {preview && (
           <Alert
