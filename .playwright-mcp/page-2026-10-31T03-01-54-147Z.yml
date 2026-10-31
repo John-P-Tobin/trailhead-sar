@@ -1,0 +1,734 @@
+- generic [active] [ref=e1]:
+  - main [ref=e6]:
+    - generic [ref=e7]:
+      - generic [ref=e8]:
+        - heading "Trailhead · Search Planner" [level=1] [ref=e9]
+        - paragraph [ref=e10]: Bayesian decision support for the incident commander · prototype with illustrative priors
+      - generic [ref=e11]:
+        - button "Load demo scenario" [ref=e12]
+        - button "Export for CalTopo" [ref=e13]
+        - button "KML" [ref=e16]
+        - button "Reset" [ref=e17]
+    - generic [ref=e18]:
+      - generic [ref=e19]:
+        - generic [ref=e20]: LKP
+        - generic [ref=e21]: E10
+      - generic [ref=e22]:
+        - generic [ref=e23]: Subject
+        - generic [ref=e24]: Dan Harper · Day hiker
+      - generic [ref=e25]:
+        - generic [ref=e26]: Missing for
+        - generic [ref=e27]: 5 h 60 min
+      - generic [ref=e32]:
+        - generic [ref=e33]: Rest of World
+        - generic [ref=e34]: 10.0%
+      - generic [ref=e35]:
+        - generic "Relative urgency 13 of 21" [ref=e36]: Measured response · 13
+        - generic [ref=e37]: Exposure severe
+    - generic [ref=e38]:
+      - generic [ref=e39]:
+        - generic [ref=e40]:
+          - generic [ref=e41]:
+            - heading "Demo scenario · step 1 of 7" [level=2] [ref=e42]
+            - button "Exit demo" [ref=e44]
+          - generic [ref=e45]:
+            - list [ref=e46]:
+              - listitem [ref=e47]:
+                - button "1 Hasty search toward the summit" [disabled] [ref=e48]:
+                  - generic [ref=e49]: "1"
+                  - generic [ref=e50]: Hasty search toward the summit
+              - listitem [ref=e52]:
+                - button "2 Trail corridors at the hut" [disabled] [ref=e53]:
+                  - generic [ref=e54]: "2"
+                  - generic [ref=e55]: Trail corridors at the hut
+              - listitem [ref=e57]:
+                - button "3 Fog on the Dry River Trail" [disabled] [ref=e58]:
+                  - generic [ref=e59]: "3"
+                  - generic [ref=e60]: Fog on the Dry River Trail
+              - listitem [ref=e62]:
+                - button "4 Clue on the Dry River Trail" [disabled] [ref=e63]:
+                  - generic [ref=e64]: "4"
+                  - generic [ref=e65]: Clue on the Dry River Trail
+              - listitem [ref=e67]:
+                - button "5 Ammonoosuc Ravine cleared" [disabled] [ref=e68]:
+                  - generic [ref=e69]: "5"
+                  - generic [ref=e70]: Ammonoosuc Ravine cleared
+              - listitem [ref=e72]:
+                - button "6 Family tip → IC override" [disabled] [ref=e73]:
+                  - generic [ref=e74]: "6"
+                  - generic [ref=e75]: Family tip → IC override
+              - listitem [ref=e77]:
+                - button "7 Subject located" [disabled] [ref=e78]:
+                  - generic [ref=e79]: "7"
+                  - generic [ref=e80]: Subject located
+            - generic [ref=e81]:
+              - blockquote [ref=e82]: 📻 Command, Team 1. Hasty search done on the Crawford Path from the hut up through F10, G10 and G9, two of us calling and whistling the whole way, visibility okay. Nothing. No clues.
+              - button "Receive radio report → parse" [ref=e83]
+              - button "Presenter note" [ref=e85]
+        - generic [ref=e86]:
+          - generic [ref=e87]:
+            - heading "Search area" [level=2] [ref=e88]
+            - generic [ref=e91]:
+              - generic [ref=e92]: Bundled Mt Washington
+              - 'tooltip "Terrain: Bundled Mt Washington. OpenStreetMap data as of 10/30/2026, 8:49:34 PM"'
+          - generic [ref=e96]:
+            - img "Search area grid map" [ref=e97]:
+              - generic [ref=e98]:
+                - generic [ref=e99]: A
+                - generic [ref=e100]: "1"
+              - generic [ref=e101]:
+                - generic [ref=e102]: B
+                - generic [ref=e103]: "2"
+              - generic [ref=e104]:
+                - generic [ref=e105]: C
+                - generic [ref=e106]: "3"
+              - generic [ref=e107]:
+                - generic [ref=e108]: D
+                - generic [ref=e109]: "4"
+              - generic [ref=e110]:
+                - generic [ref=e111]: E
+                - generic [ref=e112]: "5"
+              - generic [ref=e113]:
+                - generic [ref=e114]: F
+                - generic [ref=e115]: "6"
+              - generic [ref=e116]:
+                - generic [ref=e117]: G
+                - generic [ref=e118]: "7"
+              - generic [ref=e119]:
+                - generic [ref=e120]: H
+                - generic [ref=e121]: "8"
+              - generic [ref=e122]:
+                - generic [ref=e123]: I
+                - generic [ref=e124]: "9"
+              - generic [ref=e125]:
+                - generic [ref=e126]: J
+                - generic [ref=e127]: "10"
+              - generic [ref=e128]:
+                - generic [ref=e129]: K
+                - generic [ref=e130]: "11"
+              - generic [ref=e131]:
+                - generic [ref=e132]: L
+                - generic [ref=e133]: "12"
+              - generic [ref=e134]:
+                - generic [ref=e135]: M
+                - generic [ref=e136]: "13"
+              - generic [ref=e137]:
+                - generic [ref=e138]: "N"
+                - generic [ref=e139]: "14"
+              - generic [ref=e140]:
+                - generic [ref=e141]: O
+                - generic [ref=e142]: "15"
+              - generic:
+                - generic: Boott Spur
+                - generic: Mount Monroe
+                - generic: Mount Washington
+                - generic: Lion Head
+                - generic: Mount Franklin
+                - generic: Agiocochook Crag
+              - generic [ref=e609]:
+                - generic: "0.2"
+                - generic: "0.2"
+                - generic: "0.2"
+                - generic: "0.2"
+                - generic: "0.2"
+                - generic: "0.2"
+                - generic: "0.1"
+                - generic: "0.1"
+                - generic: "0.1"
+                - generic: "0.0"
+                - generic: "0.0"
+                - generic: "0.0"
+                - generic: "0.0"
+                - generic: "0.1"
+                - generic: "0.1"
+                - generic: "0.1"
+                - generic: "0.2"
+                - generic: "0.2"
+                - generic: "0.2"
+                - generic: "0.1"
+                - generic: "0.2"
+                - generic: "0.2"
+                - generic: "0.1"
+                - generic: "0.1"
+                - generic: "0.1"
+                - generic: "0.1"
+                - generic: "0.0"
+                - generic: "0.1"
+                - generic: "0.1"
+                - generic: "0.1"
+                - generic: "0.2"
+                - generic: "0.2"
+                - generic: "0.2"
+                - generic: "0.2"
+                - generic: "0.2"
+                - generic: "0.1"
+                - generic: "0.2"
+                - generic: "0.2"
+                - generic: "0.2"
+                - generic: "0.1"
+                - generic: "0.1"
+                - generic: "0.1"
+                - generic: "0.1"
+                - generic: "0.1"
+                - generic: "0.1"
+                - generic: "0.1"
+                - generic: "0.3"
+                - generic: "0.1"
+                - generic: "0.3"
+                - generic: "0.3"
+                - generic: "0.3"
+                - generic: "0.2"
+                - generic: "0.2"
+                - generic: "0.2"
+                - generic: "0.2"
+                - generic: "0.2"
+                - generic: "0.1"
+                - generic: "0.1"
+                - generic: "0.2"
+                - generic: "0.2"
+                - generic: "0.3"
+                - generic: "0.4"
+                - generic: "0.4"
+                - generic: "0.4"
+                - generic: "0.2"
+                - generic: "0.2"
+                - generic: "0.1"
+                - generic: "0.3"
+                - generic: "0.3"
+                - generic: "0.2"
+                - generic: "0.2"
+                - generic: "0.1"
+                - generic: "0.1"
+                - generic: "0.1"
+                - generic: "0.2"
+                - generic: "0.4"
+                - generic: "0.4"
+                - generic: "0.5"
+                - generic: "0.4"
+                - generic: "0.4"
+                - generic: "0.4"
+                - generic: "0.2"
+                - generic: "0.4"
+                - generic: "0.3"
+                - generic: "0.2"
+                - generic: "0.2"
+                - generic: "0.2"
+                - generic: "0.3"
+                - generic: "0.1"
+                - generic: "0.1"
+                - generic: "1.0"
+                - generic: "1.2"
+                - generic: "1.4"
+                - generic: "1.4"
+                - generic: "0.6"
+                - generic: "0.6"
+                - generic: "0.5"
+                - generic: "0.5"
+                - generic: "0.4"
+                - generic: "0.3"
+                - generic: "0.1"
+                - generic: "0.1"
+                - generic: "0.3"
+                - generic: "0.1"
+                - generic: "0.1"
+                - generic: "1.2"
+                - generic: "1.5"
+                - generic: "0.5"
+                - generic: "2.2"
+                - generic: "1.0"
+                - generic: "0.8"
+                - generic: "0.4"
+                - generic: "0.6"
+                - generic: "0.5"
+                - generic: "0.4"
+                - generic: "0.3"
+                - generic: "0.2"
+                - generic: "0.3"
+                - generic: "0.1"
+                - generic: "0.2"
+                - generic: "0.3"
+                - generic: "1.8"
+                - generic: "1.2"
+                - generic: "1.6"
+                - generic: "1.9"
+                - generic: "0.7"
+                - generic: "1.1"
+                - generic: "0.8"
+                - generic: "0.5"
+                - generic: "0.4"
+                - generic: "0.3"
+                - generic: "0.4"
+                - generic: "0.4"
+                - generic: "0.3"
+                - generic: "0.3"
+                - generic: "0.3"
+                - generic: "0.9"
+                - generic: "1.2"
+                - generic: "0.9"
+                - generic: "2.2"
+                - generic: "2.1"
+                - generic: "1.2"
+                - generic: "0.8"
+                - generic: "0.6"
+                - generic: "0.4"
+                - generic: "0.3"
+                - generic: "0.2"
+                - generic: "0.1"
+                - generic: "0.3"
+                - generic: "0.3"
+                - generic: "0.3"
+                - generic: "0.3"
+                - generic: "0.5"
+                - generic: "0.7"
+                - generic: "1.8"
+                - generic: "1.5"
+                - generic: "2.4"
+                - generic: "0.7"
+                - generic: "0.2"
+                - generic: "0.4"
+                - generic: "0.3"
+                - generic: "0.2"
+                - generic: "0.1"
+                - generic: "0.1"
+                - generic: "0.1"
+                - generic: "0.5"
+                - generic: "0.3"
+                - generic: "0.7"
+                - generic: "1.0"
+                - generic: "1.0"
+                - generic: "1.0"
+                - generic: "0.8"
+                - generic: "0.7"
+                - generic: "0.5"
+                - generic: "0.2"
+                - generic: "0.1"
+                - generic: "0.2"
+                - generic: "0.3"
+                - generic: "0.3"
+                - generic: "0.1"
+                - generic: "0.2"
+                - generic: "0.5"
+                - generic: "0.6"
+                - generic: "0.6"
+                - generic: "0.3"
+                - generic: "0.3"
+                - generic: "1.3"
+                - generic: "0.5"
+                - generic: "0.4"
+                - generic: "0.2"
+                - generic: "0.1"
+                - generic: "0.1"
+                - generic: "0.2"
+                - generic: "0.1"
+                - generic: "0.1"
+                - generic: "0.3"
+                - generic: "0.3"
+                - generic: "0.2"
+                - generic: "0.5"
+                - generic: "0.2"
+                - generic: "0.6"
+                - generic: "1.1"
+                - generic: "0.4"
+                - generic: "0.2"
+                - generic: "0.1"
+                - generic: "0.1"
+                - generic: "0.2"
+                - generic: "0.1"
+                - generic: "0.1"
+                - generic: "0.1"
+                - generic: "0.1"
+                - generic: "0.1"
+                - generic: "0.2"
+                - generic: "0.4"
+                - generic: "0.2"
+                - generic: "0.2"
+                - generic: "0.8"
+                - generic: "0.3"
+                - generic: "0.2"
+                - generic: "0.1"
+                - generic: "0.1"
+                - generic: "0.2"
+                - generic: "0.1"
+                - generic: "0.1"
+                - generic: "0.1"
+              - generic: "1"
+              - generic: "2"
+              - generic: "3"
+              - generic: "4"
+              - generic: "5"
+              - generic "A1 · spruce, trail, ~1080 m · POA 0.2%" [ref=e610] [cursor=pointer]
+              - generic "B1 · spruce, trail, ~1140 m · POA 0.2%" [ref=e611] [cursor=pointer]
+              - generic "C1 · spruce, trail, ~1210 m · POA 0.2%" [ref=e612] [cursor=pointer]
+              - generic "D1 · spruce, trail, ~1270 m · POA 0.2%" [ref=e613] [cursor=pointer]
+              - generic "E1 · spruce, trail, ~1320 m · POA 0.2%" [ref=e614] [cursor=pointer]
+              - generic "F1 · spruce, trail, ~1370 m · POA 0.2%" [ref=e615] [cursor=pointer]
+              - generic "G1 · spruce, ~1420 m · POA 0.1%" [ref=e616] [cursor=pointer]
+              - generic "H1 · spruce, trail, ~1450 m · POA 0.1%" [ref=e617] [cursor=pointer]
+              - generic "I1 · alpine, trail, ~1490 m · POA 0.1%" [ref=e618] [cursor=pointer]
+              - generic "J1 · alpine, ~1520 m · POA 0.0%" [ref=e619] [cursor=pointer]
+              - generic "K1 · alpine, ~1530 m · POA 0.0%" [ref=e620] [cursor=pointer]
+              - generic "L1 · alpine, ~1560 m · POA 0.0%" [ref=e621] [cursor=pointer]
+              - generic "M1 · alpine, ~1600 m · POA 0.0%" [ref=e622] [cursor=pointer]
+              - generic "N1 · alpine, trail, ~1600 m · POA 0.1%" [ref=e623] [cursor=pointer]
+              - generic "O1 · alpine, trail, ~1570 m · POA 0.1%" [ref=e624] [cursor=pointer]
+              - generic "A2 · spruce, ~1120 m · POA 0.1%" [ref=e625] [cursor=pointer]
+              - generic "B2 · spruce, drainage, ~1150 m · POA 0.2%" [ref=e626] [cursor=pointer]
+              - generic "C2 · spruce, drainage, ~1220 m · POA 0.2%" [ref=e627] [cursor=pointer]
+              - generic "D2 · spruce, drainage, ~1280 m · POA 0.2%" [ref=e628] [cursor=pointer]
+              - generic "E2 · spruce, ~1390 m · POA 0.1%" [ref=e629] [cursor=pointer]
+              - generic "F2 · spruce, trail, ~1440 m · POA 0.2%" [ref=e630] [cursor=pointer]
+              - generic "G2 · alpine, trail, ~1490 m · POA 0.2%" [ref=e631] [cursor=pointer]
+              - generic "H2 · alpine, trail, ~1530 m · POA 0.1%" [ref=e632] [cursor=pointer]
+              - generic "I2 · alpine, ~1560 m · POA 0.1%" [ref=e633] [cursor=pointer]
+              - generic "J2 · alpine, ~1600 m · POA 0.1%" [ref=e634] [cursor=pointer]
+              - generic "K2 · alpine, ~1620 m · POA 0.1%" [ref=e635] [cursor=pointer]
+              - generic "L2 · alpine, ~1610 m · POA 0.0%" [ref=e636] [cursor=pointer]
+              - generic "M2 · alpine, trail, ~1680 m · POA 0.1%" [ref=e637] [cursor=pointer]
+              - generic "N2 · alpine, trail, ~1680 m · POA 0.1%" [ref=e638] [cursor=pointer]
+              - generic "O2 · alpine, trail, ~1660 m · POA 0.1%" [ref=e639] [cursor=pointer]
+              - generic "A3 · spruce, drainage, ~1110 m · POA 0.2%" [ref=e640] [cursor=pointer]
+              - generic "B3 · spruce, drainage, ~1190 m · POA 0.2%" [ref=e641] [cursor=pointer]
+              - generic "C3 · spruce, drainage, ~1260 m · POA 0.2%" [ref=e642] [cursor=pointer]
+              - generic "D3 · spruce, drainage, ~1330 m · POA 0.2%" [ref=e643] [cursor=pointer]
+              - generic "E3 · spruce, drainage, ~1400 m · POA 0.2%" [ref=e644] [cursor=pointer]
+              - generic "F3 · alpine, ~1500 m · POA 0.1%" [ref=e645] [cursor=pointer]
+              - generic "G3 · alpine, trail, ~1560 m · POA 0.2%" [ref=e646] [cursor=pointer]
+              - generic "H3 · alpine, trail, ~1610 m · POA 0.2%" [ref=e647] [cursor=pointer]
+              - generic "I3 · alpine, trail, ~1640 m · POA 0.2%" [ref=e648] [cursor=pointer]
+              - generic "J3 · alpine, ~1680 m · POA 0.1%" [ref=e649] [cursor=pointer]
+              - generic "K3 · alpine, trail, ~1710 m · POA 0.1%" [ref=e650] [cursor=pointer]
+              - generic "L3 · alpine, trail, ~1690 m · POA 0.1%" [ref=e651] [cursor=pointer]
+              - generic "M3 · alpine, trail, ~1690 m · POA 0.1%" [ref=e652] [cursor=pointer]
+              - generic "N3 · alpine, trail, ridgeline, ~1700 m · POA 0.1%" [ref=e653] [cursor=pointer]
+              - generic "O3 · alpine, trail, ridgeline, ~1660 m · POA 0.1%" [ref=e654] [cursor=pointer]
+              - generic "A4 · spruce, ~1180 m · POA 0.1%" [ref=e655] [cursor=pointer]
+              - generic "B4 · spruce, drainage, ~1220 m · POA 0.3%" [ref=e656] [cursor=pointer]
+              - generic "C4 · spruce, ~1330 m · POA 0.1%" [ref=e657] [cursor=pointer]
+              - generic "D4 · spruce, trail, ~1410 m · POA 0.3%" [ref=e658] [cursor=pointer]
+              - generic "E4 · alpine, trail, ~1480 m · POA 0.3%" [ref=e659] [cursor=pointer]
+              - generic "F4 · alpine, trail, ~1550 m · POA 0.3%" [ref=e660] [cursor=pointer]
+              - generic "G4 · alpine, trail, ~1620 m · POA 0.2%" [ref=e661] [cursor=pointer]
+              - generic "H4 · alpine, trail, ~1680 m · POA 0.2%" [ref=e662] [cursor=pointer]
+              - generic "I4 · alpine, trail, ~1730 m · POA 0.2%" [ref=e663] [cursor=pointer]
+              - generic "J4 · alpine, trail, ~1750 m · POA 0.2%" [ref=e664] [cursor=pointer]
+              - generic "K4 · alpine, trail, ~1790 m · POA 0.2%" [ref=e665] [cursor=pointer]
+              - generic "L4 · alpine, trail, ~1750 m · POA 0.1%" [ref=e666] [cursor=pointer]
+              - generic "M4 · alpine, trail, ~1680 m · POA 0.1%" [ref=e667] [cursor=pointer]
+              - generic "N4 · alpine, trail, drainage, ~1580 m · POA 0.2%" [ref=e668] [cursor=pointer]
+              - generic "O4 · alpine, trail, drainage, ~1540 m · POA 0.2%" [ref=e669] [cursor=pointer]
+              - generic "A5 · spruce, trail, ~1190 m · POA 0.3%" [ref=e670] [cursor=pointer]
+              - generic "B5 · spruce, trail, ~1270 m · POA 0.4%" [ref=e671] [cursor=pointer]
+              - generic "C5 · spruce, trail, ~1350 m · POA 0.4%" [ref=e672] [cursor=pointer]
+              - generic "D5 · spruce, trail, ~1430 m · POA 0.4%" [ref=e673] [cursor=pointer]
+              - generic "E5 · alpine, ~1510 m · POA 0.2%" [ref=e674] [cursor=pointer]
+              - generic "F5 · alpine, ~1590 m · POA 0.2%" [ref=e675] [cursor=pointer]
+              - generic "G5 · alpine, ~1660 m · POA 0.1%" [ref=e676] [cursor=pointer]
+              - generic "H5 · alpine, trail, ~1740 m · POA 0.3%" [ref=e677] [cursor=pointer]
+              - generic "I5 · alpine, trail, ~1800 m · POA 0.3%" [ref=e678] [cursor=pointer]
+              - generic "J5 · alpine, trail, ~1830 m · POA 0.2%" [ref=e679] [cursor=pointer]
+              - generic "K5 · alpine, trail, ridgeline, ~1800 m · POA 0.2%" [ref=e680] [cursor=pointer]
+              - generic "L5 · alpine, drainage, ~1720 m · POA 0.1%" [ref=e681] [cursor=pointer]
+              - generic "M5 · alpine, trail, ~1680 m · POA 0.1%" [ref=e682] [cursor=pointer]
+              - generic "N5 · alpine, drainage, ~1570 m · POA 0.1%" [ref=e683] [cursor=pointer]
+              - generic "O5 · alpine, trail, drainage, ~1490 m · POA 0.2%" [ref=e684] [cursor=pointer]
+              - generic "A6 · spruce, drainage, ~1160 m · POA 0.4%" [ref=e685] [cursor=pointer]
+              - generic "B6 · spruce, drainage, ~1240 m · POA 0.4%" [ref=e686] [cursor=pointer]
+              - generic "C6 · spruce, drainage, ~1320 m · POA 0.5%" [ref=e687] [cursor=pointer]
+              - generic "D6 · spruce, drainage, ~1400 m · POA 0.4%" [ref=e688] [cursor=pointer]
+              - generic "E6 · alpine, drainage, ~1480 m · POA 0.4%" [ref=e689] [cursor=pointer]
+              - generic "F6 · alpine, drainage, ~1560 m · POA 0.4%" [ref=e690] [cursor=pointer]
+              - generic "G6 · alpine, ~1680 m · POA 0.2%" [ref=e691] [cursor=pointer]
+              - generic "H6 · alpine, trail, ~1760 m · POA 0.4%" [ref=e692] [cursor=pointer]
+              - generic "I6 · alpine, trail, ~1840 m · POA 0.3%" [ref=e693] [cursor=pointer]
+              - generic "J6 · alpine, trail, ridgeline, ~1910 m · POA 0.2%" [ref=e694] [cursor=pointer]
+              - generic "K6 · alpine, trail, ~1840 m · POA 0.2%" [ref=e695] [cursor=pointer]
+              - generic "L6 · alpine, drainage, ~1720 m · POA 0.2%" [ref=e696] [cursor=pointer]
+              - generic "M6 · alpine, trail, drainage, ~1640 m · POA 0.3%" [ref=e697] [cursor=pointer]
+              - generic "N6 · alpine, ~1600 m · POA 0.1%" [ref=e698] [cursor=pointer]
+              - generic "O6 · alpine, ~1520 m · POA 0.1%" [ref=e699] [cursor=pointer]
+              - generic "A7 · spruce, trail, drainage, ~1150 m · POA 1.0%" [ref=e700] [cursor=pointer]
+              - generic "B7 · spruce, trail, drainage, ~1230 m · POA 1.2%" [ref=e701] [cursor=pointer]
+              - generic "C7 · spruce, trail, drainage, ~1310 m · POA 1.4%" [ref=e702] [cursor=pointer]
+              - generic "D7 · spruce, trail, drainage, ~1390 m · POA 1.4%" [ref=e703] [cursor=pointer]
+              - generic "E7 · alpine, drainage, ~1470 m · POA 0.6%" [ref=e704] [cursor=pointer]
+              - generic "F7 · alpine, drainage, ~1540 m · POA 0.6%" [ref=e705] [cursor=pointer]
+              - generic "G7 · alpine, drainage, ~1620 m · POA 0.5%" [ref=e706] [cursor=pointer]
+              - generic "H7 · alpine, trail, ~1730 m · POA 0.5%" [ref=e707] [cursor=pointer]
+              - generic "I7 · alpine, trail, ~1790 m · POA 0.4%" [ref=e708] [cursor=pointer]
+              - generic "J7 · alpine, trail, ~1820 m · POA 0.3%" [ref=e709] [cursor=pointer]
+              - generic "K7 · alpine, ~1790 m · POA 0.1%" [ref=e710] [cursor=pointer]
+              - generic "L7 · alpine, ~1730 m · POA 0.1%" [ref=e711] [cursor=pointer]
+              - generic "M7 · alpine, trail, drainage, ~1620 m · POA 0.3%" [ref=e712] [cursor=pointer]
+              - generic "N7 · alpine, drainage, ~1550 m · POA 0.1%" [ref=e713] [cursor=pointer]
+              - generic "O7 · alpine, drainage, ~1470 m · POA 0.1%" [ref=e714] [cursor=pointer]
+              - generic "A8 · spruce, trail, drainage, ~1150 m · POA 1.2%" [ref=e715] [cursor=pointer]
+              - generic "B8 · spruce, trail, drainage, ~1210 m · POA 1.5%" [ref=e716] [cursor=pointer]
+              - generic "C8 · spruce, ~1330 m · POA 0.5%" [ref=e717] [cursor=pointer]
+              - generic "D8 · spruce, trail, drainage, ~1360 m · POA 2.2%" [ref=e718] [cursor=pointer]
+              - generic "E8 · spruce, drainage, ~1440 m · POA 1.0%" [ref=e719] [cursor=pointer]
+              - generic "F8 · alpine, drainage, ~1510 m · POA 0.8%" [ref=e720] [cursor=pointer]
+              - generic "G8 · alpine, ~1620 m · POA 0.4%" [ref=e721] [cursor=pointer]
+              - generic "H8 · alpine, trail, ~1670 m · POA 0.6%" [ref=e722] [cursor=pointer]
+              - generic "I8 · alpine, trail, ~1720 m · POA 0.5%" [ref=e723] [cursor=pointer]
+              - generic "J8 · alpine, trail, ~1730 m · POA 0.4%" [ref=e724] [cursor=pointer]
+              - generic "K8 · alpine, trail, ~1720 m · POA 0.3%" [ref=e725] [cursor=pointer]
+              - generic "L8 · alpine, trail, ~1670 m · POA 0.2%" [ref=e726] [cursor=pointer]
+              - generic "M8 · alpine, trail, drainage, ~1580 m · POA 0.3%" [ref=e727] [cursor=pointer]
+              - generic "N8 · alpine, trail, ridgeline, ~1550 m · POA 0.1%" [ref=e728] [cursor=pointer]
+              - generic "O8 · spruce, trail, drainage, ~1440 m · POA 0.2%" [ref=e729] [cursor=pointer]
+              - generic "A9 · spruce, ~1260 m · POA 0.3%" [ref=e730] [cursor=pointer]
+              - generic "B9 · spruce, trail, drainage, ~1260 m · POA 1.8%" [ref=e731] [cursor=pointer]
+              - generic "C9 · spruce, drainage, ~1300 m · POA 1.2%" [ref=e732] [cursor=pointer]
+              - generic "D9 · spruce, drainage, ~1330 m · POA 1.6%" [ref=e733] [cursor=pointer]
+              - generic "E9 · spruce, trail, ~1430 m · POA 1.9%" [ref=e734] [cursor=pointer]
+              - generic "F9 · alpine, ~1500 m · POA 0.7%" [ref=e735] [cursor=pointer]
+              - generic "G9 · alpine, trail, ~1550 m · POA 1.1%" [ref=e736] [cursor=pointer]
+              - generic "H9 · alpine, trail, ~1600 m · POA 0.8%" [ref=e737] [cursor=pointer]
+              - generic "I9 · alpine, trail, ~1630 m · POA 0.5%" [ref=e738] [cursor=pointer]
+              - generic "J9 · alpine, trail, ~1640 m · POA 0.4%" [ref=e739] [cursor=pointer]
+              - generic "K9 · alpine, trail, ~1630 m · POA 0.3%" [ref=e740] [cursor=pointer]
+              - generic "L9 · alpine, trail, drainage, ~1560 m · POA 0.4%" [ref=e741] [cursor=pointer]
+              - generic "M9 · alpine, trail, drainage, ~1520 m · POA 0.4%" [ref=e742] [cursor=pointer]
+              - generic "N9 · alpine, trail, drainage, ~1460 m · POA 0.3%" [ref=e743] [cursor=pointer]
+              - generic "O9 · spruce, trail, drainage, ~1400 m · POA 0.3%" [ref=e744] [cursor=pointer]
+              - generic "A10 · spruce, ~1340 m · POA 0.3%" [ref=e745] [cursor=pointer]
+              - generic "B10 · spruce, drainage, ~1340 m · POA 0.9%" [ref=e746] [cursor=pointer]
+              - generic "C10 · spruce, drainage, ~1380 m · POA 1.2%" [ref=e747] [cursor=pointer]
+              - generic "D10 · alpine, ~1460 m · POA 0.9%" [ref=e748] [cursor=pointer]
+              - generic "E10 · alpine, trail, ~1460 m · POA 2.2%" [ref=e749] [cursor=pointer]
+              - generic "F10 · spruce, trail, ~1430 m · POA 2.1%" [ref=e750] [cursor=pointer]
+              - generic "G10 · alpine, trail, ~1480 m · POA 1.2%" [ref=e751] [cursor=pointer]
+              - generic "H10 · alpine, trail, ~1520 m · POA 0.8%" [ref=e752] [cursor=pointer]
+              - generic "I10 · alpine, trail, ~1550 m · POA 0.6%" [ref=e753] [cursor=pointer]
+              - generic "J10 · alpine, trail, ~1560 m · POA 0.4%" [ref=e754] [cursor=pointer]
+              - generic "K10 · alpine, drainage, ~1510 m · POA 0.3%" [ref=e755] [cursor=pointer]
+              - generic "L10 · alpine, drainage, ~1480 m · POA 0.2%" [ref=e756] [cursor=pointer]
+              - generic "M10 · alpine, ~1480 m · POA 0.1%" [ref=e757] [cursor=pointer]
+              - generic "N10 · spruce, trail, drainage, ~1400 m · POA 0.3%" [ref=e758] [cursor=pointer]
+              - generic "O10 · spruce, trail, drainage, ~1340 m · POA 0.3%" [ref=e759] [cursor=pointer]
+              - generic "A11 · spruce, ~1390 m · POA 0.3%" [ref=e760] [cursor=pointer]
+              - generic "B11 · alpine, ~1450 m · POA 0.3%" [ref=e761] [cursor=pointer]
+              - generic "C11 · alpine, ~1490 m · POA 0.5%" [ref=e762] [cursor=pointer]
+              - generic "D11 · alpine, ~1540 m · POA 0.7%" [ref=e763] [cursor=pointer]
+              - generic "E11 · alpine, trail, ~1540 m · POA 1.8%" [ref=e764] [cursor=pointer]
+              - generic "F11 · alpine, trail, ~1490 m · POA 1.5%" [ref=e765] [cursor=pointer]
+              - generic "G11 · spruce, trail, drainage, ~1370 m · POA 2.4%" [ref=e766] [cursor=pointer]
+              - generic "H11 · spruce, drainage, ~1400 m · POA 0.7%" [ref=e767] [cursor=pointer]
+              - generic "I11 · alpine, ~1460 m · POA 0.2%" [ref=e768] [cursor=pointer]
+              - generic "J11 · alpine, trail, ~1470 m · POA 0.4%" [ref=e769] [cursor=pointer]
+              - generic "K11 · alpine, trail, ~1460 m · POA 0.3%" [ref=e770] [cursor=pointer]
+              - generic "L11 · alpine, trail, ~1510 m · POA 0.2%" [ref=e771] [cursor=pointer]
+              - generic "M11 · alpine, ~1520 m · POA 0.1%" [ref=e772] [cursor=pointer]
+              - generic "N11 · spruce, drainage, ~1450 m · POA 0.1%" [ref=e773] [cursor=pointer]
+              - generic "O11 · spruce, drainage, ~1400 m · POA 0.1%" [ref=e774] [cursor=pointer]
+              - generic "A12 · spruce, drainage, ~1370 m · POA 0.5%" [ref=e775] [cursor=pointer]
+              - generic "B12 · alpine, ~1490 m · POA 0.3%" [ref=e776] [cursor=pointer]
+              - generic "C12 · alpine, trail, ridgeline, ~1560 m · POA 0.7%" [ref=e777] [cursor=pointer]
+              - generic "D12 · alpine, trail, ~1570 m · POA 1.0%" [ref=e778] [cursor=pointer]
+              - generic "E12 · alpine, trail, ridgeline, ~1570 m · POA 1.0%" [ref=e779] [cursor=pointer]
+              - generic "F12 · alpine, trail, ~1500 m · POA 1.0%" [ref=e780] [cursor=pointer]
+              - generic "G12 · spruce, drainage, ~1380 m · POA 0.8%" [ref=e781] [cursor=pointer]
+              - generic "H12 · spruce, drainage, ~1310 m · POA 0.7%" [ref=e782] [cursor=pointer]
+              - generic "I12 · spruce, drainage, ~1330 m · POA 0.5%" [ref=e783] [cursor=pointer]
+              - generic "J12 · spruce, ~1440 m · POA 0.2%" [ref=e784] [cursor=pointer]
+              - generic "K12 · alpine, ~1510 m · POA 0.1%" [ref=e785] [cursor=pointer]
+              - generic "L12 · alpine, trail, ~1580 m · POA 0.2%" [ref=e786] [cursor=pointer]
+              - generic "M12 · alpine, trail, drainage, ~1570 m · POA 0.3%" [ref=e787] [cursor=pointer]
+              - generic "N12 · alpine, trail, drainage, ~1510 m · POA 0.3%" [ref=e788] [cursor=pointer]
+              - generic "O12 · alpine, trail, ~1480 m · POA 0.1%" [ref=e789] [cursor=pointer]
+              - generic "A13 · spruce, ~1420 m · POA 0.2%" [ref=e790] [cursor=pointer]
+              - generic "B13 · spruce, trail, ~1440 m · POA 0.5%" [ref=e791] [cursor=pointer]
+              - generic "C13 · alpine, trail, ~1470 m · POA 0.6%" [ref=e792] [cursor=pointer]
+              - generic "D13 · alpine, drainage, ~1460 m · POA 0.6%" [ref=e793] [cursor=pointer]
+              - generic "E13 · alpine, ~1500 m · POA 0.3%" [ref=e794] [cursor=pointer]
+              - generic "F13 · alpine, ~1460 m · POA 0.3%" [ref=e795] [cursor=pointer]
+              - generic "G13 · spruce, trail, drainage, ~1350 m · POA 1.3%" [ref=e796] [cursor=pointer]
+              - generic "H13 · spruce, drainage, ~1280 m · POA 0.5%" [ref=e797] [cursor=pointer]
+              - generic "I13 · spruce, drainage, ~1320 m · POA 0.4%" [ref=e798] [cursor=pointer]
+              - generic "J13 · spruce, ~1440 m · POA 0.2%" [ref=e799] [cursor=pointer]
+              - generic "K13 · alpine, ~1520 m · POA 0.1%" [ref=e800] [cursor=pointer]
+              - generic "L13 · alpine, ~1590 m · POA 0.1%" [ref=e801] [cursor=pointer]
+              - generic "M13 · alpine, trail, ridgeline, ~1630 m · POA 0.2%" [ref=e802] [cursor=pointer]
+              - generic "N13 · alpine, drainage, ~1520 m · POA 0.1%" [ref=e803] [cursor=pointer]
+              - generic "O13 · spruce, drainage, ~1440 m · POA 0.1%" [ref=e804] [cursor=pointer]
+              - generic "A14 · alpine, trail, ~1450 m · POA 0.3%" [ref=e805] [cursor=pointer]
+              - generic "B14 · alpine, trail, ridgeline, ~1490 m · POA 0.3%" [ref=e806] [cursor=pointer]
+              - generic "C14 · spruce, ~1420 m · POA 0.2%" [ref=e807] [cursor=pointer]
+              - generic "D14 · spruce, drainage, ~1370 m · POA 0.5%" [ref=e808] [cursor=pointer]
+              - generic "E14 · spruce, ~1410 m · POA 0.2%" [ref=e809] [cursor=pointer]
+              - generic "F14 · spruce, trail, ~1380 m · POA 0.6%" [ref=e810] [cursor=pointer]
+              - generic "G14 · spruce, trail, drainage, ~1300 m · POA 1.1%" [ref=e811] [cursor=pointer]
+              - generic "H14 · spruce, drainage, ~1240 m · POA 0.4%" [ref=e812] [cursor=pointer]
+              - generic "I14 · spruce, ~1340 m · POA 0.2%" [ref=e813] [cursor=pointer]
+              - generic "J14 · spruce, ~1410 m · POA 0.1%" [ref=e814] [cursor=pointer]
+              - generic "K14 · alpine, ~1480 m · POA 0.1%" [ref=e815] [cursor=pointer]
+              - generic "L14 · alpine, trail, ~1530 m · POA 0.2%" [ref=e816] [cursor=pointer]
+              - generic "M14 · alpine, ~1540 m · POA 0.1%" [ref=e817] [cursor=pointer]
+              - generic "N14 · alpine, ~1510 m · POA 0.1%" [ref=e818] [cursor=pointer]
+              - generic "O14 · spruce, drainage, ~1410 m · POA 0.1%" [ref=e819] [cursor=pointer]
+              - generic "A15 · spruce, ~1400 m · POA 0.1%" [ref=e820] [cursor=pointer]
+              - generic "B15 · spruce, ~1410 m · POA 0.1%" [ref=e821] [cursor=pointer]
+              - generic "C15 · spruce, ~1370 m · POA 0.2%" [ref=e822] [cursor=pointer]
+              - generic "D15 · spruce, drainage, ~1280 m · POA 0.4%" [ref=e823] [cursor=pointer]
+              - generic "E15 · spruce, ~1320 m · POA 0.2%" [ref=e824] [cursor=pointer]
+              - generic "F15 · spruce, ~1300 m · POA 0.2%" [ref=e825] [cursor=pointer]
+              - generic "G15 · spruce, trail, drainage, ~1230 m · POA 0.8%" [ref=e826] [cursor=pointer]
+              - generic "H15 · spruce, drainage, ~1190 m · POA 0.3%" [ref=e827] [cursor=pointer]
+              - generic "I15 · spruce, ~1300 m · POA 0.2%" [ref=e828] [cursor=pointer]
+              - generic "J15 · spruce, ~1360 m · POA 0.1%" [ref=e829] [cursor=pointer]
+              - generic "K15 · spruce, ~1410 m · POA 0.1%" [ref=e830] [cursor=pointer]
+              - generic "L15 · spruce, trail, ~1440 m · POA 0.2%" [ref=e831] [cursor=pointer]
+              - generic "M15 · alpine, trail, ~1450 m · POA 0.1%" [ref=e832] [cursor=pointer]
+              - generic "N15 · spruce, ~1430 m · POA 0.1%" [ref=e833] [cursor=pointer]
+              - generic "O15 · spruce, drainage, ~1350 m · POA 0.1%" [ref=e834] [cursor=pointer]
+            - link "© OpenStreetMap contributors" [ref=e835] [cursor=pointer]:
+              - /url: https://www.openstreetmap.org/copyright
+          - generic [ref=e837]:
+            - generic [ref=e838]: Trail
+            - generic [ref=e840]: Road
+            - generic [ref=e842]: Stream / drainage
+            - generic [ref=e844]: Pond / lake
+            - generic [ref=e846]:
+              - generic [ref=e847]: ▲
+              - text: Peak
+            - generic [ref=e848]: LKP
+            - generic [ref=e850]: POA (relative)
+            - generic [ref=e852]: Searched
+            - generic [ref=e854]: Suggestion (#)
+            - generic [ref=e856]: Clue
+        - generic [ref=e858]:
+          - generic [ref=e861]:
+            - generic [ref=e862]: Rest of World
+            - generic [ref=e863]: 10.0%
+            - generic [ref=e864]: Outside the grid
+          - generic [ref=e866]: Probability the subject is outside the grid. It grows as the grid is searched without a find. The app never recommends ending or expanding the search; that call stays with people.
+      - generic [ref=e868]:
+        - tablist [ref=e869]:
+          - tab "Operations" [selected] [ref=e870]
+          - tab "Cell" [ref=e871]
+          - tab "Clues" [ref=e872]
+          - tab "Weather severe" [ref=e873]:
+            - text: Weather
+            - generic [ref=e874]: severe
+          - tab "Log 2" [ref=e875]:
+            - text: Log
+            - generic [ref=e876]: "2"
+        - tabpanel "Operations" [ref=e877]:
+          - generic [ref=e878]:
+            - generic [ref=e879]:
+              - heading "Search setup" [level=2] [ref=e881]
+              - generic [ref=e883]:
+                - generic [ref=e884]:
+                  - generic [ref=e885]:
+                    - generic [ref=e886]: Last known point
+                    - generic [ref=e887]:
+                      - text: E10
+                      - generic [ref=e888]: · alpine, trail, ~1460 m
+                  - button "Move LKP" [ref=e889]
+                - generic [ref=e890]:
+                  - generic [ref=e891]: Lost-person category
+                  - combobox "Lost-person category" [ref=e892]:
+                    - option "Day hiker — Follows trails, then drainages downhill when lost." [selected]
+                    - option "Child (7–12) — Stays closer to the LKP; drawn to open ground; may hide."
+                    - option "Hunter — Off-trail, travels farther, uses ridges and drainages."
+                    - option "Older adult — Shorter distances; stays on easy, downhill terrain."
+                    - option "Trail runner — Covers long distances fast, strongly trail-bound."
+                - generic [ref=e893]:
+                  - generic [ref=e894]:
+                    - text: "Starting Rest of World (ROW): 10%"
+                    - button "model suggests 60%" [ref=e895]
+                  - 'slider "Starting Rest of World (ROW): 10% model suggests 60%" [ref=e896]': "10"
+                - paragraph [ref=e897]:
+                  - text: Priors are
+                  - strong [ref=e898]: illustrative estimates
+                  - text: (lost-person distance statistics × time missing × terrain), not operational guidance. Click any cell to review or edit its POA before the search starts.
+            - generic [ref=e899]:
+              - heading "Radio report" [level=2] [ref=e901]
+              - generic [ref=e903]:
+                - textbox "Paste or type the radio report, e.g. “Team 2 swept C4 through C6, thick spruce, spacing maybe 20 meters, fog rolling in, no clues.”" [ref=e904]
+                - generic [ref=e905]:
+                  - button "Parse with Claude" [disabled] [ref=e906]
+                  - button "Manual entry" [ref=e910]
+                  - generic [ref=e911]: Claude proposes; you confirm before anything changes.
+            - generic [ref=e912]:
+              - generic [ref=e913]:
+                - heading "Suggestions" [level=2] [ref=e914]
+                - generic [ref=e915]: Suggestions only · you assign teams
+              - generic [ref=e917]:
+                - paragraph [ref=e918]: Ranked by POA × expected POD for the next sweep.
+                - status [ref=e919]:
+                  - generic [ref=e926]:
+                    - text: "Expected POD ×0.45 for current weather:"
+                    - generic [ref=e927]: "snow: −25% expected detection"
+                    - generic [ref=e928]: "darkness: −40% expected detection"
+                - table [ref=e929]:
+                  - rowgroup [ref=e930]:
+                    - row [ref=e931]:
+                      - columnheader "#" [ref=e932]
+                      - columnheader "Cell" [ref=e933]
+                      - columnheader "POA" [ref=e934]
+                      - columnheader "Exp. POD" [ref=e935]
+                      - columnheader "Score" [ref=e936]
+                      - columnheader [ref=e937]
+                  - rowgroup [ref=e938]:
+                    - row [ref=e939]:
+                      - cell "1" [ref=e940]
+                      - cell "E10 alpine, trail, ~1460 m" [ref=e941]:
+                        - generic [ref=e942]: E10
+                        - generic [ref=e943]: alpine, trail, ~1460 m
+                      - cell "2.2%" [ref=e944]
+                      - cell "29%" [ref=e945]
+                      - cell "6.4" [ref=e946]
+                      - cell [ref=e947]:
+                        - button "Pick" [ref=e948]
+                    - row [ref=e949]:
+                      - cell "2" [ref=e950]
+                      - cell "E11 alpine, trail, ~1540 m" [ref=e951]:
+                        - generic [ref=e952]: E11
+                        - generic [ref=e953]: alpine, trail, ~1540 m
+                      - cell "1.8%" [ref=e954]
+                      - cell "29%" [ref=e955]
+                      - cell "5.4" [ref=e956]
+                      - cell [ref=e957]:
+                        - button "Pick" [ref=e958]
+                    - row [ref=e959]:
+                      - cell "3" [ref=e960]
+                      - cell "G11 spruce, trail, drainage, ~1370 m" [ref=e961]:
+                        - generic [ref=e962]: G11
+                        - generic [ref=e963]: spruce, trail, drainage, ~1370 m
+                      - cell "2.4%" [ref=e964]
+                      - cell "20%" [ref=e965]
+                      - cell "4.8" [ref=e966]
+                      - cell [ref=e967]:
+                        - button "Pick" [ref=e968]
+                    - row [ref=e969]:
+                      - cell "4" [ref=e970]
+                      - cell "D8 spruce, trail, drainage, ~1360 m" [ref=e971]:
+                        - generic [ref=e972]: D8
+                        - generic [ref=e973]: spruce, trail, drainage, ~1360 m
+                      - cell "2.2%" [ref=e974]
+                      - cell "20%" [ref=e975]
+                      - cell "4.5" [ref=e976]
+                      - cell [ref=e977]:
+                        - button "Pick" [ref=e978]
+                    - row [ref=e979]:
+                      - cell "5" [ref=e980]
+                      - cell "F11 alpine, trail, ~1490 m" [ref=e981]:
+                        - generic [ref=e982]: F11
+                        - generic [ref=e983]: alpine, trail, ~1490 m
+                      - cell "1.5%" [ref=e984]
+                      - cell "29%" [ref=e985]
+                      - cell "4.5" [ref=e986]
+                      - cell [ref=e987]:
+                        - button "Pick" [ref=e988]
+                - generic [ref=e989]:
+                  - generic [ref=e990]:
+                    - generic [ref=e991]: Team
+                    - textbox "Team 3" [ref=e992]
+                  - generic [ref=e993]:
+                    - generic [ref=e994]: Cell (any cell)
+                    - textbox "E10" [ref=e995]
+                  - button "Assign" [disabled] [ref=e996]
+  - contentinfo [ref=e4]: Decision support only. The incident commander directs all search operations.
+  - button "Open Next.js Dev Tools" [ref=e1002] [cursor=pointer]
+  - alert [ref=e5]

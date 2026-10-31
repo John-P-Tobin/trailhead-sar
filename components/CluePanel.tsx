@@ -1,8 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Panel from "./ui/Panel";
-import { btnPrimary, input, label } from "./ui/styles";
+import Alert from "./ui/Alert";
+import Button from "./ui/Button";
+import Card from "./ui/Card";
+import Empty from "./ui/Empty";
+import { IconClue } from "./ui/icons";
+import { input, label, listRow } from "./ui/styles";
 import { applyClue, BOOST_FACTORS, BoostLevel } from "@/lib/engine/clues";
 import { cellsWithin, isCellId } from "@/lib/engine/grid";
 import { ProbState } from "@/lib/engine/bayes";
@@ -42,26 +46,14 @@ export default function CluePanel({
   }, [valid, boost, target, radius, prob]);
 
   return (
-    <Panel title="Clues">
-      <p className="mb-2 text-xs text-slate-400">
-        You decide how much a clue matters. The AI never weights clues on its own.
-      </p>
+    <Card title="Clues" size="small" extra={<span>You decide the weight</span>}>
+      <p className="mb-2 text-xs text-fg-2">You decide how much a clue matters. The AI never weights clues on its own.</p>
       <div className="space-y-2">
-        <input
-          className={input}
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="e.g. Granola wrapper found at F10 / wife says he always takes the ridge"
-        />
+        <input className={input} value={text} onChange={(e) => setText(e.target.value)} placeholder="e.g. Granola wrapper found at F10 / wife says he always takes the ridge" />
         <div className="grid grid-cols-3 gap-2">
           <div>
             <label className={label}>Near cell</label>
-            <input
-              className={`${input} font-mono uppercase`}
-              value={cell || selectedCell || ""}
-              onChange={(e) => setCell(e.target.value)}
-              placeholder="F10"
-            />
+            <input className={`${input} font-mono uppercase`} value={cell || selectedCell || ""} onChange={(e) => setCell(e.target.value)} placeholder="F10" />
           </div>
           <div>
             <label className={label}>Radius</label>
@@ -83,14 +75,21 @@ export default function CluePanel({
           </div>
         </div>
         {preview && (
-          <div className="text-xs text-violet-200">
-            Preview: the {preview.n} cell{preview.n > 1 ? "s" : ""} near {target} go from{" "}
-            {(preview.before * 100).toFixed(1)}% to {(preview.after * 100).toFixed(1)}% of total probability.
-          </div>
+          <Alert
+            type="info"
+            compact
+            description={
+              <>
+                Preview: the {preview.n} cell{preview.n > 1 ? "s" : ""} near <span className="font-mono">{target}</span> go from {(preview.before * 100).toFixed(1)}% to{" "}
+                {(preview.after * 100).toFixed(1)}% of total probability.
+              </>
+            }
+          />
         )}
         <div className="flex justify-end">
-          <button
-            className={btnPrimary}
+          <Button
+            variant="primary"
+            icon={<IconClue />}
             disabled={!valid}
             onClick={() => {
               onAdd({ text: text.trim(), cell: target, radius, boost });
@@ -100,21 +99,21 @@ export default function CluePanel({
             }}
           >
             Add clue
-          </button>
+          </Button>
         </div>
       </div>
-      {clues.length > 0 && (
+      {clues.length === 0 ? (
+        <Empty icon={<IconClue width={22} height={22} />} title="No clues yet" hint="Physical finds and family statements go here. Each one is logged with the weight you chose." />
+      ) : (
         <ul className="mt-3 space-y-1 text-xs">
           {[...clues].reverse().map((c) => (
-            <li key={c.id} className="rounded bg-slate-950/50 px-2 py-1">
-              <span className="font-mono text-violet-300">{c.cell}</span> “{c.text}” ·{" "}
-              <span className="text-slate-400">
-                {c.boost === "none" ? "logged only" : `IC boost ${c.boost} ×${c.factor}, radius ${c.radius}`}
-              </span>
+            <li key={c.id} className={listRow}>
+              <span className="font-mono text-purple">{c.cell}</span> “{c.text}” ·{" "}
+              <span className="text-fg-2">{c.boost === "none" ? "logged only" : `IC boost ${c.boost} ×${c.factor}, radius ${c.radius}`}</span>
             </li>
           ))}
         </ul>
       )}
-    </Panel>
+    </Card>
   );
 }

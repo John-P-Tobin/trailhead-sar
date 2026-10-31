@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import GridMap from "./GridMap";
 import MapLegend from "./MapLegend";
-import Panel from "./ui/Panel";
 import RowIndicator from "./RowIndicator";
 import SetupPanel from "./SetupPanel";
 import CellInspector from "./CellInspector";
@@ -18,19 +17,31 @@ import DemoControls from "./DemoControls";
 import WelcomeCard from "./WelcomeCard";
 import SummitCard from "./SummitCard";
 import TerrainBadge from "./TerrainBadge";
+import StatusBar from "./StatusBar";
+import Alert from "./ui/Alert";
+import Button from "./ui/Button";
+import Card from "./ui/Card";
+import Empty from "./ui/Empty";
+import Tabs from "./ui/Tabs";
+import Tag from "./ui/Tag";
+import { useConfirm } from "./ui/ConfirmProvider";
+import { IconDownload, IconTarget } from "./ui/icons";
+import { listRow, quote } from "./ui/styles";
 import { DEMO_LKP, DEMO_PROFILE, DEMO_STEPS, demoSubject } from "@/lib/demo/scenario";
-import { combinedFactor, currentPeriod, podModifiers, safetyFlags, upcoming } from "@/lib/weather";
+import { combinedFactor, currentPeriod, exposureRisk, podModifiers, safetyFlags, upcoming } from "@/lib/weather";
 import { useWeather } from "@/lib/useWeather";
 import { rankCells } from "@/lib/engine/rank";
+import { priorSummary } from "@/lib/engine/priors";
+import { hazardsNearLkp, scoreUrgency, urgencyFactors } from "@/lib/engine/urgency";
 import { explainUpdate, parseReport } from "@/lib/api";
 import { buildUpdateSummary, localExplanation } from "@/lib/explain";
-import { btnGhost, btnSecondary } from "./ui/styles";
 import { cumulativePodMap, initialState, loadState, reducer, ReportSource, saveState } from "@/lib/store";
 import { CellId } from "@/lib/engine/grid";
 import { emptyReport, ParsedReport } from "@/lib/schemas";
+import { PROFILES } from "@/lib/profiles";
 import { describeCell, promptFeatures, snapshotOf, STYLIZED_TERRAIN, TerrainModel } from "@/lib/terrain";
 import { featuresForSnapshot, loadBundledTerrain, loadLiveTerrain } from "@/lib/terrainClient";
-import { buildCalTopoGeoJSON, buildCalTopoKML } from "@/lib/export";
+import { buildCalTopoGeoJSON, buildCalTopoKML, CALTOPO_HINT } from "@/lib/export";
 import { downloadText, fileStamp } from "@/lib/download";
 import { makeAudit } from "@/lib/audit";
 
@@ -43,11 +54,16 @@ interface Draft {
   demo?: boolean;
 }
 
+type TabKey = "ops" | "cell" | "clues" | "weather" | "log";
+
 export default function Console() {
+  const confirm = useConfirm();
   const [state, dispatch] = useReducer(reducer, undefined, () => loadState() ?? initialState());
   const [placingLkp, setPlacingLkp] = useState(false);
   const [inspect, setInspect] = useState<CellId | null>(null);
   const [draft, setDraft] = useState<Draft | null>(null);
+  const [tab, setTab] = useState<TabKey>("ops");
+  const [highlight, setHighlight] = useState<CellId[]>([]);
 
   const [parsing, setParsing] = useState(false);
   const [parseError, setParseError] = useState<string | null>(null);
@@ -128,6 +144,7 @@ export default function Console() {
   const needLkp = !state.lkp || placingLkp;
 
   const onCellClick = (id: CellId) => {
+    setHighlight([]);
     if (needLkp) {
       dispatch({ type: "set_lkp", cell: id });
       setPlacingLkp(false);
@@ -135,21 +152,21 @@ export default function Console() {
       return;
     }
     if (draft) {
-      const cells = draft.report.cells.includes(id)
-        ? draft.report.cells.filter((c) => c !== id)
-        : [...draft.report.cells, id];
+      const cells = draft.report.cells.includes(id) ? draft.report.cells.filter((c) => c !== id) : [...draft.report.cells, id];
       setDraft({ ...draft, report: { ...draft.report, cells } });
       return;
     }
-    setInspect(id === inspect ? null : id);
+    const next = id === inspect ? null : id;
+    setInspect(next);
+    if (next) setTab("cell");
   };
 
-  const openManual = (rawText?: string) =>
-    setDraft({ report: emptyReport(), proposal: null, source: "manual", rawText: rawText || undefined, key: Date.now() });
+  const openManual = (rawText?: string) => setDraft({ report: emptyReport(), proposal: null, source: "manual", rawText: rawText || undefined, key: Date.now() });
 
   const onParse = async (text: string, canned?: ParsedReport) => {
     setParsing(true);
     setParseError(null);
+    setTab("ops");
     const res = await parseReport(text, promptFeatures(terrainModel.features));
     setParsing(false);
     const demo = !!canned;
@@ -164,44 +181,43 @@ export default function Console() {
     }
   };
 
-  const resetAll = () => {
-    if (!confirm("Reset the whole search? This clears the map, reports and audit log.")) return;
-    dispatch({ type: "reset" });
+  const clearLocal = () => {
     requested.current.clear();
     setPrefill(null);
     setDraft(null);
     setInspect(null);
     setParseError(null);
+    setHighlight([]);
+    setTab("ops");
+  };
+
+  const resetAll = async () => {
+    if (!(await confirm({ title: "Reset the whole search?", content: "This clears the map, reports, clues and the audit log.", okText: "Reset", danger: true }))) return;
+    dispatch({ type: "reset" });
+    clearLocal();
   };
 
   const demoStep = state.demo ? DEMO_STEPS[state.demoStep] : undefined;
 
   // Demo mode always uses the bundled terrain, so the video never depends on a live API.
   const loadDemo = async () => {
-    if (state.audit.length > 1 && !confirm("Load the demo scenario? This replaces the current search.")) return;
+    if (state.audit.length > 1 && !(await confirm({ title: "Load the demo scenario?", content: "This replaces the current search.", okText: "Load demo" }))) return;
     const bundled = await loadBundledTerrain();
     const model = bundled ?? STYLIZED_TERRAIN;
     setTerrainModel(model);
     setTerrainNote(bundled ? null : "The bundled terrain failed to load; the demo story is tuned for it.");
     dispatch({ type: "demo_load", lkp: DEMO_LKP, profileId: DEMO_PROFILE, terrain: snapshotOf(model), subject: demoSubject() });
-    requested.current.clear();
-    setDraft(null);
-    setInspect(null);
-    setPrefill(null);
-    setParseError(null);
+    clearLocal();
   };
 
   const applyDraft = () => {
     if (!draft) return;
-    dispatch({
-      type: "apply_report",
-      payload: { confirmed: draft.report, proposal: draft.proposal, source: draft.source, rawText: draft.rawText },
-    });
+    dispatch({ type: "apply_report", payload: { confirmed: draft.report, proposal: draft.proposal, source: draft.source, rawText: draft.rawText } });
     if (draft.demo) dispatch({ type: "demo_advance" });
     setDraft(null);
   };
 
-  const selected = draft ? draft.report.cells : inspect ? [inspect] : [];
+  const selected = draft ? draft.report.cells : highlight.length ? highlight : inspect ? [inspect] : [];
 
   /** Download the grid, markers and team outlines for CalTopo, and log the export. */
   const exportCalTopo = (format: "geojson" | "kml") => {
@@ -227,65 +243,235 @@ export default function Console() {
     }
   };
 
-  const modifiers = useMemo(() => podModifiers(weather ? currentPeriod(weather) : null), [weather]);
+  const period = weather ? currentPeriod(weather) : null;
+  const modifiers = useMemo(() => podModifiers(period), [period]);
   const weatherFactor = combinedFactor(modifiers);
-  const flaggedCells = useMemo(
-    () => new Set(weather ? safetyFlags(upcoming(weather, 12), state.terrain.cells).flatMap((f) => f.cells) : []),
-    [weather, state.terrain.cells],
-  );
-  const suggestions = useMemo(
-    () => (state.prob ? rankCells(state.prob, cumPod, state.terrain.cells, weatherFactor) : []),
-    [state.prob, cumPod, state.terrain.cells, weatherFactor],
-  );
+  const flaggedCells = useMemo(() => new Set(weather ? safetyFlags(upcoming(weather, 12), state.terrain.cells).flatMap((f) => f.cells) : []), [weather, state.terrain.cells]);
+  const suggestions = useMemo(() => (state.prob ? rankCells(state.prob, cumPod, state.terrain.cells, weatherFactor) : []), [state.prob, cumPod, state.terrain.cells, weatherFactor]);
+  const exposure = period ? exposureRisk(period).level : null;
+  const exposureSoon = weather ? (upcoming(weather, 8).map((p) => exposureRisk(p).level).find((l) => l === "severe" || l === "high") ?? null) : null;
+  const urgency = useMemo(() => {
+    if (!state.subject || !state.lkp) return null;
+    const f = urgencyFactors(state.subject, { exposureNow: exposure, exposureSoon, hazardsNearLkp: hazardsNearLkp(state.lkp, state.terrain.cells) });
+    return scoreUrgency(f, state.urgencyOverrides);
+  }, [state.subject, state.lkp, state.terrain.cells, state.urgencyOverrides, exposure, exposureSoon]);
+  const summary = useMemo(() => (state.lkp && state.subject && !state.started ? priorSummary(state.lkp, state.subject, state.terrain.cells) : null), [state.lkp, state.subject, state.started, state.terrain.cells]);
+
   // Cells come from the store (what the model uses); lines and shapes from the loaded terrain.
-  const mapTerrain = {
-    cells: state.terrain.cells,
-    bbox: state.terrain.bbox,
-    osm: state.terrain.source !== "stylized",
-    features: terrainModel.features,
-  };
+  const mapTerrain = { cells: state.terrain.cells, bbox: state.terrain.bbox, osm: state.terrain.source !== "stylized", features: terrainModel.features };
+  const subjectLabel = state.subject ? `${state.subject.name ? `${state.subject.name} · ` : ""}${PROFILES[state.subject.category].label}` : PROFILES[state.profileId].label;
+
+  const opsTab = (
+    <div className="space-y-3">
+      {state.found && (
+        <Alert
+          type="success"
+          title={
+            <>
+              Subject located in <span className="font-mono">{state.found.cell}</span>
+            </>
+          }
+          description={
+            <>
+              {state.found.text}
+              {(() => {
+                const a = [...state.assignments].reverse().find((x) => x.cell === state.found!.cell);
+                return a ? (
+                  <div className="mt-1">
+                    Model: suggestion #{a.suggestedRank ?? "—"} when assigned · IC: {a.override ? `override${a.reason ? ` (“${a.reason}”)` : ""}` : "followed top suggestion"}
+                  </div>
+                ) : null;
+              })()}
+            </>
+          }
+        />
+      )}
+      {!state.lkp && <WelcomeCard onDemo={loadDemo} />}
+      {(!state.started || !state.lkp) && (
+        <SetupPanel
+          lkp={state.lkp}
+          lkpInfo={state.lkp ? describeCell(state.terrain.cells[state.lkp]) : undefined}
+          profileId={state.profileId}
+          row={state.prob?.row ?? null}
+          suggestedRow={summary?.suggestedRow}
+          started={state.started}
+          placingLkp={placingLkp}
+          onTogglePlaceLkp={() => setPlacingLkp((v) => !v)}
+          onProfile={(p) => dispatch({ type: "set_profile", profileId: p })}
+          onRow={(v) => dispatch({ type: "set_row", value: v })}
+        />
+      )}
+      {state.prob && (
+        <Card title="Radio report" size="small" tone={draft ? "primary" : "default"} extra={draft && <Tag color="primary">Review before applying</Tag>}>
+          {draft ? (
+            <div className="space-y-2">
+              {draft.rawText && <blockquote className={`${quote} border-line-strong`}>{draft.rawText}</blockquote>}
+              {parseError && draft.source === "manual" && <Alert type="warning" compact description={parseError} />}
+              <ReviewCard
+                key={draft.key}
+                draft={draft.report}
+                proposal={draft.proposal}
+                source={draft.source}
+                onChange={(report) => setDraft({ ...draft, report })}
+                onApply={() => {
+                  applyDraft();
+                  setParseError(null);
+                }}
+                onCancel={() => setDraft(null)}
+              />
+            </div>
+          ) : (
+            <ReportInput busy={parsing} error={null} onParse={onParse} onManual={openManual} />
+          )}
+        </Card>
+      )}
+      {lastReport && (
+        <Card title="Why the map changed" size="small">
+          <ExplanationCard report={lastReport} loading={explaining === lastReport.id} />
+        </Card>
+      )}
+      {state.prob && (
+        <SuggestionsPanel
+          key={prefill?.key ?? 0}
+          prefill={prefill}
+          suggestions={suggestions}
+          modifiers={modifiers}
+          weatherFactor={weatherFactor}
+          flaggedCells={flaggedCells}
+          assignments={state.assignments}
+          selectedCell={inspect}
+          terrain={state.terrain.cells}
+          onAssign={(a) => {
+            dispatch({ type: "assign", ...a });
+            if (demoStep?.kind === "override" && a.cell === demoStep.cell) dispatch({ type: "demo_advance" });
+          }}
+        />
+      )}
+    </div>
+  );
+
+  const cellTab =
+    inspect && state.prob ? (
+      <CellInspector
+        key={`${inspect}-${state.prob.cells[inspect]}`}
+        cell={inspect}
+        terrain={state.terrain.cells[inspect]}
+        poa={state.prob.cells[inspect]}
+        cumPod={cumPod[inspect] ?? 0}
+        sweeps={state.pods[inspect]?.length ?? 0}
+        editable={!state.started}
+        onEdit={(value) => dispatch({ type: "edit_cell_poa", cell: inspect, value })}
+      />
+    ) : (
+      <Card size="small">
+        <Empty icon={<IconTarget width={22} height={22} />} title="Click a cell on the map" hint="See its probability, how well it has been searched, and its terrain. Before the search starts you can edit its prior here." />
+      </Card>
+    );
+
+  const logTab = (
+    <div className="space-y-3">
+      {state.reports.length > 0 && (
+        <Card title="Applied reports" size="small">
+          <ul className="space-y-1.5 text-sm">
+            {[...state.reports].reverse().map((r) => (
+              <li key={r.id} className={listRow}>
+                <div className="flex justify-between">
+                  <span className="font-medium">{r.team}</span>
+                  <span className="text-xs text-fg-3">{new Date(r.at).toLocaleTimeString()}</span>
+                </div>
+                <div className="text-xs text-fg-2">
+                  <span className="font-mono">{r.cells.join(", ")}</span> · POD {(r.pod * 100).toFixed(0)}% · ROW {(r.rowBefore * 100).toFixed(1)}% → {(r.rowAfter * 100).toFixed(1)}%
+                </div>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
+      <AuditLog state={state} />
+    </div>
+  );
+
+  const tabs = [
+    { key: "ops", label: "Operations", badge: draft ? <Tag color={draft.report.pod_confidence === "low" ? "warning" : "primary"}>1</Tag> : undefined, content: opsTab },
+    { key: "cell", label: inspect ? `Cell ${inspect}` : "Cell", content: cellTab },
+    { key: "clues", label: "Clues", badge: state.clues.length ? <Tag>{state.clues.length}</Tag> : undefined, content: state.prob ? <CluePanel prob={state.prob} clues={state.clues} selectedCell={inspect} onAdd={(c) => dispatch({ type: "add_clue", ...c })} /> : <Card size="small"><Empty title="Place the LKP first" /></Card> },
+    {
+      key: "weather",
+      label: "Weather",
+      badge: exposure && exposure !== "low" ? <Tag color={exposure === "moderate" ? "warning" : "error"}>{exposure}</Tag> : undefined,
+      content: (
+        <div className="space-y-3">
+          <WeatherPanel
+            weather={weather}
+            loading={weatherLoading}
+            lastAttemptAt={lastAttemptAt}
+            refreshFailed={refreshFailed}
+            autoRefresh={searchActive}
+            terrain={state.terrain.cells}
+            onRefresh={refreshWeather}
+            onHighlightCells={(cells) => setHighlight(cells)}
+          />
+          <SummitCard />
+        </div>
+      ),
+    },
+    { key: "log", label: "Log", badge: state.audit.length ? <Tag>{state.audit.length}</Tag> : undefined, content: logTab },
+  ];
 
   return (
-    <main className="mx-auto max-w-[1400px] p-3 pb-16 sm:p-4 sm:pb-16">
-      <header className="mb-3 flex flex-wrap items-center gap-3">
+    <main className="mx-auto max-w-[1480px] space-y-3 p-3 pb-16 sm:p-4 sm:pb-16">
+      <header className="flex flex-wrap items-center gap-3">
         <div>
           <h1 className="text-lg font-semibold tracking-tight">
-            Trailhead <span className="text-slate-500">·</span>{" "}
-            <span className="text-slate-300">Search Planner</span>
+            Trailhead <span className="text-fg-3">·</span> <span className="text-fg-2">Search Planner</span>
           </h1>
-          <p className="text-xs text-slate-500">
-            Bayesian decision support for the incident commander · prototype with illustrative priors
-          </p>
+          <p className="text-xs text-fg-3">Bayesian decision support for the incident commander · prototype with illustrative priors</p>
         </div>
-        <div className="ml-auto flex gap-2">
-          <button className={btnSecondary} onClick={loadDemo}>
-            Load demo scenario
-          </button>
-          <button className={btnGhost} onClick={resetAll}>
+        <div className="ml-auto flex flex-wrap gap-2">
+          <Button onClick={loadDemo}>Load demo scenario</Button>
+          <Button icon={<IconDownload width={14} height={14} />} onClick={() => exportCalTopo("geojson")} disabled={!state.prob} title={CALTOPO_HINT}>
+            Export for CalTopo
+          </Button>
+          <Button variant="text" onClick={() => exportCalTopo("kml")} disabled={!state.prob} title="KML with styles, as a fallback">
+            KML
+          </Button>
+          <Button variant="danger" onClick={resetAll}>
             Reset
-          </button>
+          </Button>
         </div>
       </header>
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_420px] lg:grid-rows-[auto_1fr]">
-        <div className="lg:col-start-1 lg:row-start-1">
-          <Panel
+      <StatusBar
+        lkp={state.lkp}
+        subjectLabel={subjectLabel}
+        lastSeenAt={state.subject?.lastSeenAt ?? null}
+        row={state.prob?.row ?? null}
+        rowStart={state.rowHistory[0] ?? null}
+        urgency={urgency ? { band: urgency.band, label: urgency.bandLabel, total: urgency.total } : null}
+        exposure={exposure}
+        found={state.found?.cell ?? null}
+      />
+
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_440px]">
+        <div className="space-y-3 lg:sticky lg:top-3 lg:self-start">
+          <Card
             title="Search area"
-            right={
-              <div className="flex flex-wrap items-center justify-end gap-2">
+            size="small"
+            extra={
+              <>
                 {needLkp ? (
-                  <span className="text-xs font-medium text-amber-300">Click a cell to place the last known point</span>
+                  <Tag color="warning">Click a cell to place the last known point</Tag>
                 ) : draft ? (
-                  <span className="text-xs font-medium text-sky-300">Click cells to add/remove them from the report</span>
+                  <Tag color="primary">Click cells to add or remove them from the report</Tag>
+                ) : highlight.length ? (
+                  <Button size="sm" variant="text" onClick={() => setHighlight([])}>
+                    Clear highlight
+                  </Button>
                 ) : null}
-                <TerrainBadge
-                  source={state.terrain.source}
-                  label={state.terrain.label}
-                  fetchedAt={state.terrain.fetchedAt}
-                  loading={terrainLoading}
-                />
-              </div>
+                <TerrainBadge source={state.terrain.source} label={state.terrain.label} fetchedAt={state.terrain.fetchedAt} loading={terrainLoading} />
+              </>
             }
+            footer={<MapLegend kinds={new Set(mapTerrain.features.map((f) => f.kind))} />}
           >
             <GridMap
               terrain={mapTerrain}
@@ -298,185 +484,40 @@ export default function Console() {
               found={state.found?.cell ?? null}
               onCellClick={onCellClick}
             />
-            {terrainNote && <p className="mt-2 text-xs text-amber-300">{terrainNote}</p>}
-            <div className="mt-2">
-              <MapLegend kinds={new Set(mapTerrain.features.map((f) => f.kind))} />
-            </div>
-          </Panel>
+            {terrainNote && <Alert type="warning" compact className="mt-2" description={terrainNote} />}
+          </Card>
+          {state.prob && (
+            <Card size="small" footer="Probability the subject is outside the grid. It grows as the grid is searched without a find. The app never recommends ending or expanding the search; that call stays with people.">
+              <RowIndicator row={state.prob.row} history={state.rowHistory} />
+            </Card>
+          )}
         </div>
 
-        <div className="space-y-3 lg:col-start-2 lg:row-span-2 lg:row-start-1">
-          {!state.lkp && <WelcomeCard onDemo={loadDemo} />}
-
-          {state.found && (
-            <section className="rounded-lg border border-emerald-500/60 bg-emerald-950/40 p-3">
-              <div className="text-xs font-semibold uppercase tracking-wider text-emerald-300">Subject located</div>
-              <div className="mt-1 text-sm text-emerald-100">
-                <span className="font-mono font-semibold">{state.found.cell}</span> — {state.found.text}
-              </div>
-              {(() => {
-                const a = [...state.assignments].reverse().find((x) => x.cell === state.found!.cell);
-                return a ? (
-                  <div className="mt-1 text-xs text-emerald-200/80">
-                    Model: suggestion #{a.suggestedRank ?? "—"} when assigned · IC: {a.override ? `override${a.reason ? ` (“${a.reason}”)` : ""}` : "followed top suggestion"}
-                  </div>
-                ) : null;
-              })()}
-            </section>
-          )}
-
+        <div className="min-w-0 space-y-3">
           {state.demo && (
             <DemoControls
               step={state.demoStep}
-              busy={parsing || !!draft}
+              busy={parsing}
+              reviewing={!!draft}
               onReport={(s) => onParse(s.text, s.canned)}
               onClue={(s, boost) => {
                 dispatch({ type: "add_clue", text: s.text, cell: s.cell, radius: s.radius, boost });
                 dispatch({ type: "demo_advance" });
               }}
-              onPrefillOverride={(s) => setPrefill({ team: s.team, cell: s.cell, reason: s.reason, key: Date.now() })}
+              onPrefillOverride={(s) => {
+                setPrefill({ team: s.team, cell: s.cell, reason: s.reason, key: Date.now() });
+                setTab("ops");
+              }}
               onFound={(s) => {
                 dispatch({ type: "mark_found", cell: s.cell, text: s.text });
                 dispatch({ type: "demo_advance" });
+                setTab("ops");
               }}
               onExit={resetAll}
             />
           )}
-
-          {state.prob && (
-            <Panel title="Rest of World">
-              <RowIndicator row={state.prob.row} history={state.rowHistory} />
-              <p className="mt-2 text-xs text-slate-500">
-                Probability the subject is outside the grid. It grows as the grid is searched without a find. The app
-                never recommends ending or expanding the search — that call stays with people.
-              </p>
-            </Panel>
-          )}
-
-          <SetupPanel
-            lkp={state.lkp}
-            lkpInfo={state.lkp ? describeCell(state.terrain.cells[state.lkp]) : undefined}
-            profileId={state.profileId}
-            row={state.prob?.row ?? null}
-            started={state.started}
-            placingLkp={placingLkp}
-            onTogglePlaceLkp={() => setPlacingLkp((v) => !v)}
-            onProfile={(p) => dispatch({ type: "set_profile", profileId: p })}
-            onRow={(v) => dispatch({ type: "set_row", value: v })}
-          />
-
-          {state.prob && (
-            <Panel title="Radio report">
-              {draft ? (
-                <div className="space-y-2">
-                  {draft.rawText && (
-                    <blockquote className="rounded-md border-l-2 border-slate-600 bg-slate-950/50 px-3 py-2 font-mono text-xs text-slate-300">
-                      {draft.rawText}
-                    </blockquote>
-                  )}
-                  {parseError && draft.source === "manual" && (
-                    <div className="rounded-md border border-amber-500/50 bg-amber-950/30 px-3 py-2 text-xs text-amber-200">
-                      {parseError}
-                    </div>
-                  )}
-                  <ReviewCard
-                    key={draft.key}
-                    draft={draft.report}
-                    proposal={draft.proposal}
-                    source={draft.source}
-                    onChange={(report) => setDraft({ ...draft, report })}
-                    onApply={() => {
-                      applyDraft();
-                      setParseError(null);
-                    }}
-                    onCancel={() => setDraft(null)}
-                  />
-                </div>
-              ) : (
-                <ReportInput busy={parsing} error={null} onParse={onParse} onManual={openManual} />
-              )}
-            </Panel>
-          )}
-
-          <WeatherPanel
-            weather={weather}
-            loading={weatherLoading}
-            lastAttemptAt={lastAttemptAt}
-            refreshFailed={refreshFailed}
-            autoRefresh={searchActive}
-            terrain={state.terrain.cells}
-            onRefresh={refreshWeather}
-          />
-          <SummitCard />
-
-          {lastReport && (
-            <Panel title="Why the map changed">
-              <ExplanationCard report={lastReport} loading={explaining === lastReport.id} />
-            </Panel>
-          )}
-
-          {inspect && state.prob && !draft && (
-            <CellInspector
-              key={`${inspect}-${state.prob.cells[inspect]}`}
-              cell={inspect}
-              terrain={state.terrain.cells[inspect]}
-              poa={state.prob.cells[inspect]}
-              cumPod={cumPod[inspect] ?? 0}
-              sweeps={state.pods[inspect]?.length ?? 0}
-              editable={!state.started}
-              onEdit={(value) => dispatch({ type: "edit_cell_poa", cell: inspect, value })}
-            />
-          )}
-
-          {state.reports.length > 0 && (
-            <Panel title="Applied reports">
-              <ul className="space-y-2 text-sm">
-                {[...state.reports].reverse().map((r) => (
-                  <li key={r.id} className="rounded-md bg-slate-950/50 px-2 py-1.5">
-                    <div className="flex justify-between">
-                      <span className="font-medium">{r.team}</span>
-                      <span className="text-xs text-slate-500">{new Date(r.at).toLocaleTimeString()}</span>
-                    </div>
-                    <div className="text-xs text-slate-400">
-                      <span className="font-mono">{r.cells.join(", ")}</span> · POD {(r.pod * 100).toFixed(0)}% · ROW{" "}
-                      {(r.rowBefore * 100).toFixed(1)}% → {(r.rowAfter * 100).toFixed(1)}%
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </Panel>
-          )}
+          <Tabs tabs={tabs} active={tab} onChange={(k) => setTab(k as TabKey)} />
         </div>
-        <div className="space-y-3 lg:col-start-1 lg:row-start-2">
-          {state.prob && (
-            <div className="grid gap-3 xl:grid-cols-2">
-              <SuggestionsPanel
-                key={prefill?.key ?? 0}
-                prefill={prefill}
-                suggestions={suggestions}
-                modifiers={modifiers}
-                weatherFactor={weatherFactor}
-                flaggedCells={flaggedCells}
-                assignments={state.assignments}
-                selectedCell={inspect}
-                terrain={state.terrain.cells}
-                onAssign={(a) => {
-                  dispatch({ type: "assign", ...a });
-                  if (demoStep?.kind === "override" && a.cell === demoStep.cell) dispatch({ type: "demo_advance" });
-                }}
-              />
-              <CluePanel
-                prob={state.prob}
-                clues={state.clues}
-                selectedCell={inspect}
-                onAdd={(c) => dispatch({ type: "add_clue", ...c })}
-              />
-            </div>
-          )}
-
-          <AuditLog state={state} onExportCalTopo={exportCalTopo} />
-        </div>
-
       </div>
     </main>
   );

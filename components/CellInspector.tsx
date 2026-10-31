@@ -1,10 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import Panel from "./ui/Panel";
+import Button from "./ui/Button";
+import Card from "./ui/Card";
+import Descriptions from "./ui/Descriptions";
+import Statistic from "./ui/Statistic";
+import Tag from "./ui/Tag";
 import { CellTerrain, describeCell } from "@/lib/terrain";
 import { formatLatLon } from "@/lib/geo";
-import { btnSecondary, input } from "./ui/styles";
+import { input } from "./ui/styles";
 
 export default function CellInspector({
   cell,
@@ -24,17 +28,22 @@ export default function CellInspector({
   onEdit: (value: number) => void;
 }) {
   const [draft, setDraft] = useState((poa * 100).toFixed(2));
+  const tags = describeCell(terrain).split(", ").filter(Boolean);
   return (
-    <Panel title={`Cell ${cell}`}>
-      <div className="grid grid-cols-3 gap-2 text-sm">
-        <Stat label="POA" value={`${(poa * 100).toFixed(2)}%`} />
-        <Stat label="Cumulative POD" value={`${(cumPod * 100).toFixed(0)}%`} />
-        <Stat label="Sweeps" value={String(sweeps)} />
+    <Card title={<span>Cell <span className="font-mono">{cell}</span></span>} size="small">
+      <div className="grid grid-cols-3 gap-3">
+        <Statistic label="POA" value={`${(poa * 100).toFixed(2)}%`} />
+        <Statistic label="Cumulative POD" value={`${(cumPod * 100).toFixed(0)}%`} tone={cumPod >= 0.8 ? "success" : "default"} />
+        <Statistic label="Sweeps" value={String(sweeps)} />
       </div>
-      <div className="mt-2 text-xs text-slate-400">Terrain: {describeCell(terrain)}</div>
-      <div className="mt-1 font-mono text-[11px] text-slate-500">
-        NW {formatLatLon(terrain.bounds.north, terrain.bounds.west)} · SE {formatLatLon(terrain.bounds.south, terrain.bounds.east)}
-      </div>
+      <Descriptions
+        className="mt-3"
+        items={[
+          { label: "Terrain", span: 2, value: <span className="flex flex-wrap gap-1">{tags.map((t) => <Tag key={t}>{t}</Tag>)}</span> },
+          { label: "Elevation", value: terrain.elevationM !== undefined ? `~${terrain.elevationM} m (estimate)` : undefined },
+          { label: "Corners", value: <span className="font-mono text-xs">NW {formatLatLon(terrain.bounds.north, terrain.bounds.west)} · SE {formatLatLon(terrain.bounds.south, terrain.bounds.east)}</span>, span: 2 },
+        ]}
+      />
       {editable && (
         <form
           className="mt-3 flex items-end gap-2"
@@ -44,24 +53,13 @@ export default function CellInspector({
             if (Number.isFinite(v)) onEdit(v / 100);
           }}
         >
-          <label className="flex-1 text-xs text-slate-400">
+          <label className="flex-1 text-xs text-fg-2">
             Set POA (%) — other cells rescale, ROW unchanged
             <input className={`${input} mt-1`} value={draft} onChange={(e) => setDraft(e.target.value)} inputMode="decimal" />
           </label>
-          <button className={btnSecondary} type="submit">
-            Set
-          </button>
+          <Button type="submit">Set</Button>
         </form>
       )}
-    </Panel>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-md bg-slate-950/60 px-2 py-1.5">
-      <div className="text-[10px] uppercase tracking-wider text-slate-500">{label}</div>
-      <div className="font-mono tabular-nums">{value}</div>
-    </div>
+    </Card>
   );
 }

@@ -1,13 +1,18 @@
 "use client";
 
-import Panel from "./ui/Panel";
-import { btnPrimary, btnSecondary } from "./ui/styles";
-import { DEMO_STEPS, DEMO_SUBJECT, DemoStep } from "@/lib/demo/scenario";
+import { useState } from "react";
+import Button from "./ui/Button";
+import Card from "./ui/Card";
+import Steps from "./ui/Steps";
+import { useConfirm } from "./ui/ConfirmProvider";
+import { quote } from "./ui/styles";
+import { DEMO_STEPS, DemoStep } from "@/lib/demo/scenario";
 import { BoostLevel, BOOST_FACTORS } from "@/lib/engine/clues";
 
 export default function DemoControls({
   step,
   busy,
+  reviewing = false,
   onReport,
   onClue,
   onPrefillOverride,
@@ -16,102 +21,95 @@ export default function DemoControls({
 }: {
   step: number;
   busy: boolean;
+  /** A parsed report is open in the review card; the presenter applies it there. */
+  reviewing?: boolean;
   onReport: (s: Extract<DemoStep, { kind: "report" }>) => void;
   onClue: (s: Extract<DemoStep, { kind: "clue" }>, boost: BoostLevel) => void;
   onPrefillOverride: (s: Extract<DemoStep, { kind: "override" }>) => void;
   onFound: (s: Extract<DemoStep, { kind: "found" }>) => void;
   onExit: () => void;
 }) {
+  const confirm = useConfirm();
+  const [showNote, setShowNote] = useState(false);
   const current = DEMO_STEPS[step];
+
+  const pickBoost = async (s: Extract<DemoStep, { kind: "clue" }>, b: BoostLevel) => {
+    // The scripted story needs the suggested boost; guard against a misclick while recording.
+    if (
+      b !== s.suggestedBoost &&
+      !(await confirm({
+        title: `Apply a ${b} boost?`,
+        content: `The demo script uses a ${s.suggestedBoost} boost. A ${b} boost changes the suggestion ranking later in the story.`,
+        okText: `Apply ${b}`,
+      }))
+    )
+      return;
+    onClue(s, b);
+  };
+
   return (
-    <Panel
+    <Card
       title={`Demo scenario · step ${Math.min(step + 1, DEMO_STEPS.length)} of ${DEMO_STEPS.length}`}
-      className="border-sky-700/60"
-      right={
-        <button className="text-xs text-slate-400 hover:text-slate-200" onClick={onExit}>
+      tone="primary"
+      size="small"
+      extra={
+        <Button variant="text" size="sm" onClick={onExit}>
           Exit demo
-        </button>
+        </Button>
       }
     >
-      <p className="mb-2 text-xs text-slate-400">{DEMO_SUBJECT}</p>
-      <ol className="mb-3 flex flex-wrap gap-1 text-[11px]">
-        {DEMO_STEPS.map((s, i) => (
-          <li
-            key={s.id}
-            className={`rounded px-1.5 py-0.5 ${
-              i < step ? "bg-slate-800 text-slate-500 line-through" : i === step ? "bg-sky-700 text-white" : "bg-slate-800 text-slate-400"
-            }`}
-          >
-            {i + 1}. {s.title}
-          </li>
-        ))}
-      </ol>
+      <Steps size="sm" current={step} steps={DEMO_STEPS.map((s) => ({ key: s.id, title: s.title }))} />
 
       {!current ? (
-        <p className="text-sm text-emerald-300">Scenario complete. Export the audit log for the after-action review.</p>
+        <p className="mt-3 text-sm text-success">Scenario complete. Export the audit log for the after-action review.</p>
       ) : (
-        <div className="space-y-2">
+        <div className="mt-3 space-y-2">
           {current.kind === "report" && (
             <>
-              <blockquote className="rounded-md border-l-2 border-sky-500 bg-slate-950/60 px-3 py-2 font-mono text-xs text-slate-200">
-                📻 {current.text}
-              </blockquote>
-              <button className={btnPrimary} disabled={busy} onClick={() => onReport(current)}>
-                {busy ? "Parsing…" : "Receive radio report → parse"}
-              </button>
+              <blockquote className={`${quote} border-primary`}>📻 {current.text}</blockquote>
+              <Button variant="primary" loading={busy} disabled={reviewing} onClick={() => onReport(current)}>
+                {busy ? "Parsing…" : reviewing ? "Review the parse below, then Apply" : "Receive radio report → parse"}
+              </Button>
             </>
           )}
           {current.kind === "clue" && (
             <>
-              <blockquote className="rounded-md border-l-2 border-fuchsia-500 bg-slate-950/60 px-3 py-2 text-xs text-slate-200">
-                🔎 {current.text}
-              </blockquote>
-              <div className="text-xs text-slate-400">IC: how much should this clue boost cells near {current.cell}?</div>
+              <blockquote className={`${quote} border-purple`}>🔎 {current.text}</blockquote>
+              <div className="text-xs text-fg-2">IC: how much should this clue boost cells near {current.cell}?</div>
               <div className="flex flex-wrap gap-2">
                 {(["small", "medium", "large"] as BoostLevel[]).map((b) => (
-                  <button
-                    key={b}
-                    className={b === current.suggestedBoost ? btnPrimary : btnSecondary}
-                    onClick={() => {
-                      // The scripted story needs the suggested boost; guard against a misclick while recording.
-                      if (
-                        b !== current.suggestedBoost &&
-                        !window.confirm(`The demo script uses a ${current.suggestedBoost} boost. A ${b} boost changes the suggestion ranking later in the story. Apply ${b} anyway?`)
-                      )
-                        return;
-                      onClue(current, b);
-                    }}
-                  >
+                  <Button key={b} variant={b === current.suggestedBoost ? "primary" : "default"} onClick={() => pickBoost(current, b)}>
                     {b} ×{BOOST_FACTORS[b]}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </>
           )}
           {current.kind === "override" && (
             <>
-              <blockquote className="rounded-md border-l-2 border-violet-500 bg-slate-950/60 px-3 py-2 text-xs text-slate-200">
-                👪 {current.tip}
-              </blockquote>
-              <button className={btnSecondary} onClick={() => onPrefillOverride(current)}>
+              <blockquote className={`${quote} border-purple font-sans`}>👪 {current.tip}</blockquote>
+              <Button onClick={() => onPrefillOverride(current)}>
                 Prefill assignment: {current.team} → {current.cell}
-              </button>
-              <div className="text-[11px] text-slate-500">Then click Assign in the Suggestions panel and give a reason.</div>
+              </Button>
+              <div className="text-xs text-fg-3">Then click Assign in the Operations tab and keep the reason.</div>
             </>
           )}
           {current.kind === "found" && (
             <>
-              <blockquote className="rounded-md border-l-2 border-emerald-500 bg-slate-950/60 px-3 py-2 font-mono text-xs text-slate-200">
-                📻 {current.text}
-              </blockquote>
-              <button className={btnPrimary} onClick={() => onFound(current)}>
+              <blockquote className={`${quote} border-success`}>📻 {current.text}</blockquote>
+              <Button variant="primary" onClick={() => onFound(current)}>
                 Log subject located
-              </button>
+              </Button>
             </>
           )}
-          <p className="text-[11px] italic text-slate-500">Presenter note: {current.note}</p>
+          <div className="text-xs text-fg-3">
+            <button type="button" className="text-primary-hover hover:underline" onClick={() => setShowNote((v) => !v)}>
+              {showNote ? "Hide presenter note" : "Presenter note"}
+            </button>
+            {showNote && <span className="ml-2 italic">{current.note}</span>}
+          </div>
         </div>
       )}
-    </Panel>
+    </Card>
   );
 }
