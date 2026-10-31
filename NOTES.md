@@ -47,6 +47,16 @@
 - **Model-suggested ROW** = share of the distribution beyond the nearest grid edge (clamped 5–60 %). The IC's slider stays authoritative; for the demo the IC keeps 10 % (Dan was headed for the summit in fog), and the Subject card says what the model would suggest. Rankings on the grid do not depend on ROW.
 - The LKP cell and its neighbours now carry more mass, which is why the demo's Team 2 report line-searches around the hut (E10, D10, F11, D12, F12 added).
 
+### Parameter audit (03:10 ET Oct 31) — what is sourced, what is illustrative
+- **Hiker distance (sourced):** lognormal μ 0.962, σ 1.258 (ln km) from MapScore's ISRID fit. Implied quartiles 1.1 / 2.6 / 6.1 / 20.7 km (checked by hand: exp(μ ± 0.6745σ), exp(μ + 1.645σ)). Koester's published table for hikers in temperate mountains reads 1.1 / 3.1 / 5.8 / 18.3 km, the same data fitted differently; either is defensible.
+- **Other categories (approximate):** child 0.5 / 1.3 / 3.2 / 8 km and hunter 1.0 / 2.1 / 5.1 / 17 km sit inside the published temperate ranges for those groups; "older adult" uses short dementia-like distances 0.3 / 0.8 / 1.9 / 5 km; trail runner has no ISRID category and is a guess. All four are fitted to a lognormal and labelled illustrative in the UI.
+- **Subject scaling and reach (illustrative):** experience ×0.85 / 1 / 1.15, fitness ×0.8 / 1 / 1.2, age ×0.6 (1–6) … ×0.8 (65+), known medical ×0.8, clamped 0.4–1.6; walking speed 2.0 (hiker), 1.0 (child), 1.5 (hunter), 0.8 (older adult), 4.0 (runner) km/h × fitness, travel capped at 6 h. Not calibrated; shown to the IC on the subject card.
+- **Wind chill (sourced):** NWS formula 35.74 + 0.6215T − 35.75V^0.16 + 0.4275TV^0.16, applied only for T ≤ 50 °F and wind ≥ 3 mph. **Lapse rate (standard):** 6.5 °C/km = 0.0117 °F/m.
+- **Exposure bands (illustrative):** wind chill ≤ 0 °F severe, ≤ 20 high, ≤ 40 moderate; wet-and-cold and night bump one level; ≥ 90 °F high. Never a survival time.
+- **Detection (illustrative):** base POD per sweep open 0.75 / hardwood 0.6 / spruce 0.45 / alpine 0.65, cliffs/water capped 0.3; weather factors fog 0.7, rain 0.8, snow 0.75, darkness 0.6 (floor 0.3). Cells at ≥ 80 % cumulative POD drop out of suggestions.
+- **Urgency chart (standard):** seven factors, 1–3 each; 7–11 emergency, 12–16 measured, 17–21 evaluate — the NASAR / MRA relative urgency rating.
+- **Terrain (OSM/DEM):** treeline 1,450 m (alpine cover above), spruce above 700 m; DEM from Copernicus GLO-90, 90 m posts averaged over ~270 m cells, so a cell's mean sits below the true height of a hut or summit inside it (hut cell 1,476 m vs. ~1,540 m at the building; summit cell 1,840 m mean, 1,908 m max vs. 1,917 m). The inspector shows the range for that reason.
+
 ### Subject and urgency
 - `lib/subject.ts`: category, name, age band, experience, fitness, medical, equipment, party size, last seen, intent, notes. `defaultSubject(category)` keeps the quick path working.
 - `/api/parse-subject` + `lib/subjectParse.ts`: Claude pre-fills the card from the call-out (structured output, zod, retry once, manual fallback). Times are resolved against the client's clock and zone; missing, garbled or future times fall back to "2 h ago" and are flagged. Store flag `subjectConfirmed`; demo pre-seeds the subject but leaves it unconfirmed until step 0.
