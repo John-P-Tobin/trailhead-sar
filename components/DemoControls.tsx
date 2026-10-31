@@ -69,7 +69,19 @@ export default function DemoControls({
               <div className="text-xs text-slate-400">IC: how much should this clue boost cells near {current.cell}?</div>
               <div className="flex flex-wrap gap-2">
                 {(["small", "medium", "large"] as BoostLevel[]).map((b) => (
-                  <button key={b} className={b === current.suggestedBoost ? btnPrimary : btnSecondary} onClick={() => onClue(current, b)}>
+                  <button
+                    key={b}
+                    className={b === current.suggestedBoost ? btnPrimary : btnSecondary}
+                    onClick={() => {
+                      // The scripted story needs the suggested boost; guard against a misclick while recording.
+                      if (
+                        b !== current.suggestedBoost &&
+                        !window.confirm(`The demo script uses a ${current.suggestedBoost} boost. A ${b} boost changes the suggestion ranking later in the story. Apply ${b} anyway?`)
+                      )
+                        return;
+                      onClue(current, b);
+                    }}
+                  >
                     {b} ×{BOOST_FACTORS[b]}
                   </button>
                 ))}

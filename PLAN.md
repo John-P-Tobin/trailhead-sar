@@ -162,5 +162,10 @@ trailhead-sar/
 - [x] Export for CalTopo: GeoJSON (cells, markers, team outlines, weather note) + KML; button + hint in the audit area; exports logged; unit tests for structure and coordinate order
 - [x] Docs (PLAN, CLAUDE, NOTES), tests, lint, build, PR
 
+### Round 3 — Robustness
+- [x] Reducer never throws; corrupt saved state rejected; POD clamped; blank reports rejected; Overpass raced across two servers (tests/robustness.test.ts)
+- [x] Demo clue step guards against picking a non-suggested boost
+- [x] DEMO.md run sheet; NOTES updated
+
 ## 5. Per-milestone routine
 Build → tests → run app and check the feature → commit → push to `claude/funny-johnson-necpxn` → tick box here. Main is never left broken; reliability of the demo path beats extra features.
