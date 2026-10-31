@@ -9,6 +9,7 @@ import Skeleton from "./ui/Skeleton";
 import Statistic from "./ui/Statistic";
 import Tag from "./ui/Tag";
 import { IconRefresh } from "./ui/icons";
+import ForecastChart from "./weather/ForecastChart";
 import {
   currentPeriod,
   exposureRisk,
@@ -63,8 +64,6 @@ function UpdatedLine({ weather, lastAttemptAt, refreshFailed, autoRefresh }: { w
 const RISK_ALERT: Record<ExposureLevel, AlertType> = { low: "success", moderate: "warning", high: "error", severe: "error" };
 const RISK_TONE: Record<ExposureLevel, "success" | "warning" | "error"> = { low: "success", moderate: "warning", high: "error", severe: "error" };
 
-const hour = (iso: string) => new Date(iso).toLocaleTimeString([], { hour: "numeric" });
-
 export default function WeatherPanel({
   weather,
   loading,
@@ -88,7 +87,8 @@ export default function WeatherPanel({
   /** Elevation of the LKP cell (metres) for the lapse-rate estimate. */
   lkpElevationM?: number;
 }) {
-  const now = currentPeriod(weather ?? { source: "cached", fetchedAt: "", location: "", periods: [] });
+  const nowMs = useNow(60_000);
+  const now = currentPeriod(weather ?? { source: "cached", fetchedAt: "", location: "", periods: [] }, nowMs);
   const risk = exposureRisk(now);
   const mods = podModifiers(now);
   const next = weather ? upcoming(weather, 12) : [];
@@ -176,15 +176,7 @@ export default function WeatherPanel({
             </ul>
           )}
 
-          <div className="grid grid-cols-6 gap-1 text-center text-xs text-fg-2">
-            {next.slice(0, 12).map((p) => (
-              <div key={p.startTime} className={`rounded px-1 py-1 ${p.isDaytime ? "bg-surface-2" : "bg-background"}`}>
-                <div>{hour(p.startTime)}</div>
-                <div className="font-mono text-fg">{p.temperatureF}°</div>
-                <div>{p.windMph} mph</div>
-              </div>
-            ))}
-          </div>
+          <ForecastChart periods={next.slice(0, 12)} nowMs={nowMs} />
         </div>
       )}
     </Card>
