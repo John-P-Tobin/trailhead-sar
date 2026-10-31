@@ -1,5 +1,7 @@
 export type AuditType =
   | "setup"
+  | "subject"
+  | "urgency"
   | "prior_edit"
   | "report"
   | "explanation"

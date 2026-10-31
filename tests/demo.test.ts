@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DEMO_LKP, DEMO_PROFILE, DEMO_STEPS } from "@/lib/demo/scenario";
+import { DEMO_LKP, DEMO_PROFILE, DEMO_STEPS, demoSubject } from "@/lib/demo/scenario";
 import { cumulativePodMap, initialState, reducer, SearchState } from "@/lib/store";
 import { rankCells } from "@/lib/engine/rank";
 import { assertSumToOne } from "@/lib/engine/bayes";
@@ -12,7 +12,7 @@ import { bundledTerrain } from "./helpers/bundled";
 const terrain = snapshotOf(bundledTerrain().model);
 
 function run(upTo: string): SearchState {
-  let s = reducer(initialState(terrain), { type: "demo_load", lkp: DEMO_LKP, profileId: DEMO_PROFILE, terrain });
+  let s = reducer(initialState(terrain), { type: "demo_load", lkp: DEMO_LKP, profileId: DEMO_PROFILE, terrain, subject: demoSubject() });
   for (const step of DEMO_STEPS) {
     if (step.kind === "report") s = reducer(s, { type: "apply_report", payload: { confirmed: step.canned, source: "canned" } });
     if (step.kind === "clue") s = reducer(s, { type: "add_clue", text: step.text, cell: step.cell, radius: step.radius, boost: step.suggestedBoost });

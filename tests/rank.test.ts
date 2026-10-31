@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { expectedPod, rankCells, WELL_SEARCHED } from "@/lib/engine/rank";
 import { generatePriors } from "@/lib/engine/priors";
-import { PROFILES } from "@/lib/profiles";
+import { defaultSubject } from "@/lib/subject";
 import { DEFAULT_LKP, STYLIZED_TERRAIN } from "@/lib/terrain";
 
 const cells = STYLIZED_TERRAIN.cells;
 
-const prior = () => generatePriors(DEFAULT_LKP, PROFILES.day_hiker, cells);
+const prior = () => generatePriors(DEFAULT_LKP, defaultSubject("day_hiker"), cells);
 
 describe("rankCells", () => {
   it("returns the top 5 by POA × expected POD, descending", () => {

@@ -6,12 +6,37 @@ import { ParsedReport } from "../schemas";
 import { BoostLevel } from "../engine/clues";
 import { CellId } from "../engine/grid";
 import { ProfileId } from "../profiles";
+import { Subject } from "../subject";
 
 /** Lakes of the Clouds hut: junction of the Crawford Path, Ammonoosuc Ravine and Dry River trails. */
 export const DEMO_LKP: CellId = "E10";
 export const DEMO_PROFILE: ProfileId = "day_hiker";
 export const DEMO_SUBJECT =
   "Dan, 58, day hiker. Left the Lakes of the Clouds hut (E10) for the summit around 1 p.m. in fog; overdue since 5 p.m.";
+
+/** The initial call-out as the presenter pastes it; Claude pre-fills the subject card from it. */
+export const DEMO_CALLOUT =
+  "Caller is the wife of Dan Harper, 58. Day hiker, fit, hikes most weekends, no medical conditions or meds. Left the Lakes of the Clouds hut alone about 1 p.m. heading for the summit as fog came in. Light rain shell, day pack, no headlamp that she knows of. Overdue since 5 p.m.";
+
+/** Hours before the demo is loaded that Dan was last seen (keeps the story the same whenever it runs). */
+export const DEMO_MISSING_HOURS = 6;
+
+/** The canned subject for when Claude is unavailable; `lastSeenAt` is filled at load time. */
+export function demoSubject(now = Date.now()): Subject {
+  return {
+    category: "day_hiker",
+    name: "Dan Harper",
+    ageBand: "adult",
+    experience: "some",
+    fitness: "high",
+    medical: "none",
+    equipment: "questionable",
+    partySize: 1,
+    lastSeenAt: new Date(now - DEMO_MISSING_HOURS * 3600_000).toISOString(),
+    intent: "Heading for the summit from the hut as fog came in",
+    notes: "Light rain shell, day pack, probably no headlamp",
+  };
+}
 
 export type DemoStep =
   | { kind: "report"; id: string; title: string; text: string; canned: ParsedReport; note: string }
@@ -41,11 +66,11 @@ export const DEMO_STEPS: DemoStep[] = [
     kind: "report",
     id: "r2",
     title: "Trail corridors at the hut",
-    text: "Team 2 to command. We line-searched the top of the Ammonoosuc Ravine Trail through E9 and D9, then the Crawford Path toward Monroe, E11 and E12. Spacing about 15 meters, krummholz and rock. Negative, no clues.",
+    text: "Team 2 to command. We line-searched all around the hut: the hut grounds and the knoll west of it, E10 and D10, the top of the Ammonoosuc Ravine Trail through E9 and D9, both sides of the Crawford Path toward Monroe, E11, E12, D12 and F12, and the first stretch of the Dry River Trail in F11. Spacing about 15 meters, krummholz and rock. Negative, no clues.",
     canned: {
       team: "Team 2",
-      cells: ["E9", "D9", "E11", "E12"],
-      coverage_description: "Line search ~15 m spacing, krummholz and rock",
+      cells: ["E10", "D10", "E9", "D9", "E11", "E12", "D12", "F12", "F11"],
+      coverage_description: "Line search ~15 m spacing around the hut, krummholz and rock",
       estimated_pod: 0.6,
       pod_confidence: "high",
       conditions: [],

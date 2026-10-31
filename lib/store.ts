@@ -5,9 +5,13 @@ import { ProbState, addPod, applySweeps, assertSumToOne, clampPod, setCellPoa, s
 import { applyClue, BoostLevel, BOOST_FACTORS } from "./engine/clues";
 import { CellId, isCellId } from "./engine/grid";
 import { generatePriors, DEFAULT_ROW } from "./engine/priors";
+import { UrgencyKey, UrgencyScore } from "./engine/urgency";
 import { PROFILES, ProfileId } from "./profiles";
 import { Explanation, ParsedReport } from "./schemas";
+import { defaultSubject, Subject } from "./subject";
 import { snapshotOf, STYLIZED_TERRAIN, TerrainSnapshot } from "./terrain";
+
+export type SubjectSource = "claude" | "canned" | "manual";
 
 export type ReportSource = "claude" | "canned" | "manual";
 
@@ -54,7 +58,12 @@ export interface Assignment {
 export interface SearchState {
   version: 1;
   lkp: CellId | null;
+  /** Mirrors subject.category; kept for exports and older saved states. */
   profileId: ProfileId;
+  /** Who is missing and since when. Null until the IC confirms one (a category alone uses defaults). */
+  subject: Subject | null;
+  /** IC overrides of the proposed urgency factor scores. */
+  urgencyOverrides: Partial<Record<UrgencyKey, UrgencyScore>>;
   prob: ProbState | null;
   /** True once any report or clue has been applied; locks prior editing. */
   started: boolean;
@@ -78,6 +87,8 @@ export const initialState = (terrain: TerrainSnapshot = snapshotOf(STYLIZED_TERR
   version: 1,
   lkp: null,
   profileId: "day_hiker",
+  subject: null,
+  urgencyOverrides: {},
   prob: null,
   started: false,
   pods: {},
@@ -104,6 +115,8 @@ export type Action =
   | { type: "hydrate"; state: SearchState }
   | { type: "set_lkp"; cell: CellId }
   | { type: "set_profile"; profileId: ProfileId }
+  | { type: "set_subject"; subject: Subject; source: SubjectSource; proposal?: Subject | null; rawText?: string }
+  | { type: "set_urgency_override"; key: UrgencyKey; score: UrgencyScore | null; proposed: UrgencyScore; reason?: string }
   | { type: "edit_cell_poa"; cell: CellId; value: number }
   | { type: "set_row"; value: number }
   | { type: "apply_report"; payload: ApplyReportPayload }
@@ -113,7 +126,7 @@ export type Action =
   | { type: "log"; entry: AuditEntry }
   | { type: "reset" }
   | { type: "set_terrain"; terrain: TerrainSnapshot }
-  | { type: "demo_load"; lkp: CellId; profileId: ProfileId; terrain: TerrainSnapshot }
+  | { type: "demo_load"; lkp: CellId; profileId: ProfileId; terrain: TerrainSnapshot; subject?: Subject }
   | { type: "demo_advance" }
   | { type: "mark_found"; cell: CellId; text: string }
   | { type: "load"; state: SearchState };
@@ -127,9 +140,17 @@ function topShifts(before: ProbState, after: ProbState, n = 5) {
     .slice(0, n);
 }
 
-function regenerate(state: SearchState, lkp: CellId, profileId: ProfileId): SearchState {
-  const prob = generatePriors(lkp, PROFILES[profileId], state.terrain.cells, state.prob?.row ?? DEFAULT_ROW);
-  return { ...state, lkp, profileId, prob, rowHistory: [prob.row], priorsEdited: false };
+/** Re-seed the priors for the current subject (or the category's defaults) at the current time. */
+function regenerate(state: SearchState, lkp: CellId, profileId: ProfileId, subject?: Subject): SearchState {
+  const subj = subject ?? state.subject ?? defaultSubject(profileId);
+  const prob = generatePriors(lkp, subj, state.terrain.cells, { row: state.prob?.row ?? DEFAULT_ROW });
+  return { ...state, lkp, profileId: subj.category, subject: subj, prob, rowHistory: [prob.row], priorsEdited: false };
+}
+
+/** Switching category keeps what the IC already typed about the person; the behaviour defaults follow the category. */
+function subjectForCategory(prev: Subject | null, profileId: ProfileId): Subject {
+  const base = defaultSubject(profileId);
+  return prev ? { ...base, name: prev.name, lastSeenAt: prev.lastSeenAt, intent: prev.intent, notes: prev.notes, medical: prev.medical, equipment: prev.equipment, partySize: prev.partySize } : base;
 }
 
 /**
@@ -165,11 +186,48 @@ function reduce(state: SearchState, action: Action): SearchState {
 
     case "set_profile": {
       if (state.started) return state;
-      if (!state.lkp) return { ...state, profileId: action.profileId };
-      const next = regenerate(state, state.lkp, action.profileId);
+      const subject = subjectForCategory(state.subject, action.profileId);
+      if (!state.lkp) return { ...state, profileId: action.profileId, subject };
+      const next = regenerate(state, state.lkp, action.profileId, subject);
       return {
         ...next,
         audit: [...state.audit, makeAudit("setup", `Profile set to ${PROFILES[action.profileId].label}; priors regenerated`)],
+      };
+    }
+
+    case "set_subject": {
+      const { subject, source, proposal, rawText } = action;
+      const edits = proposal ? diffFields(proposal as unknown as Record<string, unknown>, subject as unknown as Record<string, unknown>) : null;
+      const data = { raw_text: rawText ?? null, ai_proposal: proposal ?? null, ic_confirmed: subject, ic_edits: edits, source };
+      const who = `${subject.name ? `${subject.name}, ` : ""}${PROFILES[subject.category].label}`;
+      if (state.started || !state.lkp) {
+        // After the search starts the priors are locked; the details still update the urgency chart and the record.
+        return {
+          ...state,
+          subject,
+          profileId: subject.category,
+          audit: [...state.audit, makeAudit("subject", `Subject details ${state.started ? "updated (priors locked)" : "set"}: ${who} (${source})`, data)],
+        };
+      }
+      const next = regenerate(state, state.lkp, subject.category, subject);
+      return {
+        ...next,
+        audit: [...state.audit, makeAudit("subject", `Subject confirmed: ${who} (${source}); priors regenerated`, data)],
+      };
+    }
+
+    case "set_urgency_override": {
+      const urgencyOverrides = { ...state.urgencyOverrides };
+      if (action.score === null || action.score === action.proposed) delete urgencyOverrides[action.key];
+      else urgencyOverrides[action.key] = action.score;
+      const summary =
+        action.score === null || action.score === action.proposed
+          ? `IC restored proposed urgency score for ${action.key} (${action.proposed})`
+          : `IC set urgency ${action.key} to ${action.score} (proposed ${action.proposed})${action.reason ? `: "${action.reason}"` : ""}`;
+      return {
+        ...state,
+        urgencyOverrides,
+        audit: [...state.audit, makeAudit("urgency", summary, { key: action.key, proposed: action.proposed, score: action.score, reason: action.reason ?? null })],
       };
     }
 
@@ -336,7 +394,7 @@ function reduce(state: SearchState, action: Action): SearchState {
 
     case "demo_load": {
       const base = { ...initialState(action.terrain), demo: true, profileId: action.profileId };
-      const next = regenerate(base, action.lkp, action.profileId);
+      const next = regenerate(base, action.lkp, action.profileId, action.subject);
       return {
         ...next,
         audit: [

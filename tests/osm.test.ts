@@ -3,7 +3,7 @@ import { assembleRings, buildTerrainModel, classifyTags, normalizeTerrainData, p
 import { BBox, cellBounds, fromGrid } from "@/lib/geo";
 import { promptFeatures } from "@/lib/terrain";
 import { generatePriors } from "@/lib/engine/priors";
-import { PROFILES } from "@/lib/profiles";
+import { defaultSubject } from "@/lib/subject";
 import { total } from "@/lib/engine/bayes";
 
 // A small synthetic sample inside the default grid (not real OSM data).
@@ -155,7 +155,7 @@ describe("buildTerrainModel", () => {
   });
 
   it("priors on OSM terrain sum to 1 and favor the trail over plain ground", () => {
-    const s = generatePriors("H5", PROFILES.day_hiker, model.cells);
+    const s = generatePriors("H5", defaultSubject("day_hiker"), model.cells);
     expect(total(s)).toBeCloseTo(1, 9);
     expect(s.cells.E5).toBeGreaterThan(s.cells.E4);
   });
