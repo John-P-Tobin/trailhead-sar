@@ -57,7 +57,7 @@ export const DEMO_STEPS: DemoStep[] = [
     kind: "report",
     id: "r1",
     title: "Hasty search toward the summit",
-    text: "Command, Team 1. Hasty search done on the Crawford Path from the hut up through F10, G10 and G9, two of us calling and whistling the whole way, visibility okay. Nothing. No clues.",
+    text: "Command, Team 1. Hasty search done on the Crawford Path from the hut at E10 up through F10, G10 and G9, two of us calling and whistling the whole way, visibility okay. Nothing. No clues.",
     canned: {
       team: "Team 1",
       cells: ["E10", "F10", "G10", "G9"],

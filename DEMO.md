@@ -13,8 +13,8 @@ Target timing in brackets. Spoken lines are written to be read aloud as-is.
 ## The search (~1 min 50 s)
 | # | Click | Say |
 |---|---|---|
-| 0 | **Receive call-out → pre-fill subject**, glance at the subject card, **Confirm subject** | "The wife's call comes in. Claude reads it into a structured subject: age, fitness, gear, when he was last seen. I confirm every field. From that, the model draws the distance rings, how far people like Dan are usually found, and scores the relative urgency chart ICs are trained on: measured response, thirteen of twenty-one." |
-| 1 | **Receive radio report → parse**, then **Apply to map** | "Team 1 radios in. Claude turns the report into cells and a detection estimate, but it only proposes. Nothing changes until I click Apply. The trail cells cool, and Rest of World ticks up." |
+| 0 | **Receive call-out → pre-fill subject**; check **Fitness = High** and **Experience = Some or Experienced** on the card (the story is tuned for a fit hiker), then **Confirm subject** | "The wife's call comes in. Claude reads it into a structured subject: age, fitness, gear, when he was last seen. I confirm every field. From that, the model draws the distance rings, how far people like Dan are usually found, and scores the relative urgency chart ICs are trained on: measured response, thirteen of twenty-one." |
+| 1 | **Receive radio report → parse**; check the cells read **E10, F10, G10, G9** (add E10 by clicking it on the map if Claude left it out), then **Apply to map** | "Team 1 radios in. Claude turns the report into cells and a detection estimate, but it only proposes. Nothing changes until I click Apply. The trail cells cool, and Rest of World ticks up." |
 | 2 | **Receive radio report → parse**, then **Apply to map** | "Team 2 line-searches around the hut. Probability moves downhill into the two drainages. Claude explains the shift and names the assumption it's least sure about." |
 | 3 | **Receive radio report → parse**, point at the amber card, then **Apply to map** | "Fog. Claude flags this parse as low confidence: verify with team. Detection is only 25 percent, so these cells are barely cleared, and the weather tab shows the forecast cutting expected detection." |
 | 4 | Clue: click **small ×1.5** (the highlighted button). *Not medium.* | "Team 4 found a wrapper at G13. The AI never weights clues. I decide how much it matters. It's a busy trail, so I give it a small boost." |
@@ -32,6 +32,7 @@ Target timing in brackets. Spoken lines are written to be read aloud as-is.
 
 ## If something goes wrong on camera
 - **Picked the wrong clue boost:** a dialog asks before anything but small. Click **Cancel**. If medium was applied anyway, G14 becomes #2 and line 6 no longer fits: **Reset** and start over.
+- **Claude read something differently:** that is the review card doing its job. Fix the field or cell and apply; the story needs the cells listed above and a fit subject.
 - **Parse is slow or fails:** the canned parse or canned subject fills the card (amber tag); keep going.
 - **Weather badge says "Using cached weather":** fine for the demo. Optionally say "when the weather service is down, it says so."
 - **"Publish to CalTopo" button is missing:** the three `CALTOPO_*` variables are not set in Vercel (see NOTES.md). Use **Export for CalTopo** instead and say "the file imports straight into CalTopo."
