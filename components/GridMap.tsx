@@ -68,7 +68,7 @@ export default function GridMap({
 
   return (
     <div className="relative">
-      <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="h-auto w-full select-none" role="img" aria-label="Search area grid map">
+      <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="block h-auto max-h-[calc(100vh-230px)] min-h-72 w-full select-none" role="img" aria-label="Search area grid map">
         <defs>
           <pattern id="cliff" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
             <line x1="0" y1="0" x2="0" y2="6" stroke="#1b1b1b" strokeWidth="2.5" />
@@ -305,7 +305,7 @@ export default function GridMap({
           href="https://www.openstreetmap.org/copyright"
           target="_blank"
           rel="noopener noreferrer"
-          className="absolute bottom-0 right-1 rounded bg-slate-950/80 px-1.5 py-0.5 text-[10px] text-slate-300 hover:text-white"
+          className="absolute bottom-0 right-1 rounded bg-slate-950/80 px-1.5 py-0.5 text-xs text-slate-300 hover:text-white"
         >
           © OpenStreetMap contributors
         </a>

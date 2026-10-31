@@ -1,25 +1,16 @@
-import Panel from "./ui/Panel";
+import Card from "./ui/Card";
+import { IconExternal } from "./ui/icons";
 
 // Link-out only: we do not scrape, hotlink or rehost the Observatory's images or video.
-// Verify these URLs before the demo (they could not be checked from the build container).
 export const MWOBS_LINKS = [
-  {
-    label: "Summit webcams",
-    href: "https://www.mountwashington.org/experience-the-weather/mount-washington-weather-cams/",
-  },
-  {
-    label: "Higher Summits Forecast",
-    href: "https://www.mountwashington.org/experience-the-weather/higher-summit-forecast.aspx",
-  },
+  { label: "Summit webcams", href: "https://www.mountwashington.org/experience-the-weather/mount-washington-weather-cams/" },
+  { label: "Higher Summits Forecast", href: "https://www.mountwashington.org/experience-the-weather/higher-summit-forecast.aspx" },
 ];
 
 export default function SummitCard() {
   return (
-    <Panel title="Summit conditions">
-      <p className="text-xs text-slate-400">
-        Ridge and summit weather can differ sharply from the valley forecast. Check the Mount Washington Observatory&apos;s
-        official pages:
-      </p>
+    <Card title="Summit conditions" size="small" footer="Opens mountwashington.org. Content belongs to the Observatory.">
+      <p className="text-xs text-fg-2">Ridge and summit weather can differ sharply from the valley forecast. Check the Mount Washington Observatory&apos;s official pages:</p>
       <div className="mt-2 flex flex-wrap gap-2">
         {MWOBS_LINKS.map((l) => (
           <a
@@ -27,13 +18,12 @@ export default function SummitCard() {
             href={l.href}
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-md border border-slate-700 bg-slate-800 px-3 py-1.5 text-sm text-sky-200 hover:bg-slate-700"
+            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-line-strong bg-surface-2 px-3 text-sm text-primary-hover hover:bg-surface-3"
           >
-            {l.label} ↗
+            {l.label} <IconExternal width={14} height={14} />
           </a>
         ))}
       </div>
-      <p className="mt-2 text-[11px] text-slate-500">Opens mountwashington.org. Content belongs to the Observatory.</p>
-    </Panel>
+    </Card>
   );
 }

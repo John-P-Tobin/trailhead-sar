@@ -1,15 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import Alert from "./ui/Alert";
+import Button from "./ui/Button";
+import Tag from "./ui/Tag";
 import { expandCellRefs } from "@/lib/engine/grid";
 import { ParsedReport, PodConfidence } from "@/lib/schemas";
 import { ReportSource } from "@/lib/store";
-import { btnGhost, btnPrimary, input, label } from "./ui/styles";
+import { input, label } from "./ui/styles";
 
-const SOURCE_LABEL: Record<ReportSource, string> = {
-  claude: "Proposed by Claude — review every value",
-  canned: "Demo fallback parse (Claude unavailable) — review every value",
-  manual: "Manual entry",
+const SOURCE_LABEL: Record<ReportSource, { text: string; color: "primary" | "warning" | "default" }> = {
+  claude: { text: "Proposed by Claude — review every value", color: "primary" },
+  canned: { text: "Demo fallback parse (Claude unavailable) — review every value", color: "warning" },
+  manual: { text: "Manual entry", color: "default" },
 };
 
 const splitList = (s: string) =>
@@ -38,8 +41,7 @@ export default function ReviewCard({
   const [cluesText, setCluesText] = useState(draft.clues.join("; "));
   const low = draft.pod_confidence === "low";
   const set = <K extends keyof ParsedReport>(k: K, v: ParsedReport[K]) => onChange({ ...draft, [k]: v });
-  const changed = (k: keyof ParsedReport) =>
-    proposal && JSON.stringify(proposal[k]) !== JSON.stringify(draft[k]) ? "border-sky-500/70" : "";
+  const changed = (k: keyof ParsedReport) => (proposal && JSON.stringify(proposal[k]) !== JSON.stringify(draft[k]) ? "border-primary ring-1 ring-primary/40" : "");
 
   const addCells = () => {
     const cells = expandCellRefs(cellText);
@@ -48,26 +50,27 @@ export default function ReviewCard({
   };
 
   return (
-    <div className={`rounded-lg border p-3 ${low ? "border-amber-500/70 bg-amber-950/20" : "border-sky-700/60 bg-slate-950/40"}`}>
-      {low && (
-        <div className="mb-3 rounded-md border border-amber-500/60 bg-amber-500/15 px-3 py-2 text-sm font-semibold text-amber-200">
-          ⚠ Low confidence — verify with team before applying.
-        </div>
-      )}
-      <div className="mb-3 flex items-center justify-between text-xs">
-        <span className={source === "manual" ? "text-slate-400" : "text-sky-300"}>{SOURCE_LABEL[source]}</span>
-        {proposal && <span className="text-slate-500">Blue border = edited by IC</span>}
+    <div className={`rounded-card border p-3 ${low ? "border-warning/60 bg-warning/5" : "border-primary/40 bg-surface-2/40"}`}>
+      {low && <Alert type="warning" className="mb-3" title="Low confidence — verify with team before applying." />}
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <Tag color={SOURCE_LABEL[source].color}>{SOURCE_LABEL[source].text}</Tag>
+        {proposal && <span className="text-xs text-fg-3">Blue outline = edited by IC</span>}
       </div>
 
       {draft.unclear_points.length > 0 && (
-        <div className="mb-3 rounded-md border border-amber-600/40 bg-amber-950/30 px-3 py-2 text-xs text-amber-200">
-          <div className="mb-1 font-semibold uppercase tracking-wider">Unclear in report</div>
-          <ul className="list-disc pl-4">
-            {draft.unclear_points.map((u, i) => (
-              <li key={i}>{u}</li>
-            ))}
-          </ul>
-        </div>
+        <Alert
+          type="warning"
+          compact
+          className="mb-3"
+          title="Unclear in report"
+          description={
+            <ul className="list-disc pl-4">
+              {draft.unclear_points.map((u, i) => (
+                <li key={i}>{u}</li>
+              ))}
+            </ul>
+          }
+        />
       )}
 
       <div className="grid grid-cols-2 gap-3">
@@ -77,11 +80,7 @@ export default function ReviewCard({
         </div>
         <div>
           <label className={label}>POD confidence</label>
-          <select
-            className={`${input} ${changed("pod_confidence")}`}
-            value={draft.pod_confidence}
-            onChange={(e) => set("pod_confidence", e.target.value as PodConfidence)}
-          >
+          <select className={`${input} ${changed("pod_confidence")}`} value={draft.pod_confidence} onChange={(e) => set("pod_confidence", e.target.value as PodConfidence)}>
             <option value="low">Low</option>
             <option value="med">Medium</option>
             <option value="high">High</option>
@@ -90,12 +89,12 @@ export default function ReviewCard({
 
         <div className="col-span-2">
           <label className={label}>Cells searched (click map cells or type, e.g. “C4-C6”)</label>
-          <div className={`flex min-h-9 flex-wrap items-center gap-1 rounded-md border border-slate-700 bg-slate-950 p-1 ${changed("cells")}`}>
+          <div className={`flex min-h-9 flex-wrap items-center gap-1 rounded-md border border-line-strong bg-surface-2 p-1 ${changed("cells")}`}>
             {draft.cells.map((c) => (
               <button
                 key={c}
                 type="button"
-                className="rounded bg-slate-700 px-1.5 py-0.5 font-mono text-xs hover:bg-rose-700"
+                className="rounded bg-surface-3 px-1.5 py-0.5 font-mono text-xs text-fg hover:bg-error/30"
                 onClick={() => set("cells", draft.cells.filter((x) => x !== c))}
                 title="Remove"
               >
@@ -120,20 +119,10 @@ export default function ReviewCard({
 
         <div className="col-span-2">
           <label className={label}>
-            Estimated POD per cell: <span className="font-mono text-slate-200">{(draft.estimated_pod * 100).toFixed(0)}%</span>
-            {proposal && proposal.estimated_pod !== draft.estimated_pod && (
-              <span className="ml-2 text-sky-300">(AI proposed {(proposal.estimated_pod * 100).toFixed(0)}%)</span>
-            )}
+            Estimated POD per cell: <span className="font-mono text-fg">{(draft.estimated_pod * 100).toFixed(0)}%</span>
+            {proposal && proposal.estimated_pod !== draft.estimated_pod && <span className="ml-2 text-primary-hover">(AI proposed {(proposal.estimated_pod * 100).toFixed(0)}%)</span>}
           </label>
-          <input
-            type="range"
-            min={0}
-            max={95}
-            step={5}
-            value={Math.round(draft.estimated_pod * 100)}
-            onChange={(e) => set("estimated_pod", Number(e.target.value) / 100)}
-            className="w-full accent-sky-400"
-          />
+          <input type="range" min={0} max={95} step={5} value={Math.round(draft.estimated_pod * 100)} onChange={(e) => set("estimated_pod", Number(e.target.value) / 100)} className="w-full" />
         </div>
 
         <div className="col-span-2">
@@ -170,19 +159,15 @@ export default function ReviewCard({
           />
         </div>
       </div>
-      {draft.clues.length > 0 && (
-        <p className="mt-2 text-xs text-violet-300">
-          Clues are logged but not weighted automatically. Use the Clues panel to choose a boost.
-        </p>
-      )}
+      {draft.clues.length > 0 && <p className="mt-2 text-xs text-purple">Clues are logged but not weighted automatically. Use the Clues tab to choose a boost.</p>}
 
       <div className="mt-4 flex items-center justify-end gap-2">
-        <button className={btnGhost} onClick={onCancel}>
+        <Button variant="text" onClick={onCancel}>
           Discard
-        </button>
-        <button className={btnPrimary} onClick={onApply} disabled={draft.cells.length === 0}>
+        </Button>
+        <Button variant="primary" onClick={onApply} disabled={draft.cells.length === 0}>
           Apply to map
-        </button>
+        </Button>
       </div>
     </div>
   );

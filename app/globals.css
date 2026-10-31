@@ -1,17 +1,44 @@
 @import "tailwindcss";
 
-:root {
-  --background: #0b1220;
-  --foreground: #e2e8f0;
-}
+/* Design tokens: an Ant-Design-style dark theme on a navy base. */
+@theme {
+  --color-background: #0b1220;
+  --color-foreground: #e6edf5;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-surface: #0f172a; /* card */
+  --color-surface-2: #121c32; /* list rows, inputs */
+  --color-surface-3: #1a2740; /* hover */
+  --color-line: #273449; /* borders */
+  --color-line-strong: #34435d;
+
+  --color-fg: #e6edf5;
+  --color-fg-2: #a3b1c6;
+  --color-fg-3: #6b7a93;
+
+  --color-primary: #1677ff;
+  --color-primary-hover: #4096ff;
+  --color-success: #52c41a;
+  --color-warning: #faad14;
+  --color-error: #ff4d4f;
+  --color-info: #1677ff;
+  --color-purple: #b37feb;
+
+  --radius-card: 8px;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--color-background);
+  color: var(--color-fg);
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Thin scrollbars inside tab panels and long lists. */
+.scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line-strong) transparent;
+}
+
+/* Accent colour for native range inputs and checkboxes. */
+input[type="range"] {
+  accent-color: var(--color-primary);
 }

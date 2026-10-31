@@ -67,7 +67,8 @@ export function hoursSince(iso: string, now = Date.now()): number {
 }
 
 export function formatMissingFor(hours: number): string {
-  const h = Math.floor(hours);
-  const m = Math.round((hours - h) * 60);
+  const totalMin = Math.max(0, Math.round(hours * 60));
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
   return h ? `${h} h ${m.toString().padStart(2, "0")} min` : `${m} min`;
 }

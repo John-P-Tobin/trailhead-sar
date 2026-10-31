@@ -1,14 +1,17 @@
 "use client";
 
-import Panel from "./ui/Panel";
+import Button from "./ui/Button";
+import Card from "./ui/Card";
+import Tag from "./ui/Tag";
 import { PROFILE_LIST, ProfileId } from "@/lib/profiles";
-import { btnSecondary, input, label } from "./ui/styles";
+import { input, label } from "./ui/styles";
 
 export default function SetupPanel({
   lkp,
   lkpInfo,
   profileId,
   row,
+  suggestedRow,
   started,
   placingLkp,
   onTogglePlaceLkp,
@@ -20,6 +23,8 @@ export default function SetupPanel({
   lkpInfo?: string;
   profileId: ProfileId;
   row: number | null;
+  /** The behaviour model's suggested share outside the grid, if known. */
+  suggestedRow?: number;
   started: boolean;
   placingLkp: boolean;
   onTogglePlaceLkp: () => void;
@@ -27,38 +32,31 @@ export default function SetupPanel({
   onRow: (v: number) => void;
 }) {
   return (
-    <Panel title="Setup" right={started && <span className="text-xs text-slate-500">Locked — search in progress</span>}>
+    <Card title="Search setup" size="small" extra={started && <Tag>Locked — search in progress</Tag>}>
       <div className="space-y-3">
         <div className="flex items-center gap-2">
           <div className="flex-1">
             <div className={label}>Last known point</div>
             {lkp ? (
               <div className="text-sm">
-                <span className="font-mono font-semibold text-rose-400">{lkp}</span>{" "}
-                <span className="text-slate-400">· {lkpInfo}</span>
+                <span className="font-mono font-semibold text-rose-400">{lkp}</span> <span className="text-fg-2">· {lkpInfo}</span>
               </div>
             ) : (
-              <div className="text-sm text-amber-300">Click the map to place the LKP.</div>
+              <div className="text-sm text-warning">Click the map to place the LKP.</div>
             )}
           </div>
           {lkp && !started && (
-            <button className={btnSecondary} onClick={onTogglePlaceLkp}>
+            <Button size="sm" onClick={onTogglePlaceLkp}>
               {placingLkp ? "Cancel" : "Move LKP"}
-            </button>
+            </Button>
           )}
         </div>
 
         <div>
           <label className={label} htmlFor="profile">
-            Lost-person profile
+            Lost-person category
           </label>
-          <select
-            id="profile"
-            className={input}
-            value={profileId}
-            disabled={started}
-            onChange={(e) => onProfile(e.target.value as ProfileId)}
-          >
+          <select id="profile" className={input} value={profileId} disabled={started} onChange={(e) => onProfile(e.target.value as ProfileId)}>
             {PROFILE_LIST.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.label} — {p.summary}
@@ -71,24 +69,20 @@ export default function SetupPanel({
           <div>
             <label className={label} htmlFor="row">
               Starting Rest of World (ROW): {(row * 100).toFixed(0)}%
+              {suggestedRow !== undefined && (
+                <button type="button" className="ml-2 text-primary-hover hover:underline" onClick={() => onRow(suggestedRow)}>
+                  model suggests {(suggestedRow * 100).toFixed(0)}%
+                </button>
+              )}
             </label>
-            <input
-              id="row"
-              type="range"
-              min={0}
-              max={40}
-              step={1}
-              value={Math.round(row * 100)}
-              onChange={(e) => onRow(Number(e.target.value) / 100)}
-              className="w-full accent-violet-400"
-            />
+            <input id="row" type="range" min={0} max={60} step={1} value={Math.round(row * 100)} onChange={(e) => onRow(Number(e.target.value) / 100)} className="w-full" />
           </div>
         )}
-        <p className="text-xs text-slate-500">
-          Priors are <strong className="text-slate-400">illustrative estimates</strong> (distance from LKP × terrain ×
-          profile), not published statistics. Click any cell to review or edit its POA before the search starts.
+        <p className="text-xs text-fg-3">
+          Priors are <strong className="text-fg-2">illustrative estimates</strong> (lost-person distance statistics × time missing × terrain), not operational
+          guidance. Click any cell to review or edit its POA before the search starts.
         </p>
       </div>
-    </Panel>
+    </Card>
   );
 }

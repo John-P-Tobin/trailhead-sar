@@ -1,8 +1,8 @@
-export const btn =
-  "inline-flex items-center justify-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-40";
-export const btnPrimary = `${btn} bg-sky-600 text-white hover:bg-sky-500`;
-export const btnSecondary = `${btn} border border-slate-700 bg-slate-800 text-slate-100 hover:bg-slate-700`;
-export const btnGhost = `${btn} text-slate-300 hover:bg-slate-800`;
+// Shared form-control classes. Buttons, tags and alerts have their own components.
 export const input =
-  "w-full rounded-md border border-slate-700 bg-slate-950 px-2 py-1.5 text-sm text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none";
-export const label = "block text-xs font-medium text-slate-400 mb-1";
+  "w-full rounded-md border border-line-strong bg-surface-2 px-2.5 py-1.5 text-sm text-fg placeholder:text-fg-3 transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:cursor-not-allowed disabled:opacity-50";
+export const label = "mb-1 block text-xs font-medium text-fg-2";
+/** Row inside a list (clues, assignments, reports). */
+export const listRow = "rounded-md bg-surface-2 px-2.5 py-1.5";
+/** Quoted radio text. */
+export const quote = "rounded-md border-l-2 bg-surface-2 px-3 py-2 font-mono text-xs leading-relaxed text-fg";

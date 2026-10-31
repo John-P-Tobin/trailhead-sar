@@ -13,7 +13,7 @@ import {
   suggestedRow,
   TRAVEL_HOURS_CAP,
 } from "@/lib/engine/behaviour";
-import { defaultSubject, hoursSince } from "@/lib/subject";
+import { defaultSubject, formatMissingFor, hoursSince } from "@/lib/subject";
 import { PROFILES } from "@/lib/profiles";
 
 const H = 3600_000;
@@ -26,6 +26,12 @@ describe("subject helpers", () => {
     expect(hoursSince(new Date(now - 2 * H).toISOString(), now)).toBeCloseTo(2);
     expect(hoursSince(new Date(now + H).toISOString(), now)).toBe(0);
     expect(hoursSince("not a date", now)).toBe(0);
+  });
+
+  it("formatMissingFor never shows 60 minutes", () => {
+    expect(formatMissingFor(5.9999)).toBe("6 h 00 min");
+    expect(formatMissingFor(0.5)).toBe("30 min");
+    expect(formatMissingFor(2.25)).toBe("2 h 15 min");
   });
 
   it("defaultSubject fills every field from the category", () => {
